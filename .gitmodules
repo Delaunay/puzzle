@@ -7,3 +7,9 @@
 [submodule "dependencies/sdl2"]
 	path = dependencies/sdl2
 	url = git@github.com:spurious/SDL-mirror.git
+[submodule "dependencies/imgui"]
+	path = dependencies/imgui
+	url = git@github.com:ocornut/imgui.git
+[submodule "dependencies/glm"]
+	path = dependencies/glm
+	url = git@github.com:g-truc/glm.git

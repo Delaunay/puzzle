@@ -7,8 +7,13 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_vulkan.h>
 
+#include "imgui.h"
+#include "imgui_impl_sdl.h"
+#include "imgui_impl_vulkan.h"
+
 #include "logger.h"
 #include "sys.h"
+#include "vertex.h"
 
 #include <algorithm>
 #include <vector>
@@ -17,6 +22,18 @@
 #include <cstdint>
 #include <optional>
 #include <set>
+
+const std::vector<Vertex> vertices = {
+    {{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}},
+    {{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},
+    {{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},
+    {{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}}
+};
+
+const std::vector<uint16_t> indices = {
+    0, 1, 2, 2, 3, 0
+};
+
 
 
 VkResult create_debug_utils_messenger_EXT(VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger) {
@@ -35,6 +52,14 @@ void destroy_debug_utils_messenger_EXT(VkInstance instance, VkDebugUtilsMessenge
     }
 }
 
+
+void check_vk_result(VkResult err)
+{
+    if (err != VK_SUCCESS) {
+        RAISE(std::runtime_error, "failed to create descriptor pool!")
+    }
+}
+
 namespace puzzle {
 bool Application::init_window() {
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS)){
@@ -46,8 +71,8 @@ bool Application::init_window() {
         "test_project",
         0,
         0,
-        WIDTH,
-        HEIGHT,
+        int(WIDTH),
+        int(HEIGHT),
         SDL_WINDOW_VULKAN);
 
 
@@ -58,14 +83,80 @@ bool Application::init_window() {
     glfwSetWindowUserPointer(window, this);
     glfwSetFramebufferSizeCallback(window, framebufferResizeCallback);
     */
-        return true;
+    return true;
+}
+
+
+bool Application::init_imgui(){
+    debug("init ImGUI");
+
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+    //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+
+    // Setup Dear ImGui style
+    ImGui::StyleColorsDark();
+    //ImGui::StyleColorsClassic();
+
+    // Setup Platform/Renderer bindings
+    ImGui_ImplSDL2_InitForVulkan(window);
+    ImGui_ImplVulkan_InitInfo init_info = {};
+    init_info.Instance = instance;
+    init_info.PhysicalDevice = physical_device;
+    init_info.Device = device;
+    init_info.QueueFamily = find_queue_families(physical_device).graphics_family.value();
+    init_info.Queue = graphics_queue;
+    init_info.PipelineCache = pipeline_cache;
+    init_info.DescriptorPool = descriptor_pool;
+    init_info.Allocator = allocator;
+    init_info.MinImageCount = MAX_FRAMES_IN_FLIGHT;
+    init_info.ImageCount = MAX_FRAMES_IN_FLIGHT;
+    init_info.CheckVkResultFn = check_vk_result;
+    ImGui_ImplVulkan_Init(&init_info, render_pass);
+
+    return true;
+}
+
+void Application::init_fonts(){
+    debug("loading fonts");
+
+    // Use any command queue
+    VkCommandPool command_pool = cmd_pool;
+    VkCommandBuffer command_buffer = cmd_buffer[0];
+
+    auto err = vkResetCommandPool(device, command_pool, 0);
+    check_vk_result(err);
+
+    VkCommandBufferBeginInfo begin_info = {};
+    begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+    begin_info.flags |= VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+    err = vkBeginCommandBuffer(command_buffer, &begin_info);
+
+    check_vk_result(err);
+    ImGui_ImplVulkan_CreateFontsTexture(command_buffer);
+
+    VkSubmitInfo end_info = {};
+    end_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+    end_info.commandBufferCount = 1;
+    end_info.pCommandBuffers = &command_buffer;
+    err = vkEndCommandBuffer(command_buffer);
+    check_vk_result(err);
+    err = vkQueueSubmit(graphics_queue, 1, &end_info, VK_NULL_HANDLE);
+    check_vk_result(err);
+
+    err = vkDeviceWaitIdle(device);
+    check_vk_result(err);
+    ImGui_ImplVulkan_DestroyFontUploadObjects();
 }
 
 /*
-    static void framebufferResizeCallback(SDL_Window* window, int width, int height) {
-        auto app = reinterpret_cast<HelloTriangleApplication*>(glfwGetWindowUserPointer(window));
-        app->framebufferResized = true;
-    } */
+static void framebufferResizeCallback(SDL_Window* window, int width, int height) {
+    auto app = reinterpret_cast<HelloTriangleApplication*>(glfwGetWindowUserPointer(window));
+    app->framebufferResized = true;
+}
+*/
 
 void Application::init_vulkan() {
     create_instance();
@@ -73,14 +164,157 @@ void Application::init_vulkan() {
     create_surface();
     pick_physical_device();
     create_logical_device();
+
+    create_descriptor_pool();
+
     create_swap_chain();
     create_image_views();
     create_render_pass();
     create_graphics_pipeline();
     create_framebuffers();
     create_command_pool();
+    create_vertex_buffer();
+    create_index_buffer();
     create_command_buffers();
     create_sync_objects();
+}
+
+void Application::create_index_buffer() {
+    VkDeviceSize bufferSize = sizeof(indices[0]) * indices.size();
+
+    VkBuffer stagingBuffer;
+    VkDeviceMemory stagingBufferMemory;
+    create_buffer
+        (bufferSize,
+         VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+         VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+         stagingBuffer,
+         stagingBufferMemory);
+
+    void* data;
+    vkMapMemory(device, stagingBufferMemory, 0, bufferSize, 0, &data);
+    memcpy(data, indices.data(), size_t(bufferSize));
+    vkUnmapMemory(device, stagingBufferMemory);
+
+    create_buffer(
+        bufferSize,
+        VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
+        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+        index_buffer,
+        index_buffer_memory);
+
+    copy_buffer(stagingBuffer, index_buffer, bufferSize);
+
+    vkDestroyBuffer(device, stagingBuffer, nullptr);
+    vkFreeMemory(device, stagingBufferMemory, nullptr);
+}
+
+void Application::create_buffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory){
+    VkBufferCreateInfo bufferInfo{};
+    bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+    bufferInfo.size = size;
+    bufferInfo.usage = usage;
+    bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+
+    if (vkCreateBuffer(device, &bufferInfo, nullptr, &buffer) != VK_SUCCESS) {
+        throw std::runtime_error("failed to create buffer!");
+    }
+
+    VkMemoryRequirements memRequirements;
+    vkGetBufferMemoryRequirements(device, buffer, &memRequirements);
+
+    VkMemoryAllocateInfo allocInfo{};
+    allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+    allocInfo.allocationSize = memRequirements.size;
+    allocInfo.memoryTypeIndex = find_memory_type(memRequirements.memoryTypeBits, properties);
+
+    if (vkAllocateMemory(device, &allocInfo, nullptr, &bufferMemory) != VK_SUCCESS) {
+        throw std::runtime_error("failed to allocate buffer memory!");
+    }
+
+    vkBindBufferMemory(device, buffer, bufferMemory, 0);
+}
+
+void Application::copy_buffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size){
+    // TODO: create another command_pool for memory operation and use
+    // VK_COMMAND_POOL_CREATE_TRANSIENT_BIT
+
+    VkCommandBufferAllocateInfo allocInfo{};
+    allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+    allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+    allocInfo.commandPool = cmd_pool;
+    allocInfo.commandBufferCount = 1;
+
+    VkCommandBuffer commandBuffer;
+    vkAllocateCommandBuffers(device, &allocInfo, &commandBuffer);
+
+    VkCommandBufferBeginInfo beginInfo{};
+    beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+    beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+
+    vkBeginCommandBuffer(commandBuffer, &beginInfo);
+
+    VkBufferCopy copyRegion{};
+    copyRegion.srcOffset = 0; // Optional
+    copyRegion.dstOffset = 0; // Optional
+    copyRegion.size = size;
+    vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion);
+
+    vkEndCommandBuffer(commandBuffer);
+
+    VkSubmitInfo submitInfo{};
+    submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+    submitInfo.commandBufferCount = 1;
+    submitInfo.pCommandBuffers = &commandBuffer;
+
+    vkQueueSubmit(graphics_queue, 1, &submitInfo, VK_NULL_HANDLE);
+    vkQueueWaitIdle(graphics_queue);
+
+    vkFreeCommandBuffers(device, cmd_pool, 1, &commandBuffer);
+}
+
+void Application::create_vertex_buffer(){
+    VkDeviceSize bufferSize = sizeof(vertices[0]) * vertices.size();
+
+    VkBuffer stagingBuffer;
+    VkDeviceMemory stagingBufferMemory;
+    create_buffer(
+        bufferSize,
+        VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+        stagingBuffer,
+        stagingBufferMemory);
+
+    void* data;
+    vkMapMemory(device, stagingBufferMemory, 0, bufferSize, 0, &data);
+    memcpy(data, vertices.data(), size_t(bufferSize));
+    vkUnmapMemory(device, stagingBufferMemory);
+
+    create_buffer(
+        bufferSize,
+        VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+        vertex_buffer,
+        vertex_buffer_memory);
+
+    copy_buffer(stagingBuffer, vertex_buffer, bufferSize);
+
+    vkDestroyBuffer(device, stagingBuffer, nullptr);
+    vkFreeMemory(device, stagingBufferMemory, nullptr);
+}
+
+
+uint32_t Application::find_memory_type(uint32_t typeFilter, VkMemoryPropertyFlags properties) {
+    VkPhysicalDeviceMemoryProperties memProperties;
+    vkGetPhysicalDeviceMemoryProperties(physical_device, &memProperties);
+
+    for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++) {
+        if (typeFilter & (1 << i)&& (memProperties.memoryTypes[i].propertyFlags & properties) == properties) {
+            return i;
+        }
+    }
+
+    RAISE(std::runtime_error, "failed to find suitable memory type!")
 }
 
 void Application::handle_event(SDL_Event& event){
@@ -91,6 +325,7 @@ void Application::handle_event(SDL_Event& event){
     if (event.type == SDL_WINDOWEVENT) {
         SDL_WindowEvent wevent = event.window;
         switch (wevent.type) {
+        // event.window.windowID == SDL_GetWindowID(window)
         case SDL_WINDOWEVENT_SIZE_CHANGED:
         case SDL_WINDOWEVENT_RESIZED:
             framebuffer_resized = true;
@@ -99,14 +334,63 @@ void Application::handle_event(SDL_Event& event){
     }
 }
 
+void Application::imgui_draw(){
+    // Start the Dear ImGui frame
+    ImGui_ImplVulkan_NewFrame();
+    ImGui_ImplSDL2_NewFrame(window);
+    ImGui::NewFrame();
+
+    // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
+    if (gui.show_demo_window)
+        ImGui::ShowDemoWindow(&gui.show_demo_window);
+
+    // 2. Show a simple window that we create ourselves. We use a Begin/End pair to created a named window.
+    {
+        static float f = 0.0f;
+        static int counter = 0;
+
+        ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
+
+        ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
+        ImGui::Checkbox("Demo Window", &gui.show_demo_window);      // Edit bools storing our window open/close state
+        ImGui::Checkbox("Another Window", &gui.show_another_window);
+
+        ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
+        ImGui::ColorEdit3("clear color", (float*)&gui.clear_color); // Edit 3 floats representing a color
+
+        if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
+            counter++;
+        ImGui::SameLine();
+        ImGui::Text("counter = %d", counter);
+
+        ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+        ImGui::End();
+    }
+
+    // 3. Show another simple window.
+    if (gui.show_another_window)
+    {
+        ImGui::Begin("Another Window", &gui.show_another_window);   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
+        ImGui::Text("Hello from another window!");
+        if (ImGui::Button("Close Me"))
+            gui.show_another_window = false;
+        ImGui::End();
+    }
+
+    ImGui::Render();
+}
+
 void Application::event_loop() {
     SDL_Event event;
 
     while (running) {
         while (SDL_PollEvent(&event)) {
+            IMGUI_GUARD(ImGui_ImplSDL2_ProcessEvent(&event));
+
             handle_event(event);
         }
 
+        IMGUI_GUARD(imgui_draw());
         draw_frame();
     }
 
@@ -132,7 +416,17 @@ void Application::cleanup_swap_chain() {
 }
 
 void Application::cleanup() {
+    IMGUI_GUARD(ImGui_ImplVulkan_Shutdown());
+    IMGUI_GUARD(ImGui_ImplSDL2_Shutdown());
+    IMGUI_GUARD(ImGui::DestroyContext());
+
     cleanup_swap_chain();
+
+    vkDestroyBuffer(device, index_buffer, nullptr);
+    vkFreeMemory(device, index_buffer_memory, nullptr);
+
+    vkDestroyBuffer(device, vertex_buffer, nullptr);
+    vkFreeMemory(device, vertex_buffer_memory, nullptr);
 
     for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
         vkDestroySemaphore(device, render_finished[i], nullptr);
@@ -142,6 +436,7 @@ void Application::cleanup() {
 
     vkDestroyCommandPool(device, cmd_pool, nullptr);
 
+    vkDestroyDescriptorPool(device, descriptor_pool, allocator);
     vkDestroyDevice(device, nullptr);
 
     if (enable_validation_layers) {
@@ -166,8 +461,7 @@ void Application::recreate_swap_chain() {
         glfwWaitEvents();
     }*/
 
-        vkDeviceWaitIdle(device);
-
+    vkDeviceWaitIdle(device);
     cleanup_swap_chain();
 
     create_swap_chain();
@@ -449,10 +743,15 @@ void Application::create_graphics_pipeline() {
 
     VkPipelineShaderStageCreateInfo shaderStages[] = {vertShaderStageInfo, fragShaderStageInfo};
 
+    auto binding_desc = Vertex::binding_description();
+    auto attribute_desc = Vertex::attribute_description();
+
     VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
     vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-    vertexInputInfo.vertexBindingDescriptionCount = 0;
-    vertexInputInfo.vertexAttributeDescriptionCount = 0;
+    vertexInputInfo.vertexBindingDescriptionCount = 1;
+    vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attribute_desc.size());
+    vertexInputInfo.pVertexBindingDescriptions = &binding_desc;
+    vertexInputInfo.pVertexAttributeDescriptions = attribute_desc.data();
 
     VkPipelineInputAssemblyStateCreateInfo inputAssembly{};
     inputAssembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
@@ -482,7 +781,7 @@ void Application::create_graphics_pipeline() {
     rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
     rasterizer.depthClampEnable = VK_FALSE;
     rasterizer.rasterizerDiscardEnable = VK_FALSE;
-    rasterizer.polygonMode = VK_POLYGON_MODE_LINE;
+    rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
     rasterizer.lineWidth = 2.0f;
     rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
     rasterizer.frontFace = VK_FRONT_FACE_CLOCKWISE;
@@ -563,6 +862,34 @@ void Application::create_framebuffers() {
     }
 }
 
+
+void Application::create_descriptor_pool() {
+    VkDescriptorPoolSize pool_sizes[] ={
+        { VK_DESCRIPTOR_TYPE_SAMPLER, 1000 },
+        { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1000 },
+        { VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1000 },
+        { VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1000 },
+        { VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER, 1000 },
+        { VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, 1000 },
+        { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1000 },
+        { VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1000 },
+        { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1000 },
+        { VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 1000 },
+        { VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, 1000 }
+    };
+
+    VkDescriptorPoolCreateInfo pool_info = {};
+    pool_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+    pool_info.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
+    pool_info.maxSets = 1000 * IM_ARRAYSIZE(pool_sizes);
+    pool_info.poolSizeCount = uint32_t(IM_ARRAYSIZE(pool_sizes));
+    pool_info.pPoolSizes = pool_sizes;
+
+    if (vkCreateDescriptorPool(device, &pool_info, allocator, &descriptor_pool) != VK_SUCCESS) {
+        RAISE(std::runtime_error, "failed to create descriptor pool!")
+    }
+}
+
 void Application::create_command_pool() {
     QueueFamilyIndices queueFamilyIndices = find_queue_families(physical_device);
 
@@ -589,35 +916,7 @@ void Application::create_command_buffers() {
     }
 
     for (size_t i = 0; i < cmd_buffer.size(); i++) {
-        VkCommandBufferBeginInfo beginInfo{};
-        beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 
-        if (vkBeginCommandBuffer(cmd_buffer[i], &beginInfo) != VK_SUCCESS) {
-            RAISE(std::runtime_error, "failed to begin recording command buffer!")
-        }
-
-        VkRenderPassBeginInfo renderPassInfo{};
-        renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-        renderPassInfo.renderPass = render_pass;
-        renderPassInfo.framebuffer = sc_framebuffers[i];
-        renderPassInfo.renderArea.offset = {0, 0};
-        renderPassInfo.renderArea.extent = sc_extent;
-
-        VkClearValue clearColor = {0.0f, 0.0f, 0.0f, 1.0f};
-        renderPassInfo.clearValueCount = 1;
-        renderPassInfo.pClearValues = &clearColor;
-
-        vkCmdBeginRenderPass(cmd_buffer[i], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
-
-        vkCmdBindPipeline(cmd_buffer[i], VK_PIPELINE_BIND_POINT_GRAPHICS, graphics_pipeline);
-
-        vkCmdDraw(cmd_buffer[i], 3, 1, 0, 0);
-
-        vkCmdEndRenderPass(cmd_buffer[i]);
-
-        if (vkEndCommandBuffer(cmd_buffer[i]) != VK_SUCCESS) {
-            RAISE(std::runtime_error, "failed to record command buffer!")
-        }
     }
 }
 
@@ -643,65 +942,129 @@ void Application::create_sync_objects() {
     }
 }
 
+
+void Application::render_frame(VkCommandBuffer cmd, VkFramebuffer frame_buffer){
+    VkCommandBufferBeginInfo beginInfo{};
+    beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+
+    if (vkBeginCommandBuffer(cmd, &beginInfo) != VK_SUCCESS) {
+        RAISE(std::runtime_error, "failed to begin recording command buffer!")
+    }
+
+    VkRenderPassBeginInfo renderPassInfo{};
+    renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+    renderPassInfo.renderPass = render_pass;
+    renderPassInfo.framebuffer = frame_buffer;
+    renderPassInfo.renderArea.offset = {0, 0};
+    renderPassInfo.renderArea.extent = sc_extent;
+
+    VkClearValue clearColor = {0.0f, 0.0f, 0.0f, 1.0f};
+    renderPassInfo.clearValueCount = 1;
+    renderPassInfo.pClearValues = &clearColor;
+
+    vkCmdBeginRenderPass(cmd, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+    vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, graphics_pipeline);
+
+    // Draw Triangle
+    VkBuffer vertexBuffers[] = {vertex_buffer};
+    VkDeviceSize offsets[] = {0};
+
+    vkCmdBindVertexBuffers(cmd, 0, 1, vertexBuffers, offsets);
+    vkCmdBindIndexBuffer(cmd, index_buffer, 0, VK_INDEX_TYPE_UINT16);
+    vkCmdDrawIndexed(cmd, static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
+    // ---
+
+    // Draw ImGUI
+    IMGUI_GUARD(ImDrawData* draw_data = ImGui::GetDrawData());
+    IMGUI_GUARD(ImGui_ImplVulkan_RenderDrawData(draw_data, cmd));
+    // ---
+
+    // Done
+    vkCmdEndRenderPass(cmd);
+    if (vkEndCommandBuffer(cmd) != VK_SUCCESS) {
+        RAISE(std::runtime_error, "failed to record command buffer!")
+    }
+}
+
 void Application::draw_frame() {
+    // Wait for previous work on the image to finish
     vkWaitForFences(device, 1, &inflight_fences[current_frame], VK_TRUE, UINT64_MAX);
 
     uint32_t imageIndex;
-    VkResult result = vkAcquireNextImageKHR(device, swap_chain, UINT64_MAX, image_available[current_frame], VK_NULL_HANDLE, &imageIndex);
+    // acquire the image from the swap chain when the image is finished being presented
+    // and drawing can happen again
+    {
+        VkResult result = vkAcquireNextImageKHR(device, swap_chain, UINT64_MAX, image_available[current_frame], VK_NULL_HANDLE, &imageIndex);
 
-    if (result == VK_ERROR_OUT_OF_DATE_KHR  | result == VK_SUBOPTIMAL_KHR || framebuffer_resized) {
-        recreate_swap_chain();
-        return;
-    } else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
-        RAISE(std::runtime_error, "failed to acquire swap chain image!")
+        if (result == VK_ERROR_OUT_OF_DATE_KHR  | result == VK_SUBOPTIMAL_KHR || framebuffer_resized) {
+            recreate_swap_chain();
+            return;
+        } else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
+            RAISE(std::runtime_error, "failed to acquire swap chain image!")
+        }
     }
 
+    // ---
+    // Check if a previous frame is using this image (i.e. there is its fence to wait on)
     if (inflight_images[imageIndex] != VK_NULL_HANDLE) {
         vkWaitForFences(device, 1, &inflight_images[imageIndex], VK_TRUE, UINT64_MAX);
     }
+    // Mark the image as now being in use by this frame
     inflight_images[imageIndex] = inflight_fences[current_frame];
+    //
 
-    VkSubmitInfo submitInfo{};
-    submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+    // Submit the work
+    {
+        VkSubmitInfo submitInfo{};
+        submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
-    VkSemaphore waitSemaphores[] = {image_available[current_frame]};
-    VkPipelineStageFlags waitStages[] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
-    submitInfo.waitSemaphoreCount = 1;
-    submitInfo.pWaitSemaphores = waitSemaphores;
-    submitInfo.pWaitDstStageMask = waitStages;
+        VkSemaphore waitSemaphores[] = {image_available[current_frame]};
+        VkPipelineStageFlags waitStages[] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
+        submitInfo.waitSemaphoreCount = 1;
+        // Wait for the image to be available
+        submitInfo.pWaitSemaphores = waitSemaphores;
+        submitInfo.pWaitDstStageMask = waitStages;
+        submitInfo.commandBufferCount = 1;
+        submitInfo.pCommandBuffers = &cmd_buffer[imageIndex];
 
-    submitInfo.commandBufferCount = 1;
-    submitInfo.pCommandBuffers = &cmd_buffer[imageIndex];
+        // When rendering is done signal it to the rendering semaphore
+        VkSemaphore signalSemaphores[] = {render_finished[current_frame]};
+        submitInfo.signalSemaphoreCount = 1;
+        submitInfo.pSignalSemaphores = signalSemaphores;
 
-    VkSemaphore signalSemaphores[] = {render_finished[current_frame]};
-    submitInfo.signalSemaphoreCount = 1;
-    submitInfo.pSignalSemaphores = signalSemaphores;
+        // Make Rendering commands
+        vkResetCommandBuffer(cmd_buffer[imageIndex], VK_COMMAND_BUFFER_RESET_RELEASE_RESOURCES_BIT);
+        render_frame(cmd_buffer[imageIndex], sc_framebuffers[imageIndex]);
 
-    vkResetFences(device, 1, &inflight_fences[current_frame]);
-
-    if (vkQueueSubmit(graphics_queue, 1, &submitInfo, inflight_fences[current_frame]) != VK_SUCCESS) {
-        RAISE(std::runtime_error, "failed to submit draw command buffer!")
+        vkResetFences(device, 1, &inflight_fences[current_frame]);
+        if (vkQueueSubmit(graphics_queue, 1, &submitInfo, inflight_fences[current_frame]) != VK_SUCCESS) {
+            RAISE(std::runtime_error, "failed to submit draw command buffer!")
+        }
     }
 
-    VkPresentInfoKHR presentInfo{};
-    presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+    // Present the image
+    {
+        VkPresentInfoKHR presentInfo{};
+        presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+        presentInfo.waitSemaphoreCount = 1;
 
-    presentInfo.waitSemaphoreCount = 1;
-    presentInfo.pWaitSemaphores = signalSemaphores;
+        // Wait for rendering to be done before presenting the image
+        VkSemaphore signalSemaphores[] = {render_finished[current_frame]};
+        presentInfo.pWaitSemaphores = signalSemaphores;
 
-    VkSwapchainKHR swapChains[] = {swap_chain};
-    presentInfo.swapchainCount = 1;
-    presentInfo.pSwapchains = swapChains;
+        VkSwapchainKHR swapChains[] = {swap_chain};
+        presentInfo.swapchainCount = 1;
+        presentInfo.pSwapchains = swapChains;
+        presentInfo.pImageIndices = &imageIndex;
 
-    presentInfo.pImageIndices = &imageIndex;
+        auto result = vkQueuePresentKHR(present_queue, &presentInfo);
 
-    result = vkQueuePresentKHR(present_queue, &presentInfo);
-
-    if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || framebuffer_resized) {
-        framebuffer_resized = false;
-        recreate_swap_chain();
-    } else if (result != VK_SUCCESS) {
-        RAISE(std::runtime_error, "failed to present swap chain image!")
+        if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || framebuffer_resized) {
+            framebuffer_resized = false;
+            recreate_swap_chain();
+        } else if (result != VK_SUCCESS) {
+            RAISE(std::runtime_error, "failed to present swap chain image!")
+        }
     }
 
     current_frame = (current_frame + 1) % MAX_FRAMES_IN_FLIGHT;

@@ -1,13 +1,19 @@
+#ifndef PUZZLE_APP_HEADER
+#define PUZZLE_APP_HEADER
+
 #include <vulkan/vulkan.h>
 #include <SDL2/SDL.h>
 
 #include <vector>
 #include <optional>
 
+#define IMGUI_GUARD(X) X
+
 #include "logger.h"
+#include "imgui_impl_vulkan.h"
+
 
 namespace puzzle {
-
 
 struct QueueFamilyIndices {
     std::optional<uint32_t> graphics_family;
@@ -22,6 +28,12 @@ struct SwapChainSupportDetails {
     VkSurfaceCapabilitiesKHR        capabilities;
     std::vector<VkSurfaceFormatKHR> formats;
     std::vector<VkPresentModeKHR>   present_modes;
+};
+
+struct ImgGuiState {
+    bool show_demo_window = true;
+    bool show_another_window = false;
+    ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 };
 
 class Application {
@@ -70,9 +82,32 @@ public:
     std::vector<VkFence>         inflight_images;
     size_t                       current_frame = 0;
 
+    VkBuffer                     vertex_buffer;
+    VkDeviceMemory               vertex_buffer_memory;
+    VkBuffer                     index_buffer;
+    VkDeviceMemory               index_buffer_memory;
+
+    // ImGUI
+    VkDescriptorPool             descriptor_pool = VK_NULL_HANDLE;
+    VkAllocationCallbacks*       allocator = nullptr;
+    VkPipelineCache              pipeline_cache = VK_NULL_HANDLE;
+
+    ImGui_ImplVulkanH_Window     imgui_data;
+    ImgGuiState                  gui;
+
+    bool init_imgui();
+
+    void init_fonts();
+
     void run() {
         init_window();
         init_vulkan();
+
+        // We are ready to render frames
+        // start loading ImGUI and its fonts
+        IMGUI_GUARD(init_imgui());
+        IMGUI_GUARD(init_fonts());
+
         event_loop();
         cleanup();
     }
@@ -98,12 +133,21 @@ public:
     void create_graphics_pipeline();
     void create_framebuffers();
     void create_command_pool();
+    void create_index_buffer();
+    void create_vertex_buffer();
     void create_command_buffers();
     void create_sync_objects();
+    void create_descriptor_pool();
+    void create_buffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory);
 
     void event_loop();
     void handle_event(SDL_Event& event);
     void draw_frame();
+    void render_frame(VkCommandBuffer cmd, VkFramebuffer frame_buffer);
+    void present_frame();
+    void imgui_draw();
+
+    void copy_buffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
 
     VkShaderModule create_shader_module(const std::vector<char>& code);
 
@@ -116,6 +160,7 @@ public:
 
     SwapChainSupportDetails query_swap_chain_support(VkPhysicalDevice device);
     QueueFamilyIndices find_queue_families(VkPhysicalDevice device);
+    uint32_t           find_memory_type(uint32_t typeFilter, VkMemoryPropertyFlags properties);
 
     std::vector<const char*> required_extensions();
     bool is_device_suitable(VkPhysicalDevice device);
@@ -127,3 +172,5 @@ public:
 };
 
 }
+
+#endif

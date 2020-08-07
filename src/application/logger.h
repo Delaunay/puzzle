@@ -1,5 +1,5 @@
-#ifndef PROJECT_TEST_SRC_LOGGER_HEADER
-#define PROJECT_TEST_SRC_LOGGER_HEADER
+#ifndef PUZZLE_APP_LOGGER_HEADER
+#define PUZZLE_APP_LOGGER_HEADER
 
 #include <string>
 #include <vector>
