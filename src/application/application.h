@@ -42,6 +42,8 @@ public:
         WIDTH(w), HEIGHT(h), enable_validation_layers(enable_validation)
     {}
 
+    virtual ~Application(){}
+
     std::vector<const char*> validation_layers = {
         "VK_LAYER_KHRONOS_validation"
     };
@@ -141,11 +143,16 @@ public:
     void create_buffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory);
 
     void event_loop();
-    void handle_event(SDL_Event& event);
     void draw_frame();
-    void render_frame(VkCommandBuffer cmd, VkFramebuffer frame_buffer);
+
+    void decorated_imgui_draw();
+    void decorated_render_frame(VkCommandBuffer cmd, VkFramebuffer frame_buffer);
+
+    virtual void handle_event(SDL_Event& event);
+    virtual void render_frame(VkCommandBuffer cmd);
+    virtual void imgui_draw();
+
     void present_frame();
-    void imgui_draw();
 
     void copy_buffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
 
