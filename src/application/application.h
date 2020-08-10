@@ -10,6 +10,7 @@
 #define IMGUI_GUARD(X) X
 
 #include "logger.h"
+#include "utils.h"
 #include "imgui_impl_vulkan.h"
 
 
@@ -97,6 +98,21 @@ public:
     ImGui_ImplVulkanH_Window     imgui_data;
     ImgGuiState                  gui;
 
+    RollingAverage<120>          render_times;
+    // VK_PRESENT_MODE_MAILBOX_KHR: v-sync like
+    // specifies that the presentation engine waits for the next vertical blanking period to update the current image.
+    // Tearing cannot be observed.
+    // Queue of size 1, if full newest frame replace the old one
+
+    // VK_PRESENT_MODE_FIFO_KHR: v-sync like
+    // Images are put on a queue to be displayed
+    // REQUIRED by the standard
+
+    // VK_PRESENT_MODE_IMMEDIATE_KHR: No capping
+    // request applied immediately
+    VkPresentModeKHR             preferred_mode = VK_PRESENT_MODE_IMMEDIATE_KHR;
+    float                        fps_cap        = 244;
+
     bool init_imgui();
 
     void init_fonts();
@@ -147,6 +163,8 @@ public:
 
     void decorated_imgui_draw();
     void decorated_render_frame(VkCommandBuffer cmd, VkFramebuffer frame_buffer);
+    void decorated_draw_frames();
+    void decorated_handle_event(SDL_Event& event);
 
     virtual void handle_event(SDL_Event& event);
     virtual void render_frame(VkCommandBuffer cmd);

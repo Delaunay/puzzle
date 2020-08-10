@@ -22,6 +22,7 @@
 #include <cstdint>
 #include <optional>
 #include <set>
+#include <thread>
 
 const std::vector<Vertex> vertices = {
     {{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}},
@@ -331,32 +332,51 @@ void Application::decorated_imgui_draw(){
     ImGui::Render();
 }
 
+
+void Application::decorated_handle_event(SDL_Event& event){
+    TimeIt event_handling;
+    while (SDL_PollEvent(&event)) {
+        IMGUI_GUARD(ImGui_ImplSDL2_ProcessEvent(&event));
+
+        if (event.type == SDL_QUIT) {
+            running = false;
+        }
+        // maybe check event.window.windowID == SDL_GetWindowID(window)
+        else if (event.type == SDL_WINDOWEVENT) {
+            SDL_WindowEvent wevent = event.window;
+            switch (wevent.type) {
+            case SDL_WINDOWEVENT_SIZE_CHANGED:
+            case SDL_WINDOWEVENT_RESIZED:
+                framebuffer_resized = true;
+                break;
+            }
+        }
+
+        handle_event(event);
+    }
+}
+
+void Application::decorated_draw_frames(){
+    TimeIt draw_time;
+    IMGUI_GUARD(decorated_imgui_draw());
+    draw_frame();
+}
+
 void Application::event_loop() {
     SDL_Event event;
 
+    double ms_per_frame = 1000.0 / double(fps_cap);
+
     while (running) {
-        while (SDL_PollEvent(&event)) {
-            IMGUI_GUARD(ImGui_ImplSDL2_ProcessEvent(&event));
+        TimeIt loop_time;
 
-            if (event.type == SDL_QUIT) {
-                running = false;
-            }
-            // maybe check event.window.windowID == SDL_GetWindowID(window)
-            else if (event.type == SDL_WINDOWEVENT) {
-                SDL_WindowEvent wevent = event.window;
-                switch (wevent.type) {
-                case SDL_WINDOWEVENT_SIZE_CHANGED:
-                case SDL_WINDOWEVENT_RESIZED:
-                    framebuffer_resized = true;
-                    break;
-                }
-            }
+        decorated_handle_event(event);
+        decorated_draw_frames();
 
-            handle_event(event);
+        auto free_time = ms_per_frame - (loop_time.stop() * 2);
+        if (free_time > 0) {
+            std::this_thread::sleep_for(TimeIt::Duration(free_time));
         }
-
-        IMGUI_GUARD(decorated_imgui_draw());
-        draw_frame();
     }
 
     vkDeviceWaitIdle(device);
@@ -1063,12 +1083,25 @@ VkSurfaceFormatKHR Application::choose_swap_surface_format(const std::vector<VkS
 }
 
 VkPresentModeKHR Application::choose_swap_present_mode(const std::vector<VkPresentModeKHR>& availablePresentModes) {
+    bool non_compliance_found = true;
+
     for (const auto& availablePresentMode : availablePresentModes) {
-        if (availablePresentMode == VK_PRESENT_MODE_MAILBOX_KHR) {
+        if (availablePresentMode == preferred_mode) {
             return availablePresentMode;
+        }
+
+        if (availablePresentMode == VK_PRESENT_MODE_FIFO_KHR){
+            non_compliance_found = false;
         }
     }
 
+    if (non_compliance_found){
+        RAISE(std::runtime_error, "Device is not compliant; VK_PRESENT_MODE_FIFO_KHR not implemented")
+    }
+
+    // v-sync (2)
+    // specifies that the presentation engine waits for the next vertical blanking period to update the current image.
+    // Tearing cannot be observed
     return VK_PRESENT_MODE_FIFO_KHR;
 }
 

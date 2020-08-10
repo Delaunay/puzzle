@@ -5,19 +5,20 @@
 #include <ratio>
 #include <cmath>
 #include <atomic>
+#include <algorithm>
 
 #include "logger.h"
 
 class TimeIt {
   public:
     using TimePoint       = std::chrono::high_resolution_clock::time_point;
+    using Duration        = std::chrono::duration<double, std::milli>;
     using Clock           = std::chrono::high_resolution_clock;
     TimePoint const start = Clock::now();
 
     double stop() const {
         TimePoint end = Clock::now();
-        std::chrono::duration<double> time_span =
-            std::chrono::duration_cast<std::chrono::duration<double>>(end - start);
+        Duration time_span = std::chrono::duration_cast<Duration>(end - start);
         return time_span.count();
     }
 
@@ -43,6 +44,8 @@ struct RuntimeStatistics {
         return st;
     }
 
+
+
 };
 
 struct StatStream {
@@ -66,6 +69,41 @@ struct StatStream {
     double sum        = 0;
     double sum2       = 0;
     std::size_t count = 0;
+};
+
+
+template<std::size_t N>
+struct RollingAverage {
+    float size() const {
+        return std::max(_size, N);
+    }
+
+    float sum() const {
+        float s = 0;
+        auto n = size();
+        for (int i = 0; i < n; ++i){
+            s += values[i];
+        }
+        return s;
+    }
+
+    float mean() const {
+        return sum() / size();
+    }
+
+    float fps() const {
+        return 1000.0 / mean();
+    }
+
+    template<typename T>
+    RollingAverage& operator+= (T val) {
+        values[_size] = val;
+        _size = (_size + 1) % N;
+        return *this;
+    }
+
+    std::size_t _size = 0;
+    std::array<float, N> values;
 };
 
 #endif

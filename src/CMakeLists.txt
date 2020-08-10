@@ -23,6 +23,7 @@ ENDIF()
 # ==========================
 
 ADD_SUBDIRECTORY(application)
+# ADD_SUBDIRECTORY(node-editor)
 
 ADD_EXECUTABLE(main main.cpp)
 TARGET_LINK_LIBRARIES(main glm::glm spdlog::spdlog SDL2 Vulkan::Vulkan vkApplication)
