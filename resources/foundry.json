@@ -1,0 +1,163 @@
+[
+  {
+    "Recipe Name": "Aluminum Ingot",
+    "Crafting Time (sec)": 3.0,
+    "Ingredients": [
+      {
+        "qty": 12.0,
+        "name": "Aluminum Scrap",
+        "speed": 240.0
+      },
+      {
+        "qty": 7.0,
+        "name": "Silica",
+        "speed": 140.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 4.0,
+        "name": "Aluminum Ingot",
+        "speed": 80.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "alt Coke Steel Ingot",
+    "Crafting Time (sec)": 12.0,
+    "Ingredients": [
+      {
+        "qty": 15.0,
+        "name": "Iron Ore",
+        "speed": 75.0
+      },
+      {
+        "qty": 15.0,
+        "name": "Petroleum Coke",
+        "speed": 75.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 20.0,
+        "name": "Steel Ingot",
+        "speed": 100.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "alt Compacted Steel Ingot",
+    "Crafting Time (sec)": 16.0,
+    "Ingredients": [
+      {
+        "qty": 6.0,
+        "name": "Iron Ore",
+        "speed": 22.5
+      },
+      {
+        "qty": 3.0,
+        "name": "Compacted Coal",
+        "speed": 11.3
+      }
+    ],
+    "Products": [
+      {
+        "qty": 10.0,
+        "name": "Steel Ingot",
+        "speed": 37.5
+      }
+    ]
+  },
+  {
+    "Recipe Name": "alt Copper Alloy Ingot",
+    "Crafting Time (sec)": 12.0,
+    "Ingredients": [
+      {
+        "qty": 10.0,
+        "name": "Copper Ore",
+        "speed": 50.0
+      },
+      {
+        "qty": 5.0,
+        "name": "Iron Ore",
+        "speed": 25.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 20.0,
+        "name": "Copper Ingot",
+        "speed": 100.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "alt Iron Alloy Ingot",
+    "Crafting Time (sec)": 6.0,
+    "Ingredients": [
+      {
+        "qty": 2.0,
+        "name": "Iron Ore",
+        "speed": 20.0
+      },
+      {
+        "qty": 2.0,
+        "name": "Copper Ore",
+        "speed": 20.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 5.0,
+        "name": "Iron Ingot",
+        "speed": 50.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "alt Solid Steel Ingot",
+    "Crafting Time (sec)": 3.0,
+    "Ingredients": [
+      {
+        "qty": 2.0,
+        "name": "Iron Ingot",
+        "speed": 40.0
+      },
+      {
+        "qty": 2.0,
+        "name": "Coal",
+        "speed": 40.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 3.0,
+        "name": "Steel Ingot",
+        "speed": 60.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "Steel Ingot",
+    "Crafting Time (sec)": 4.0,
+    "Ingredients": [
+      {
+        "qty": 3.0,
+        "name": "Iron Ore",
+        "speed": 45.0
+      },
+      {
+        "qty": 3.0,
+        "name": "Coal",
+        "speed": 45.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 3.0,
+        "name": "Steel Ingot",
+        "speed": 45.0
+      }
+    ]
+  }
+]

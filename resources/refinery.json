@@ -1,0 +1,932 @@
+[
+  {
+    "Recipe Name": "Alumina Solution",
+    "Crafting Time (sec)": 6.0,
+    "Ingredients": [
+      {
+        "qty": 7.0,
+        "name": "Bauxite",
+        "speed": 70.0
+      },
+      {
+        "qty": 10.0,
+        "name": "Water",
+        "speed": 100.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 8.0,
+        "name": "Alumina Solution",
+        "speed": 80.0
+      },
+      {
+        "qty": 2.0,
+        "name": "Silica",
+        "speed": 20.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "Aluminum Scrap",
+    "Crafting Time (sec)": 1.0,
+    "Ingredients": [
+      {
+        "qty": 4.0,
+        "name": "Alumina Solution",
+        "speed": 240.0
+      },
+      {
+        "qty": 1.0,
+        "name": "Petroleum Coke",
+        "speed": 60.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 6.0,
+        "name": "Aluminum Scrap",
+        "speed": 360.0
+      },
+      {
+        "qty": 1.0,
+        "name": "Water",
+        "speed": 60.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "alt Coated Cable",
+    "Crafting Time (sec)": 8.0,
+    "Ingredients": [
+      {
+        "qty": 5.0,
+        "name": "Wire",
+        "speed": 37.5
+      },
+      {
+        "qty": 2.0,
+        "name": "Heavy Oil Residue",
+        "speed": 15.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 9.0,
+        "name": "Cable",
+        "speed": 67.5
+      }
+    ]
+  },
+  {
+    "Recipe Name": "alt Diluted Packaged Fuel",
+    "Crafting Time (sec)": 2.0,
+    "Ingredients": [
+      {
+        "qty": 1.0,
+        "name": "Heavy Oil Residue",
+        "speed": 30.0
+      },
+      {
+        "qty": 2.0,
+        "name": "Packaged Water",
+        "speed": 60.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 2.0,
+        "name": "Packaged Fuel",
+        "speed": 60.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "alt Electrode - Aluminum Scrap",
+    "Crafting Time (sec)": 2.0,
+    "Ingredients": [
+      {
+        "qty": 3.0,
+        "name": "Alumina Solution",
+        "speed": 90.0
+      },
+      {
+        "qty": 1.0,
+        "name": "Coal",
+        "speed": 30.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 5.0,
+        "name": "Aluminum Scrap",
+        "speed": 150.0
+      },
+      {
+        "qty": 1.0,
+        "name": "Water",
+        "speed": 30.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "Fuel",
+    "Crafting Time (sec)": 6.0,
+    "Ingredients": [
+      {
+        "qty": 6.0,
+        "name": "Crude Oil",
+        "speed": 60.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 4.0,
+        "name": "Fuel",
+        "speed": 40.0
+      },
+      {
+        "qty": 3.0,
+        "name": "Polymer Resin",
+        "speed": 30.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "alt Heavy Oil Residue",
+    "Crafting Time (sec)": 6.0,
+    "Ingredients": [
+      {
+        "qty": 3.0,
+        "name": "Crude Oil",
+        "speed": 30.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 4.0,
+        "name": "Heavy Oil Residue",
+        "speed": 40.0
+      },
+      {
+        "qty": 2.0,
+        "name": "Polymer Resin",
+        "speed": 20.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "Liquid Biofuel",
+    "Crafting Time (sec)": 4.0,
+    "Ingredients": [
+      {
+        "qty": 6.0,
+        "name": "Solid Biofuel",
+        "speed": 90.0
+      },
+      {
+        "qty": 3.0,
+        "name": "Water",
+        "speed": 45.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 4.0,
+        "name": "Liquid Biofuel",
+        "speed": 60.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "Packaged Fuel",
+    "Crafting Time (sec)": 3.0,
+    "Ingredients": [
+      {
+        "qty": 2.0,
+        "name": "Fuel",
+        "speed": 40.0
+      },
+      {
+        "qty": 2.0,
+        "name": "Empty Canister",
+        "speed": 40.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 2.0,
+        "name": "Packaged Fuel",
+        "speed": 40.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "Packaged Heavy Oil Residue",
+    "Crafting Time (sec)": 4.0,
+    "Ingredients": [
+      {
+        "qty": 2.0,
+        "name": "Heavy Oil Residue",
+        "speed": 30.0
+      },
+      {
+        "qty": 2.0,
+        "name": "Empty Canister",
+        "speed": 30.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 2.0,
+        "name": "Packaged Heavy Oil Residue",
+        "speed": 30.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "Packaged Liquid Biofuel",
+    "Crafting Time (sec)": 3.0,
+    "Ingredients": [
+      {
+        "qty": 2.0,
+        "name": "Liquid Biofuel",
+        "speed": 40.0
+      },
+      {
+        "qty": 2.0,
+        "name": "Empty Canister",
+        "speed": 40.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 2.0,
+        "name": "Packaged Liquid Biofuel",
+        "speed": 40.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "Packaged Oil",
+    "Crafting Time (sec)": 4.0,
+    "Ingredients": [
+      {
+        "qty": 2.0,
+        "name": "Crude Oil",
+        "speed": 30.0
+      },
+      {
+        "qty": 2.0,
+        "name": "Empty Canister",
+        "speed": 30.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 2.0,
+        "name": "Packaged Oil",
+        "speed": 30.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "Packaged Turbofuel",
+    "Crafting Time (sec)": 6.0,
+    "Ingredients": [
+      {
+        "qty": 2.0,
+        "name": "Turbofuel",
+        "speed": 20.0
+      },
+      {
+        "qty": 2.0,
+        "name": "Empty Canister",
+        "speed": 20.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 2.0,
+        "name": "Packaged Turbofuel",
+        "speed": 20.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "Packaged Water",
+    "Crafting Time (sec)": 2.0,
+    "Ingredients": [
+      {
+        "qty": 2.0,
+        "name": "Water",
+        "speed": 60.0
+      },
+      {
+        "qty": 2.0,
+        "name": "Empty Canister",
+        "speed": 60.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 2.0,
+        "name": "Packaged Water",
+        "speed": 60.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "Petroleum Coke",
+    "Crafting Time (sec)": 6.0,
+    "Ingredients": [
+      {
+        "qty": 4.0,
+        "name": "Heavy Oil Residue",
+        "speed": 40.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 12.0,
+        "name": "Petroleum Coke",
+        "speed": 120.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "Plastic",
+    "Crafting Time (sec)": 6.0,
+    "Ingredients": [
+      {
+        "qty": 3.0,
+        "name": "Crude Oil",
+        "speed": 30.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 2.0,
+        "name": "Plastic",
+        "speed": 20.0
+      },
+      {
+        "qty": 1.0,
+        "name": "Heavy Oil Residue",
+        "speed": 10.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "alt Polyester Fabric",
+    "Crafting Time (sec)": 12.0,
+    "Ingredients": [
+      {
+        "qty": 16.0,
+        "name": "Polymer Resin",
+        "speed": 80.0
+      },
+      {
+        "qty": 10.0,
+        "name": "Water",
+        "speed": 50.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 1.0,
+        "name": "Fabric",
+        "speed": 5.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "alt Polymer Resin",
+    "Crafting Time (sec)": 6.0,
+    "Ingredients": [
+      {
+        "qty": 6.0,
+        "name": "Crude Oil",
+        "speed": 60.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 13.0,
+        "name": "Polymer Resin",
+        "speed": 130.0
+      },
+      {
+        "qty": 2.0,
+        "name": "Heavy Oil Residue",
+        "speed": 20.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "alt Pure Caterium Ingot",
+    "Crafting Time (sec)": 5.0,
+    "Ingredients": [
+      {
+        "qty": 2.0,
+        "name": "Caterium Ore",
+        "speed": 24.0
+      },
+      {
+        "qty": 2.0,
+        "name": "Water",
+        "speed": 24.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 1.0,
+        "name": "Caterium Ingot",
+        "speed": 12.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "alt Pure Copper Ingot",
+    "Crafting Time (sec)": 24.0,
+    "Ingredients": [
+      {
+        "qty": 6.0,
+        "name": "Copper Ore",
+        "speed": 15.0
+      },
+      {
+        "qty": 4.0,
+        "name": "Water",
+        "speed": 10.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 15.0,
+        "name": "Copper Ingot",
+        "speed": 37.5
+      }
+    ]
+  },
+  {
+    "Recipe Name": "alt Pure Iron Ingot",
+    "Crafting Time (sec)": 12.0,
+    "Ingredients": [
+      {
+        "qty": 7.0,
+        "name": "Iron Ore",
+        "speed": 35.0
+      },
+      {
+        "qty": 4.0,
+        "name": "Water",
+        "speed": 20.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 13.0,
+        "name": "Iron Ingot",
+        "speed": 65.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "alt Pure Quartz Crystal",
+    "Crafting Time (sec)": 8.0,
+    "Ingredients": [
+      {
+        "qty": 9.0,
+        "name": "Raw Quartz",
+        "speed": 67.5
+      },
+      {
+        "qty": 5.0,
+        "name": "Water",
+        "speed": 37.5
+      }
+    ],
+    "Products": [
+      {
+        "qty": 7.0,
+        "name": "Quartz Crystal",
+        "speed": 52.5
+      }
+    ]
+  },
+  {
+    "Recipe Name": "alt Recycled Plastic",
+    "Crafting Time (sec)": 12.0,
+    "Ingredients": [
+      {
+        "qty": 6.0,
+        "name": "Rubber",
+        "speed": 30.0
+      },
+      {
+        "qty": 6.0,
+        "name": "Fuel",
+        "speed": 30.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 12.0,
+        "name": "Plastic",
+        "speed": 60.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "alt Recycled Rubber",
+    "Crafting Time (sec)": 12.0,
+    "Ingredients": [
+      {
+        "qty": 6.0,
+        "name": "Plastic",
+        "speed": 30.0
+      },
+      {
+        "qty": 6.0,
+        "name": "Fuel",
+        "speed": 30.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 12.0,
+        "name": "Rubber",
+        "speed": 60.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "Residual Fuel",
+    "Crafting Time (sec)": 6.0,
+    "Ingredients": [
+      {
+        "qty": 6.0,
+        "name": "Heavy Oil Residue",
+        "speed": 60.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 4.0,
+        "name": "Fuel",
+        "speed": 40.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "Residual Plastic",
+    "Crafting Time (sec)": 6.0,
+    "Ingredients": [
+      {
+        "qty": 6.0,
+        "name": "Polymer Resin",
+        "speed": 60.0
+      },
+      {
+        "qty": 2.0,
+        "name": "Water",
+        "speed": 20.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 2.0,
+        "name": "Plastic",
+        "speed": 20.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "Residual Rubber",
+    "Crafting Time (sec)": 6.0,
+    "Ingredients": [
+      {
+        "qty": 4.0,
+        "name": "Polymer Resin",
+        "speed": 40.0
+      },
+      {
+        "qty": 4.0,
+        "name": "Water",
+        "speed": 40.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 2.0,
+        "name": "Rubber",
+        "speed": 20.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "Rubber",
+    "Crafting Time (sec)": 6.0,
+    "Ingredients": [
+      {
+        "qty": 3.0,
+        "name": "Crude Oil",
+        "speed": 30.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 2.0,
+        "name": "Rubber",
+        "speed": 20.0
+      },
+      {
+        "qty": 2.0,
+        "name": "Heavy Oil Residue",
+        "speed": 20.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "alt Steamed Copper Sheet",
+    "Crafting Time (sec)": 8.0,
+    "Ingredients": [
+      {
+        "qty": 3.0,
+        "name": "Copper Ingot",
+        "speed": 22.5
+      },
+      {
+        "qty": 3.0,
+        "name": "Water",
+        "speed": 22.5
+      }
+    ],
+    "Products": [
+      {
+        "qty": 3.0,
+        "name": "Copper Sheet",
+        "speed": 22.5
+      }
+    ]
+  },
+  {
+    "Recipe Name": "Sulfuric Acid",
+    "Crafting Time (sec)": 6.0,
+    "Ingredients": [
+      {
+        "qty": 5.0,
+        "name": "Sulfur",
+        "speed": 50.0
+      },
+      {
+        "qty": 5.0,
+        "name": "Water",
+        "speed": 50.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 10.0,
+        "name": "Sulfuric Acid",
+        "speed": 100.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "alt Turbo Heavy Fuel",
+    "Crafting Time (sec)": 8.0,
+    "Ingredients": [
+      {
+        "qty": 5.0,
+        "name": "Heavy Oil Residue",
+        "speed": 37.5
+      },
+      {
+        "qty": 4.0,
+        "name": "Compacted Coal",
+        "speed": 30.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 4.0,
+        "name": "Turbofuel",
+        "speed": 30.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "alt Turbofuel",
+    "Crafting Time (sec)": 16.0,
+    "Ingredients": [
+      {
+        "qty": 6.0,
+        "name": "Fuel",
+        "speed": 22.5
+      },
+      {
+        "qty": 4.0,
+        "name": "Compacted Coal",
+        "speed": 15.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 5.0,
+        "name": "Turbofuel",
+        "speed": 18.8
+      }
+    ]
+  },
+  {
+    "Recipe Name": "Unpackage Fuel",
+    "Crafting Time (sec)": 2.0,
+    "Ingredients": [
+      {
+        "qty": 2.0,
+        "name": "Packaged Fuel",
+        "speed": 60.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 2.0,
+        "name": "Fuel",
+        "speed": 60.0
+      },
+      {
+        "qty": 2.0,
+        "name": "Empty Canister",
+        "speed": 60.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "Unpackage Heavy Oil Residue",
+    "Crafting Time (sec)": 6.0,
+    "Ingredients": [
+      {
+        "qty": 2.0,
+        "name": "Packaged Heavy Oil Residue",
+        "speed": 20.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 2.0,
+        "name": "Heavy Oil Residue",
+        "speed": 20.0
+      },
+      {
+        "qty": 2.0,
+        "name": "Empty Canister",
+        "speed": 20.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "Unpackage Liquid Biofuel",
+    "Crafting Time (sec)": 2.0,
+    "Ingredients": [
+      {
+        "qty": 2.0,
+        "name": "Packaged Liquid Biofuel",
+        "speed": 60.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 2.0,
+        "name": "Liquid Biofuel",
+        "speed": 60.0
+      },
+      {
+        "qty": 2.0,
+        "name": "Empty Canister",
+        "speed": 60.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "Unpackage Oil",
+    "Crafting Time (sec)": 2.0,
+    "Ingredients": [
+      {
+        "qty": 2.0,
+        "name": "Packaged Oil",
+        "speed": 60.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 2.0,
+        "name": "Crude Oil",
+        "speed": 60.0
+      },
+      {
+        "qty": 2.0,
+        "name": "Empty Canister",
+        "speed": 60.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "Unpackage Turbo Fuel",
+    "Crafting Time (sec)": 6.0,
+    "Ingredients": [
+      {
+        "qty": 2.0,
+        "name": "Packaged Turbofuel",
+        "speed": 20.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 2.0,
+        "name": "Turbofuel",
+        "speed": 20.0
+      },
+      {
+        "qty": 2.0,
+        "name": "Empty Canister",
+        "speed": 20.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "Unpackage Water",
+    "Crafting Time (sec)": 1.0,
+    "Ingredients": [
+      {
+        "qty": 2.0,
+        "name": "Packaged Water",
+        "speed": 120.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 2.0,
+        "name": "Water",
+        "speed": 120.0
+      },
+      {
+        "qty": 2.0,
+        "name": "Empty Canister",
+        "speed": 120.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "Uranium Pellet",
+    "Crafting Time (sec)": 6.0,
+    "Ingredients": [
+      {
+        "qty": 5.0,
+        "name": "Uranium",
+        "speed": 50.0
+      },
+      {
+        "qty": 8.0,
+        "name": "Sulfuric Acid",
+        "speed": 80.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 5.0,
+        "name": "Uranium Pellet",
+        "speed": 50.0
+      },
+      {
+        "qty": 2.0,
+        "name": "Sulfuric Acid",
+        "speed": 20.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "alt Wet Concrete",
+    "Crafting Time (sec)": 3.0,
+    "Ingredients": [
+      {
+        "qty": 6.0,
+        "name": "Limestone",
+        "speed": 120.0
+      },
+      {
+        "qty": 5.0,
+        "name": "Water",
+        "speed": 100.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 4.0,
+        "name": "Concrete",
+        "speed": 80.0
+      }
+    ]
+  }
+]

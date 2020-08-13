@@ -11,7 +11,7 @@ FIND_PACKAGE(Vulkan REQUIRED)
 
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/dependencies/sdl2/include)
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/dependencies/imgui)
-
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/dependencies/stb)
 
 IF (${Vulkan_FOUND})
   MESSAGE(STATUS "Found Vulkan")
@@ -23,10 +23,24 @@ ENDIF()
 # ==========================
 
 ADD_SUBDIRECTORY(application)
-# ADD_SUBDIRECTORY(node-editor)
+ADD_CUSTOM_TARGET(asset_dirs)
 
-ADD_EXECUTABLE(main main.cpp)
-TARGET_LINK_LIBRARIES(main glm::glm spdlog::spdlog SDL2 Vulkan::Vulkan vkApplication)
+FUNCTION(asset_dir dirname)
+  ADD_CUSTOM_TARGET(link_${dirname} ALL COMMAND
+    ${CMAKE_COMMAND} -E create_symlink
+    "${CMAKE_SOURCE_DIR}/${dirname}"
+    "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${dirname}")
+
+  ADD_DEPENDENCIES(asset_dirs link_${dirname})
+ENDFUNCTION()
+
+asset_dir("resources")
+
+FILE(GLOB MAIN_SRC *.cpp *.h)
+
+ADD_EXECUTABLE(main ${MAIN_SRC})
+TARGET_LINK_LIBRARIES(main glm::glm spdlog::spdlog SDL2 Vulkan::Vulkan vkApplication nlohmann_json::nlohmann_json)
+ADD_DEPENDENCIES(main asset_dirs)
 
 
 # Find Shaders and compile them

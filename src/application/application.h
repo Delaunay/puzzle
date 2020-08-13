@@ -6,6 +6,7 @@
 
 #include <vector>
 #include <optional>
+#include <unordered_map>
 
 #define IMGUI_GUARD(X) X
 
@@ -13,6 +14,36 @@
 #include "utils.h"
 #include "imgui_impl_vulkan.h"
 
+struct Image{
+    int x = 0;
+    int y = 0;
+    int c = 4;
+    void* data = nullptr;
+
+    Image(std::string const& path);
+
+    Image(){}
+
+    ~Image();
+};
+
+
+struct DeviceImage {
+    VkSampler      sampler = VK_NULL_HANDLE;
+    VkImageView    view    = VK_NULL_HANDLE;
+    VkImage        image   = VK_NULL_HANDLE;
+    VkDeviceMemory memory  = VK_NULL_HANDLE;
+    ImTextureID    descriptor_set = nullptr;
+
+    void cleanup(VkDevice device, VkDescriptorPool pool){
+        vkDestroySampler(device, sampler, nullptr);
+        vkDestroyImageView(device, view, nullptr);
+        vkDestroyImage(device, image, nullptr);
+        vkFreeMemory(device, memory, nullptr);
+    }
+};
+
+std::string to_string(VkResult err);
 
 namespace puzzle {
 
@@ -36,6 +67,8 @@ struct ImgGuiState {
     bool show_another_window = false;
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 };
+
+
 
 class Application {
 public:
@@ -97,6 +130,7 @@ public:
 
     ImGui_ImplVulkanH_Window     imgui_data;
     ImgGuiState                  gui;
+    std::unordered_map<void*, DeviceImage> texture_cache;
 
     RollingAverage<120>          render_times;
     // VK_PRESENT_MODE_MAILBOX_KHR: v-sync like
@@ -158,6 +192,8 @@ public:
     void create_descriptor_pool();
     void create_buffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory);
 
+    DeviceImage* load_texture_image(Image const& img);
+
     void event_loop();
     void draw_frame();
 
@@ -187,6 +223,15 @@ public:
     QueueFamilyIndices find_queue_families(VkPhysicalDevice device);
     uint32_t           find_memory_type(uint32_t typeFilter, VkMemoryPropertyFlags properties);
 
+    VkCommandBuffer begin_single_time_commands();
+    // void new_descriptor_set();
+    VkSampler new_texture_sampler();
+
+    VkImageView create_image_view(VkImage image, VkFormat format);
+    void end_single_time_commands(VkCommandBuffer commandBuffer);
+
+    void copy_buffer_to_image(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
+    void transition_image_layout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
     std::vector<const char*> required_extensions();
     bool is_device_suitable(VkPhysicalDevice device);
 

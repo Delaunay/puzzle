@@ -1,0 +1,561 @@
+[
+  {
+    "Recipe Name": "alt Biocoal",
+    "Crafting Time (sec)": 8.0,
+    "texture": "resources/assets/coal.png",
+    "Ingredients": [
+      {
+        "qty": 5.0,
+        "name": "Biomass",
+        "speed": 37.5
+      }
+    ],
+    "Products": [
+      {
+        "qty": 6.0,
+        "name": "Coal",
+        "speed": 45.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "Biomass (Alien Carapace)",
+    "Crafting Time (sec)": 4.0,
+    "Ingredients": [
+      {
+        "qty": 1.0,
+        "name": "Alien Carapace",
+        "speed": 15.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 100.0,
+        "name": "Biomass",
+        "speed": 1500.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "Biomass (Alien Organs)",
+    "Crafting Time (sec)": 8.0,
+    "Ingredients": [
+      {
+        "qty": 1.0,
+        "name": "Alien Organs",
+        "speed": 7.5
+      }
+    ],
+    "Products": [
+      {
+        "qty": 200.0,
+        "name": "Biomass",
+        "speed": 1500.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "Biomass (Leaves)",
+    "Crafting Time (sec)": 5.0,
+    "Ingredients": [
+      {
+        "qty": 10.0,
+        "name": "Leaves",
+        "speed": 120.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 5.0,
+        "name": "Biomass",
+        "speed": 60.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "Biomass (Mycelia)",
+    "Crafting Time (sec)": 4.0,
+    "Ingredients": [
+      {
+        "qty": 10.0,
+        "name": "Mycelia",
+        "speed": 150.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 10.0,
+        "name": "Biomass",
+        "speed": 150.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "Biomass (Wood)",
+    "Crafting Time (sec)": 4.0,
+    "Ingredients": [
+      {
+        "qty": 4.0,
+        "name": "Wood",
+        "speed": 60.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 20.0,
+        "name": "Biomass",
+        "speed": 300.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "Cable",
+    "Crafting Time (sec)": 2.0,
+    "Ingredients": [
+      {
+        "qty": 2.0,
+        "name": "Wire",
+        "speed": 60.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 1.0,
+        "name": "Cable",
+        "speed": 30.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "alt Casted Screw",
+    "Crafting Time (sec)": 24.0,
+    "Ingredients": [
+      {
+        "qty": 5.0,
+        "name": "Iron Ingot",
+        "speed": 12.5
+      }
+    ],
+    "Products": [
+      {
+        "qty": 20.0,
+        "name": "Screw",
+        "speed": 50.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "alt Caterium Wire",
+    "Crafting Time (sec)": 4.0,
+    "Ingredients": [
+      {
+        "qty": 1.0,
+        "name": "Caterium Ingot",
+        "speed": 15.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 8.0,
+        "name": "Wire",
+        "speed": 120.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "alt Charcoal",
+    "Crafting Time (sec)": 4.0,
+    "Ingredients": [
+      {
+        "qty": 1.0,
+        "name": "Wood",
+        "speed": 15.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 10.0,
+        "name": "Coal",
+        "speed": 150.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "Color Cartridge",
+    "Crafting Time (sec)": 8.0,
+    "Ingredients": [
+      {
+        "qty": 5.0,
+        "name": "Flower Petals",
+        "speed": 37.5
+      }
+    ],
+    "Products": [
+      {
+        "qty": 10.0,
+        "name": "Color Cartridge",
+        "speed": 75.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "Concrete",
+    "Crafting Time (sec)": 4.0,
+    "Ingredients": [
+      {
+        "qty": 3.0,
+        "name": "Limestone",
+        "speed": 45.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 1.0,
+        "name": "Concrete",
+        "speed": 15.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "Copper Sheet",
+    "Crafting Time (sec)": 6.0,
+    "Ingredients": [
+      {
+        "qty": 2.0,
+        "name": "Copper Ingot",
+        "speed": 20.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 1.0,
+        "name": "Copper Sheet",
+        "speed": 10.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "Empty Canister",
+    "Crafting Time (sec)": 4.0,
+    "Ingredients": [
+      {
+        "qty": 2.0,
+        "name": "Plastic",
+        "speed": 30.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 4.0,
+        "name": "Empty Canister",
+        "speed": 60.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "Iron Plate",
+    "Crafting Time (sec)": 6.0,
+    "Ingredients": [
+      {
+        "qty": 3.0,
+        "name": "Iron Ingot",
+        "speed": 30.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 2.0,
+        "name": "Iron Plate",
+        "speed": 20.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "Iron Rod",
+    "Crafting Time (sec)": 4.0,
+    "Ingredients": [
+      {
+        "qty": 1.0,
+        "name": "Iron Ingot",
+        "speed": 15.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 1.0,
+        "name": "Iron Rod",
+        "speed": 15.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "alt Iron Wire",
+    "Crafting Time (sec)": 24.0,
+    "Ingredients": [
+      {
+        "qty": 5.0,
+        "name": "Iron Ingot",
+        "speed": 12.5
+      }
+    ],
+    "Products": [
+      {
+        "qty": 9.0,
+        "name": "Wire",
+        "speed": 22.5
+      }
+    ]
+  },
+  {
+    "Recipe Name": "Power Shard (1)",
+    "Crafting Time (sec)": 8.0,
+    "Ingredients": [
+      {
+        "qty": 1.0,
+        "name": "Green Power Slug",
+        "speed": 7.5
+      }
+    ],
+    "Products": [
+      {
+        "qty": 1.0,
+        "name": "Power Shard",
+        "speed": 7.5
+      }
+    ]
+  },
+  {
+    "Recipe Name": "Power Shard (2)",
+    "Crafting Time (sec)": 12.0,
+    "Ingredients": [
+      {
+        "qty": 1.0,
+        "name": "Yellow Power Slug",
+        "speed": 5.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 2.0,
+        "name": "Power Shard",
+        "speed": 10.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "Power Shard (3)",
+    "Crafting Time (sec)": 24.0,
+    "Ingredients": [
+      {
+        "qty": 1.0,
+        "name": "Purple Power Slug",
+        "speed": 2.5
+      }
+    ],
+    "Products": [
+      {
+        "qty": 5.0,
+        "name": "Power Shard",
+        "speed": 12.5
+      }
+    ]
+  },
+  {
+    "Recipe Name": "Quartz Crystal",
+    "Crafting Time (sec)": 8.0,
+    "Ingredients": [
+      {
+        "qty": 5.0,
+        "name": "Raw Quartz",
+        "speed": 37.5
+      }
+    ],
+    "Products": [
+      {
+        "qty": 3.0,
+        "name": "Quartz Crystal",
+        "speed": 22.5
+      }
+    ]
+  },
+  {
+    "Recipe Name": "Quickwire",
+    "Crafting Time (sec)": 5.0,
+    "Ingredients": [
+      {
+        "qty": 1.0,
+        "name": "Caterium Ingot",
+        "speed": 12.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 5.0,
+        "name": "Quickwire",
+        "speed": 60.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "Screw",
+    "Crafting Time (sec)": 6.0,
+    "Ingredients": [
+      {
+        "qty": 1.0,
+        "name": "Iron Rod",
+        "speed": 10.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 4.0,
+        "name": "Screw",
+        "speed": 40.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "Silica",
+    "Crafting Time (sec)": 8.0,
+    "Ingredients": [
+      {
+        "qty": 3.0,
+        "name": "Raw Quartz",
+        "speed": 22.5
+      }
+    ],
+    "Products": [
+      {
+        "qty": 5.0,
+        "name": "Silica",
+        "speed": 37.5
+      }
+    ]
+  },
+  {
+    "Recipe Name": "Solid Biofuel",
+    "Crafting Time (sec)": 4.0,
+    "Ingredients": [
+      {
+        "qty": 8.0,
+        "name": "Biomass",
+        "speed": 120.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 4.0,
+        "name": "Solid Biofuel",
+        "speed": 60.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "Spiked Rebar",
+    "Crafting Time (sec)": 4.0,
+    "Ingredients": [
+      {
+        "qty": 1.0,
+        "name": "Iron Rod",
+        "speed": 15.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 1.0,
+        "name": "Spiked Rebar",
+        "speed": 15.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "Steel Beam",
+    "Crafting Time (sec)": 4.0,
+    "Ingredients": [
+      {
+        "qty": 4.0,
+        "name": "Steel Ingot",
+        "speed": 60.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 1.0,
+        "name": "Steel Beam",
+        "speed": 15.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "Steel Pipe",
+    "Crafting Time (sec)": 6.0,
+    "Ingredients": [
+      {
+        "qty": 3.0,
+        "name": "Steel Ingot",
+        "speed": 30.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 2.0,
+        "name": "Steel Pipe",
+        "speed": 20.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "alt Steel Rod",
+    "Crafting Time (sec)": 5.0,
+    "Ingredients": [
+      {
+        "qty": 1.0,
+        "name": "Steel Ingot",
+        "speed": 12.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 4.0,
+        "name": "Iron Rod",
+        "speed": 48.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "alt Steel Screw",
+    "Crafting Time (sec)": 12.0,
+    "Ingredients": [
+      {
+        "qty": 1.0,
+        "name": "Steel Beam",
+        "speed": 5.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 52.0,
+        "name": "Screw",
+        "speed": 260.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "Wire",
+    "Crafting Time (sec)": 4.0,
+    "Ingredients": [
+      {
+        "qty": 1.0,
+        "name": "Copper Ingot",
+        "speed": 15.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 2.0,
+        "name": "Wire",
+        "speed": 30.0
+      }
+    ]
+  }
+]

@@ -131,4 +131,8 @@ ADD_CUSTOM_TARGET(zothers ALL SOURCES
     .gitignore
     .gitmodules
     .clang-format
+    # resources/Docs.json
 )
+
+FILE(GLOB RESOURCES_FILE resources/*.json)
+ADD_CUSTOM_TARGET(resources ALL SOURCES ${RESOURCES_FILE})

@@ -13,6 +13,7 @@ ENDIF(BUILD_BENCHMARK)
 ADD_SUBDIRECTORY(spdlog)
 ADD_SUBDIRECTORY(sdl2)
 ADD_SUBDIRECTORY(glm)
+ADD_SUBDIRECTORY(json)
 
 # To display source in IDE
 file(GLOB_RECURSE IMGUI_SRC imgui/*.cpp imgui/*.h)

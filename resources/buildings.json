@@ -1,0 +1,164 @@
+[
+    {
+        "name": "Constructor",
+        "energy": -4,
+        "w": 8,
+        "l": 10,
+        "h": 7,
+        "inputs": ["C"],
+        "outputs": ["C"]
+    },
+    {
+        "name": "Assembler",
+        "energy": -15,
+        "w": 10,
+        "l": 15,
+        "h": 10,
+        "inputs": ["C", "C"],
+        "outputs": ["C"]
+    },
+    {
+        "name": "Manufacturer",
+        "energy": -55,
+        "w": 18,
+        "l": 19,
+        "h": 8,
+        "inputs": ["C", "C", "C", "C"],
+        "outputs": ["C"]
+    },    
+    {   
+        "name": "Refinery",
+        "energy": -30,
+        "w": 12,
+        "l": 20,
+        "h": 30,
+        "inputs": ["C", "P"],
+        "outputs": ["C", "P"]
+    },
+    {
+        "name": "Smelter",
+        "energy": -4,
+        "w": 6,
+        "l": 9,
+        "h": 9,
+        "inputs": ["C"],
+        "outputs": ["C"]
+    },
+    {
+        "name": "Foundry",
+        "energy": -16,
+        "w": 10,
+        "l": 9,
+        "h": 9,
+        "inputs": ["C", "C"],
+        "outputs": ["C", "N"]
+    },
+    {
+        "name": "AWESOME Sink",
+        "energy": -30,
+        "w": 16,
+        "l": 12,
+        "h": 24,
+        "inputs": ["C"],
+        "outputs": []
+    },
+    {
+        "name": "Coal Generator",
+        "energy": 75,
+        "w": 10,
+        "l": 25,
+        "h": 36,
+        "inputs": ["C", "P"],
+        "outputs": []
+    },
+    {
+        "name": "Fuild Buffer",
+        "energy": 0,
+        "w": 6,
+        "l": 6,
+        "h": 8,
+        "inputs": ["C"],
+        "outputs": ["C"]
+    },
+    {
+        "name": "Geo Thermal Generator",
+        "energy": 200,
+        "w": 19,
+        "l": 20,
+        "h": 34,
+        "inputs": [],
+        "outputs": []
+    },
+    {
+        "name": "Foundation",
+        "energy": 0,
+        "w": 8,
+        "l": 8,
+        "h": 1,
+        "inputs": [],
+        "outputs": []
+    },
+    {
+        "name": "Storage Container",
+        "energy": 0,
+        "w": 5,
+        "l": 10,
+        "h": 4,
+        "inputs": ["P"],
+        "outputs": ["P"]
+    },
+    {
+        "name": "Nuclear Plant",
+        "energy": 2500,
+        "w": 38,
+        "l": 43,
+        "h": 49,
+        "inputs": ["P", "C"],
+        "outputs": ["C"]
+    },
+    {
+        "name": "Oil Extractor",
+        "energy": -40,
+        "w": 12,
+        "l": 20,
+        "h": 30,
+        "inputs": [],
+        "outputs": ["C"]
+    },
+    {
+        "name": "Water Extractor",
+        "energy": -20,
+        "w": 20,
+        "l": 19.5,
+        "h": 17,
+        "inputs": [],
+        "outputs": ["C"]
+    },
+    {
+        "name": "Truck Station",
+        "energy": -20,
+        "w": 16,
+        "l": 22,
+        "h": 12,
+        "inputs": ["C", "C"],
+        "outputs": ["C"]
+    },
+    {
+        "name": "Space Elevator",
+        "energy": 0,
+        "w": 54,
+        "l": 54,
+        "h": 118,
+        "inputs": ["C", "C", "C", "C", "C", "C"],
+        "outputs": []
+    },
+    {
+        "name": "Miner",
+        "energy": -5,
+        "w": 8,
+        "l": 14,
+        "h": 18,
+        "inputs": [],
+        "outputs": ["C"]
+    }
+]

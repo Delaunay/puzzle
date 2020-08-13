@@ -9,6 +9,13 @@
 
 #include "logger.h"
 
+
+template<typename T>
+T next_id() {
+    static int _next_id = 1;
+    return T(_next_id++);
+}
+
 class TimeIt {
   public:
     using TimePoint       = std::chrono::high_resolution_clock::time_point;

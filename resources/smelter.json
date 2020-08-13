@@ -1,0 +1,74 @@
+[
+  {
+    "Recipe Name": "Caterium Ingot",
+    "Crafting Time (sec)": 4.0,
+    "Ingredients": [
+      {
+        "qty": 3.0,
+        "name": "Caterium Ore",
+        "speed": 45.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 1.0,
+        "name": "Caterium Ingot",
+        "speed": 15.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "Copper Ingot",
+    "Crafting Time (sec)": 2.0,
+    "Ingredients": [
+      {
+        "qty": 1.0,
+        "name": "Copper Ore",
+        "speed": 30.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 1.0,
+        "name": "Copper Ingot",
+        "speed": 30.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "Iron Ingot",
+    "Crafting Time (sec)": 2.0,
+    "Ingredients": [
+      {
+        "qty": 1.0,
+        "name": "Iron Ore",
+        "speed": 30.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 1.0,
+        "name": "Iron Ingot",
+        "speed": 30.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "alt Pure Aluminum Ingot",
+    "Crafting Time (sec)": 5.0,
+    "Ingredients": [
+      {
+        "qty": 12.0,
+        "name": "Aluminum Scrap",
+        "speed": 144.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 3.0,
+        "name": "Aluminum Ingot",
+        "speed": 36.0
+      }
+    ]
+  }
+]

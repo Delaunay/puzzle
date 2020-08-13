@@ -1,0 +1,912 @@
+[
+  {
+    "Recipe Name": "Adaptive Control Unit",
+    "Crafting Time (sec)": 120.0,
+    "Ingredients": [
+      {
+        "qty": 15.0,
+        "name": "Automated Wiring",
+        "speed": 7.5
+      },
+      {
+        "qty": 10.0,
+        "name": "Circuit Board",
+        "speed": 5.0
+      },
+      {
+        "qty": 2.0,
+        "name": "Heavy Modular Frame",
+        "speed": 1.0
+      },
+      {
+        "qty": 2.0,
+        "name": "Computer",
+        "speed": 1.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 2.0,
+        "name": "Adaptive Control Unit",
+        "speed": 1.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "Battery",
+    "Crafting Time (sec)": 32.0,
+    "Ingredients": [
+      {
+        "qty": 8.0,
+        "name": "Alclad Aluminum Sheet",
+        "speed": 15.0
+      },
+      {
+        "qty": 16.0,
+        "name": "Wire",
+        "speed": 30.0
+      },
+      {
+        "qty": 20.0,
+        "name": "Sulfur",
+        "speed": 37.5
+      },
+      {
+        "qty": 8.0,
+        "name": "Plastic",
+        "speed": 15.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 3.0,
+        "name": "Battery",
+        "speed": 5.6
+      }
+    ]
+  },
+  {
+    "Recipe Name": "Beacon",
+    "Crafting Time (sec)": 8.0,
+    "Ingredients": [
+      {
+        "qty": 3.0,
+        "name": "Iron Plate",
+        "speed": 22.5
+      },
+      {
+        "qty": 1.0,
+        "name": "Iron Rod",
+        "speed": 7.5
+      },
+      {
+        "qty": 15.0,
+        "name": "Wire",
+        "speed": 112.5
+      },
+      {
+        "qty": 2.0,
+        "name": "Cable",
+        "speed": 15.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 1.0,
+        "name": "Beacon",
+        "speed": 7.5
+      }
+    ]
+  },
+  {
+    "Recipe Name": "alt Caterium Computer",
+    "Crafting Time (sec)": 16.0,
+    "Ingredients": [
+      {
+        "qty": 7.0,
+        "name": "Circuit Board",
+        "speed": 26.3
+      },
+      {
+        "qty": 28.0,
+        "name": "Quickwire",
+        "speed": 105.0
+      },
+      {
+        "qty": 12.0,
+        "name": "Rubber",
+        "speed": 45.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 1.0,
+        "name": "Computer",
+        "speed": 3.8
+      }
+    ]
+  },
+  {
+    "Recipe Name": "Computer",
+    "Crafting Time (sec)": 24.0,
+    "Ingredients": [
+      {
+        "qty": 10.0,
+        "name": "Circuit Board",
+        "speed": 25.0
+      },
+      {
+        "qty": 9.0,
+        "name": "Cable",
+        "speed": 22.5
+      },
+      {
+        "qty": 18.0,
+        "name": "Plastic",
+        "speed": 45.0
+      },
+      {
+        "qty": 52.0,
+        "name": "Screw",
+        "speed": 130.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 1.0,
+        "name": "Computer",
+        "speed": 2.5
+      }
+    ]
+  },
+  {
+    "Recipe Name": "Crystal Oscillator",
+    "Crafting Time (sec)": 120.0,
+    "Ingredients": [
+      {
+        "qty": 36.0,
+        "name": "Quartz Crystal",
+        "speed": 18.0
+      },
+      {
+        "qty": 28.0,
+        "name": "Cable",
+        "speed": 14.0
+      },
+      {
+        "qty": 5.0,
+        "name": "Reinforced Iron Plate",
+        "speed": 2.5
+      }
+    ],
+    "Products": [
+      {
+        "qty": 2.0,
+        "name": "Crystal Oscillator",
+        "speed": 1.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "alt Flexible Framework",
+    "Crafting Time (sec)": 16.0,
+    "Ingredients": [
+      {
+        "qty": 1.0,
+        "name": "Modular Frame",
+        "speed": 3.8
+      },
+      {
+        "qty": 6.0,
+        "name": "Steel Beam",
+        "speed": 22.5
+      },
+      {
+        "qty": 8.0,
+        "name": "Rubber",
+        "speed": 30.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 2.0,
+        "name": "Versatile Framework",
+        "speed": 7.5
+      }
+    ]
+  },
+  {
+    "Recipe Name": "Gas Filter",
+    "Crafting Time (sec)": 8.0,
+    "Ingredients": [
+      {
+        "qty": 5.0,
+        "name": "Coal",
+        "speed": 37.5
+      },
+      {
+        "qty": 2.0,
+        "name": "Rubber",
+        "speed": 15.0
+      },
+      {
+        "qty": 2.0,
+        "name": "Fabric",
+        "speed": 15.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 1.0,
+        "name": "Gas Filter",
+        "speed": 7.5
+      }
+    ]
+  },
+  {
+    "Recipe Name": "alt Heavy Encased Frame",
+    "Crafting Time (sec)": 64.0,
+    "Ingredients": [
+      {
+        "qty": 8.0,
+        "name": "Modular Frame",
+        "speed": 7.5
+      },
+      {
+        "qty": 10.0,
+        "name": "Encased Industrial Beam",
+        "speed": 9.4
+      },
+      {
+        "qty": 36.0,
+        "name": "Steel Pipe",
+        "speed": 33.8
+      },
+      {
+        "qty": 22.0,
+        "name": "Concrete",
+        "speed": 20.6
+      }
+    ],
+    "Products": [
+      {
+        "qty": 3.0,
+        "name": "Heavy Modular Frame",
+        "speed": 2.8
+      }
+    ]
+  },
+  {
+    "Recipe Name": "alt Heavy Flexible Frame",
+    "Crafting Time (sec)": 16.0,
+    "Ingredients": [
+      {
+        "qty": 5.0,
+        "name": "Modular Frame",
+        "speed": 18.8
+      },
+      {
+        "qty": 3.0,
+        "name": "Encased Industrial Beam",
+        "speed": 11.3
+      },
+      {
+        "qty": 20.0,
+        "name": "Rubber",
+        "speed": 75.0
+      },
+      {
+        "qty": 104.0,
+        "name": "Screw",
+        "speed": 390.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 1.0,
+        "name": "Heavy Modular Frame",
+        "speed": 3.8
+      }
+    ]
+  },
+  {
+    "Recipe Name": "Heavy Modular Frame",
+    "Crafting Time (sec)": 30.0,
+    "Ingredients": [
+      {
+        "qty": 5.0,
+        "name": "Modular Frame",
+        "speed": 10.0
+      },
+      {
+        "qty": 15.0,
+        "name": "Steel Pipe",
+        "speed": 30.0
+      },
+      {
+        "qty": 5.0,
+        "name": "Encased Industrial Beam",
+        "speed": 10.0
+      },
+      {
+        "qty": 100.0,
+        "name": "Screw",
+        "speed": 200.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 1.0,
+        "name": "Heavy Modular Frame",
+        "speed": 2.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "High-Speed Connector",
+    "Crafting Time (sec)": 16.0,
+    "Ingredients": [
+      {
+        "qty": 56.0,
+        "name": "Quickwire",
+        "speed": 210.0
+      },
+      {
+        "qty": 10.0,
+        "name": "Cable",
+        "speed": 37.5
+      },
+      {
+        "qty": 1.0,
+        "name": "Circuit Board",
+        "speed": 3.8
+      }
+    ],
+    "Products": [
+      {
+        "qty": 1.0,
+        "name": "High-Speed Connector",
+        "speed": 3.8
+      }
+    ]
+  },
+  {
+    "Recipe Name": "alt High-Speed Wiring",
+    "Crafting Time (sec)": 32.0,
+    "Ingredients": [
+      {
+        "qty": 2.0,
+        "name": "Stator",
+        "speed": 3.8
+      },
+      {
+        "qty": 40.0,
+        "name": "Wire",
+        "speed": 75.0
+      },
+      {
+        "qty": 1.0,
+        "name": "High-Speed Connector",
+        "speed": 1.9
+      }
+    ],
+    "Products": [
+      {
+        "qty": 4.0,
+        "name": "Automated Wiring",
+        "speed": 7.5
+      }
+    ]
+  },
+  {
+    "Recipe Name": "alt Infused Uranium Cell",
+    "Crafting Time (sec)": 120.0,
+    "Ingredients": [
+      {
+        "qty": 40.0,
+        "name": "Uranium Pellet",
+        "speed": 20.0
+      },
+      {
+        "qty": 45.0,
+        "name": "Sulfur",
+        "speed": 22.5
+      },
+      {
+        "qty": 45.0,
+        "name": "Silica",
+        "speed": 22.5
+      },
+      {
+        "qty": 75.0,
+        "name": "Quickwire",
+        "speed": 37.5
+      }
+    ],
+    "Products": [
+      {
+        "qty": 35.0,
+        "name": "Encased Uranium Cell",
+        "speed": 17.5
+      }
+    ]
+  },
+  {
+    "Recipe Name": "alt Insulated Crystal Oscillator",
+    "Crafting Time (sec)": 32.0,
+    "Ingredients": [
+      {
+        "qty": 10.0,
+        "name": "Quartz Crystal",
+        "speed": 18.8
+      },
+      {
+        "qty": 7.0,
+        "name": "Rubber",
+        "speed": 13.1
+      },
+      {
+        "qty": 1.0,
+        "name": "A.I. Limiter",
+        "speed": 1.9
+      }
+    ],
+    "Products": [
+      {
+        "qty": 1.0,
+        "name": "Crystal Oscillator",
+        "speed": 1.9
+      }
+    ]
+  },
+  {
+    "Recipe Name": "Iodine Infused Filter",
+    "Crafting Time (sec)": 16.0,
+    "Ingredients": [
+      {
+        "qty": 1.0,
+        "name": "Gas Filter",
+        "speed": 3.8
+      },
+      {
+        "qty": 8.0,
+        "name": "Quickwire",
+        "speed": 30.0
+      },
+      {
+        "qty": 2.0,
+        "name": "Rubber",
+        "speed": 7.5
+      }
+    ],
+    "Products": [
+      {
+        "qty": 1.0,
+        "name": "Iodine Infused Filter",
+        "speed": 3.8
+      }
+    ]
+  },
+  {
+    "Recipe Name": "Modular Engine",
+    "Crafting Time (sec)": 60.0,
+    "Ingredients": [
+      {
+        "qty": 2.0,
+        "name": "Motor",
+        "speed": 2.0
+      },
+      {
+        "qty": 15.0,
+        "name": "Rubber",
+        "speed": 15.0
+      },
+      {
+        "qty": 2.0,
+        "name": "Smart Plating",
+        "speed": 2.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 1.0,
+        "name": "Modular Engine",
+        "speed": 1.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "Nuclear Fuel Rod",
+    "Crafting Time (sec)": 150.0,
+    "Ingredients": [
+      {
+        "qty": 25.0,
+        "name": "Encased Uranium Cell",
+        "speed": 10.0
+      },
+      {
+        "qty": 3.0,
+        "name": "Encased Industrial Beam",
+        "speed": 1.2
+      },
+      {
+        "qty": 5.0,
+        "name": "Electromagnetic Control Rod",
+        "speed": 2.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 1.0,
+        "name": "Nuclear Fuel Rod",
+        "speed": 0.4
+      }
+    ]
+  },
+  {
+    "Recipe Name": "alt Nuclear Fuel Unit",
+    "Crafting Time (sec)": 300.0,
+    "Ingredients": [
+      {
+        "qty": 50.0,
+        "name": "Encased Uranium Cell",
+        "speed": 10.0
+      },
+      {
+        "qty": 10.0,
+        "name": "Electromagnetic Control Rod",
+        "speed": 2.0
+      },
+      {
+        "qty": 3.0,
+        "name": "Crystal Oscillator",
+        "speed": 0.6
+      },
+      {
+        "qty": 6.0,
+        "name": "Beacon",
+        "speed": 1.2
+      }
+    ],
+    "Products": [
+      {
+        "qty": 3.0,
+        "name": "Nuclear Fuel Rod",
+        "speed": 0.6
+      }
+    ]
+  },
+  {
+    "Recipe Name": "alt Plastic Smart Plating",
+    "Crafting Time (sec)": 24.0,
+    "Ingredients": [
+      {
+        "qty": 1.0,
+        "name": "Reinforced Iron Plate",
+        "speed": 2.5
+      },
+      {
+        "qty": 1.0,
+        "name": "Rotor",
+        "speed": 2.5
+      },
+      {
+        "qty": 3.0,
+        "name": "Plastic",
+        "speed": 7.5
+      }
+    ],
+    "Products": [
+      {
+        "qty": 2.0,
+        "name": "Smart Plating",
+        "speed": 5.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "alt Radio Control System",
+    "Crafting Time (sec)": 48.0,
+    "Ingredients": [
+      {
+        "qty": 10.0,
+        "name": "Heat Sink",
+        "speed": 12.5
+      },
+      {
+        "qty": 1.0,
+        "name": "Supercomputer",
+        "speed": 1.3
+      },
+      {
+        "qty": 30.0,
+        "name": "Quartz Crystal",
+        "speed": 37.5
+      }
+    ],
+    "Products": [
+      {
+        "qty": 3.0,
+        "name": "Radio Control Unit",
+        "speed": 3.8
+      }
+    ]
+  },
+  {
+    "Recipe Name": "Radio Control Unit",
+    "Crafting Time (sec)": 24.0,
+    "Ingredients": [
+      {
+        "qty": 4.0,
+        "name": "Heat Sink",
+        "speed": 10.0
+      },
+      {
+        "qty": 16.0,
+        "name": "Rubber",
+        "speed": 40.0
+      },
+      {
+        "qty": 1.0,
+        "name": "Crystal Oscillator",
+        "speed": 2.5
+      },
+      {
+        "qty": 1.0,
+        "name": "Computer",
+        "speed": 2.5
+      }
+    ],
+    "Products": [
+      {
+        "qty": 1.0,
+        "name": "Radio Control Unit",
+        "speed": 2.5
+      }
+    ]
+  },
+  {
+    "Recipe Name": "Rifle Cartridge",
+    "Crafting Time (sec)": 20.0,
+    "Ingredients": [
+      {
+        "qty": 1.0,
+        "name": "Beacon",
+        "speed": 3.0
+      },
+      {
+        "qty": 10.0,
+        "name": "Steel Pipe",
+        "speed": 30.0
+      },
+      {
+        "qty": 10.0,
+        "name": "Black Powder",
+        "speed": 30.0
+      },
+      {
+        "qty": 10.0,
+        "name": "Rubber",
+        "speed": 30.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 5.0,
+        "name": "Rifle Cartridge",
+        "speed": 15.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "alt Rigour Motor",
+    "Crafting Time (sec)": 48.0,
+    "Ingredients": [
+      {
+        "qty": 3.0,
+        "name": "Rotor",
+        "speed": 3.8
+      },
+      {
+        "qty": 3.0,
+        "name": "Stator",
+        "speed": 3.8
+      },
+      {
+        "qty": 1.0,
+        "name": "Crystal Oscillator",
+        "speed": 1.3
+      }
+    ],
+    "Products": [
+      {
+        "qty": 6.0,
+        "name": "Motor",
+        "speed": 7.5
+      }
+    ]
+  },
+  {
+    "Recipe Name": "alt Seismic Nobelisk",
+    "Crafting Time (sec)": 40.0,
+    "Ingredients": [
+      {
+        "qty": 8.0,
+        "name": "Black Powder",
+        "speed": 12.0
+      },
+      {
+        "qty": 8.0,
+        "name": "Steel Pipe",
+        "speed": 12.0
+      },
+      {
+        "qty": 1.0,
+        "name": "Crystal Oscillator",
+        "speed": 1.5
+      }
+    ],
+    "Products": [
+      {
+        "qty": 4.0,
+        "name": "Nobelisk",
+        "speed": 6.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "alt Signal Beacon",
+    "Crafting Time (sec)": 120.0,
+    "Ingredients": [
+      {
+        "qty": 4.0,
+        "name": "Steel Beam",
+        "speed": 2.0
+      },
+      {
+        "qty": 16.0,
+        "name": "Steel Pipe",
+        "speed": 8.0
+      },
+      {
+        "qty": 1.0,
+        "name": "Crystal Oscillator",
+        "speed": 0.5
+      }
+    ],
+    "Products": [
+      {
+        "qty": 20.0,
+        "name": "Beacon",
+        "speed": 10.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "alt Silicone High-Speed Connector",
+    "Crafting Time (sec)": 40.0,
+    "Ingredients": [
+      {
+        "qty": 60.0,
+        "name": "Quickwire",
+        "speed": 90.0
+      },
+      {
+        "qty": 25.0,
+        "name": "Silica",
+        "speed": 37.5
+      },
+      {
+        "qty": 2.0,
+        "name": "Circuit Board",
+        "speed": 3.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 2.0,
+        "name": "High-Speed Connector",
+        "speed": 3.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "Supercomputer",
+    "Crafting Time (sec)": 32.0,
+    "Ingredients": [
+      {
+        "qty": 2.0,
+        "name": "Computer",
+        "speed": 3.8
+      },
+      {
+        "qty": 2.0,
+        "name": "A.I. Limiter",
+        "speed": 3.8
+      },
+      {
+        "qty": 3.0,
+        "name": "High-Speed Connector",
+        "speed": 5.6
+      },
+      {
+        "qty": 28.0,
+        "name": "Plastic",
+        "speed": 52.5
+      }
+    ],
+    "Products": [
+      {
+        "qty": 1.0,
+        "name": "Supercomputer",
+        "speed": 1.9
+      }
+    ]
+  },
+  {
+    "Recipe Name": "Turbo Motor",
+    "Crafting Time (sec)": 32.0,
+    "Ingredients": [
+      {
+        "qty": 4.0,
+        "name": "Heat Sink",
+        "speed": 7.5
+      },
+      {
+        "qty": 2.0,
+        "name": "Radio Control Unit",
+        "speed": 3.8
+      },
+      {
+        "qty": 4.0,
+        "name": "Motor",
+        "speed": 7.5
+      },
+      {
+        "qty": 24.0,
+        "name": "Rubber",
+        "speed": 45.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 1.0,
+        "name": "Turbo Motor",
+        "speed": 1.9
+      }
+    ]
+  },
+  {
+    "Recipe Name": "alt Turbo Rigour Motor",
+    "Crafting Time (sec)": 64.0,
+    "Ingredients": [
+      {
+        "qty": 7.0,
+        "name": "Motor",
+        "speed": 6.6
+      },
+      {
+        "qty": 5.0,
+        "name": "Radio Control Unit",
+        "speed": 4.7
+      },
+      {
+        "qty": 9.0,
+        "name": "A.I. Limiter",
+        "speed": 8.4
+      },
+      {
+        "qty": 7.0,
+        "name": "Stator",
+        "speed": 6.6
+      }
+    ],
+    "Products": [
+      {
+        "qty": 3.0,
+        "name": "Turbo Motor",
+        "speed": 2.8
+      }
+    ]
+  }
+]

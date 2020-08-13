@@ -1,0 +1,1015 @@
+[
+  {
+    "Recipe Name": "A.I. Limiter",
+    "Crafting Time (sec)": 12.0,
+    "texture": "resources/assets/ai_limiter.png",
+    "Ingredients": [
+      {
+        "qty": 5.0,
+        "name": "Copper Sheet",
+        "speed": 25.0
+      },
+      {
+        "qty": 20.0,
+        "name": "Quickwire",
+        "speed": 100.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 1.0,
+        "name": "A.I. Limiter",
+        "speed": 5.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "alt Adhered Iron Plate",
+    "Crafting Time (sec)": 16.0,
+    "Ingredients": [
+      {
+        "qty": 3.0,
+        "name": "Iron Plate",
+        "speed": 11.3
+      },
+      {
+        "qty": 1.0,
+        "name": "Rubber",
+        "speed": 3.8
+      }
+    ],
+    "Products": [
+      {
+        "qty": 1.0,
+        "name": "Reinforced Iron Plate",
+        "speed": 3.8
+      }
+    ]
+  },
+  {
+    "Recipe Name": "Alclad Aluminum Sheet",
+    "Crafting Time (sec)": 8.0,
+    "Ingredients": [
+      {
+        "qty": 8.0,
+        "name": "Aluminum Ingot",
+        "speed": 60.0
+      },
+      {
+        "qty": 3.0,
+        "name": "Copper Ingot",
+        "speed": 22.5
+      }
+    ],
+    "Products": [
+      {
+        "qty": 4.0,
+        "name": "Alclad Aluminum Sheet",
+        "speed": 30.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "Automated Wiring",
+    "Crafting Time (sec)": 24.0,
+    "Ingredients": [
+      {
+        "qty": 1.0,
+        "name": "Stator",
+        "speed": 2.5
+      },
+      {
+        "qty": 20.0,
+        "name": "Cable",
+        "speed": 50.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 1.0,
+        "name": "Automated Wiring",
+        "speed": 2.5
+      }
+    ]
+  },
+  {
+    "Recipe Name": "Black Powder",
+    "Crafting Time (sec)": 8.0,
+    "Ingredients": [
+      {
+        "qty": 1.0,
+        "name": "Coal",
+        "speed": 7.5
+      },
+      {
+        "qty": 2.0,
+        "name": "Sulfur",
+        "speed": 15.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 1.0,
+        "name": "Black Powder",
+        "speed": 7.5
+      }
+    ]
+  },
+  {
+    "Recipe Name": "alt Bolted Frame",
+    "Crafting Time (sec)": 24.0,
+    "Ingredients": [
+      {
+        "qty": 3.0,
+        "name": "Reinforced Iron Plate",
+        "speed": 7.5
+      },
+      {
+        "qty": 56.0,
+        "name": "Screw",
+        "speed": 140.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 2.0,
+        "name": "Modular Frame",
+        "speed": 5.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "alt Bolted Iron Plate",
+    "Crafting Time (sec)": 12.0,
+    "Ingredients": [
+      {
+        "qty": 18.0,
+        "name": "Iron Plate",
+        "speed": 90.0
+      },
+      {
+        "qty": 50.0,
+        "name": "Screw",
+        "speed": 250.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 3.0,
+        "name": "Reinforced Iron Plate",
+        "speed": 15.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "alt Caterium Circuit Board",
+    "Crafting Time (sec)": 48.0,
+    "Ingredients": [
+      {
+        "qty": 10.0,
+        "name": "Plastic",
+        "speed": 12.5
+      },
+      {
+        "qty": 30.0,
+        "name": "Quickwire",
+        "speed": 37.5
+      }
+    ],
+    "Products": [
+      {
+        "qty": 7.0,
+        "name": "Circuit Board",
+        "speed": 8.8
+      }
+    ]
+  },
+  {
+    "Recipe Name": "alt Cheap Silica",
+    "Crafting Time (sec)": 16.0,
+    "Ingredients": [
+      {
+        "qty": 3.0,
+        "name": "Raw Quartz",
+        "speed": 11.3
+      },
+      {
+        "qty": 5.0,
+        "name": "Limestone",
+        "speed": 18.8
+      }
+    ],
+    "Products": [
+      {
+        "qty": 7.0,
+        "name": "Silica",
+        "speed": 26.3
+      }
+    ]
+  },
+  {
+    "Recipe Name": "Circuit Board",
+    "Crafting Time (sec)": 8.0,
+    "Ingredients": [
+      {
+        "qty": 2.0,
+        "name": "Copper Sheet",
+        "speed": 15.0
+      },
+      {
+        "qty": 4.0,
+        "name": "Plastic",
+        "speed": 30.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 1.0,
+        "name": "Circuit Board",
+        "speed": 7.5
+      }
+    ]
+  },
+  {
+    "Recipe Name": "alt Coated Iron Plate",
+    "Crafting Time (sec)": 12.0,
+    "Ingredients": [
+      {
+        "qty": 10.0,
+        "name": "Iron Ingot",
+        "speed": 50.0
+      },
+      {
+        "qty": 2.0,
+        "name": "Plastic",
+        "speed": 10.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 15.0,
+        "name": "Iron Plate",
+        "speed": 75.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "alt Compacted Coal",
+    "Crafting Time (sec)": 12.0,
+    "Ingredients": [
+      {
+        "qty": 5.0,
+        "name": "Coal",
+        "speed": 25.0
+      },
+      {
+        "qty": 5.0,
+        "name": "Sulfur",
+        "speed": 25.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 5.0,
+        "name": "Compacted Coal",
+        "speed": 25.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "alt Copper Rotor",
+    "Crafting Time (sec)": 16.0,
+    "Ingredients": [
+      {
+        "qty": 6.0,
+        "name": "Copper Sheet",
+        "speed": 22.5
+      },
+      {
+        "qty": 52.0,
+        "name": "Screw",
+        "speed": 195.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 3.0,
+        "name": "Rotor",
+        "speed": 11.3
+      }
+    ]
+  },
+  {
+    "Recipe Name": "alt Crystal Computer",
+    "Crafting Time (sec)": 64.0,
+    "Ingredients": [
+      {
+        "qty": 8.0,
+        "name": "Circuit Board",
+        "speed": 7.5
+      },
+      {
+        "qty": 3.0,
+        "name": "Crystal Oscillator",
+        "speed": 2.8
+      }
+    ],
+    "Products": [
+      {
+        "qty": 3.0,
+        "name": "Computer",
+        "speed": 2.8
+      }
+    ]
+  },
+  {
+    "Recipe Name": "alt Electrode Circuit Board",
+    "Crafting Time (sec)": 12.0,
+    "Ingredients": [
+      {
+        "qty": 6.0,
+        "name": "Rubber",
+        "speed": 30.0
+      },
+      {
+        "qty": 9.0,
+        "name": "Petroleum Coke",
+        "speed": 45.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 1.0,
+        "name": "Circuit Board",
+        "speed": 5.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "alt Electromagnetic Connection Rod",
+    "Crafting Time (sec)": 60.0,
+    "Ingredients": [
+      {
+        "qty": 10.0,
+        "name": "Stator",
+        "speed": 10.0
+      },
+      {
+        "qty": 5.0,
+        "name": "High-Speed Connector",
+        "speed": 5.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 10.0,
+        "name": "Electromagnetic Control Rod",
+        "speed": 10.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "Electromagnetic Control Rod",
+    "Crafting Time (sec)": 30.0,
+    "Ingredients": [
+      {
+        "qty": 3.0,
+        "name": "Stator",
+        "speed": 6.0
+      },
+      {
+        "qty": 2.0,
+        "name": "A.I. Limiter",
+        "speed": 4.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 2.0,
+        "name": "Electromagnetic Control Rod",
+        "speed": 4.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "Encased Industrial Beam",
+    "Crafting Time (sec)": 10.0,
+    "Ingredients": [
+      {
+        "qty": 4.0,
+        "name": "Steel Beam",
+        "speed": 24.0
+      },
+      {
+        "qty": 5.0,
+        "name": "Concrete",
+        "speed": 30.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 1.0,
+        "name": "Encased Industrial Beam",
+        "speed": 6.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "alt Encased Industrial Pipe",
+    "Crafting Time (sec)": 15.0,
+    "Ingredients": [
+      {
+        "qty": 7.0,
+        "name": "Steel Pipe",
+        "speed": 28.0
+      },
+      {
+        "qty": 5.0,
+        "name": "Concrete",
+        "speed": 20.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 1.0,
+        "name": "Encased Industrial Beam",
+        "speed": 4.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "Encased Uranium Cell",
+    "Crafting Time (sec)": 60.0,
+    "Ingredients": [
+      {
+        "qty": 40.0,
+        "name": "Uranium Pellet",
+        "speed": 40.0
+      },
+      {
+        "qty": 9.0,
+        "name": "Concrete",
+        "speed": 9.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 10.0,
+        "name": "Encased Uranium Cell",
+        "speed": 10.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "Fabric",
+    "Crafting Time (sec)": 4.0,
+    "Ingredients": [
+      {
+        "qty": 1.0,
+        "name": "Mycelia",
+        "speed": 15.0
+      },
+      {
+        "qty": 5.0,
+        "name": "Biomass",
+        "speed": 75.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 1.0,
+        "name": "Fabric",
+        "speed": 15.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "alt Fine Concrete",
+    "Crafting Time (sec)": 24.0,
+    "Ingredients": [
+      {
+        "qty": 3.0,
+        "name": "Silica",
+        "speed": 7.5
+      },
+      {
+        "qty": 12.0,
+        "name": "Limestone",
+        "speed": 30.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 10.0,
+        "name": "Concrete",
+        "speed": 25.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "alt Fused Quickwire",
+    "Crafting Time (sec)": 8.0,
+    "Ingredients": [
+      {
+        "qty": 1.0,
+        "name": "Caterium Ingot",
+        "speed": 7.5
+      },
+      {
+        "qty": 5.0,
+        "name": "Copper Ingot",
+        "speed": 37.5
+      }
+    ],
+    "Products": [
+      {
+        "qty": 12.0,
+        "name": "Quickwire",
+        "speed": 90.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "alt Fused Wire",
+    "Crafting Time (sec)": 20.0,
+    "Ingredients": [
+      {
+        "qty": 4.0,
+        "name": "Copper Ingot",
+        "speed": 12.0
+      },
+      {
+        "qty": 1.0,
+        "name": "Caterium Ingot",
+        "speed": 3.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 30.0,
+        "name": "Wire",
+        "speed": 90.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "alt Gun Powder",
+    "Crafting Time (sec)": 16.0,
+    "Ingredients": [
+      {
+        "qty": 2.0,
+        "name": "Sulfur",
+        "speed": 7.5
+      },
+      {
+        "qty": 1.0,
+        "name": "Compacted Coal",
+        "speed": 3.8
+      }
+    ],
+    "Products": [
+      {
+        "qty": 4.0,
+        "name": "Black Powder",
+        "speed": 15.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "alt Heat Exchanger",
+    "Crafting Time (sec)": 32.0,
+    "Ingredients": [
+      {
+        "qty": 20.0,
+        "name": "Alclad Aluminum Sheet",
+        "speed": 37.5
+      },
+      {
+        "qty": 30.0,
+        "name": "Copper Sheet",
+        "speed": 56.3
+      }
+    ],
+    "Products": [
+      {
+        "qty": 7.0,
+        "name": "Heat Sink",
+        "speed": 13.1
+      }
+    ]
+  },
+  {
+    "Recipe Name": "Heat Sink",
+    "Crafting Time (sec)": 12.0,
+    "Ingredients": [
+      {
+        "qty": 8.0,
+        "name": "Alclad Aluminum Sheet",
+        "speed": 40.0
+      },
+      {
+        "qty": 14.0,
+        "name": "Rubber",
+        "speed": 70.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 2.0,
+        "name": "Heat Sink",
+        "speed": 10.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "alt Insulated Cable",
+    "Crafting Time (sec)": 12.0,
+    "Ingredients": [
+      {
+        "qty": 9.0,
+        "name": "Wire",
+        "speed": 45.0
+      },
+      {
+        "qty": 6.0,
+        "name": "Rubber",
+        "speed": 30.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 20.0,
+        "name": "Cable",
+        "speed": 100.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "Modular Frame",
+    "Crafting Time (sec)": 60.0,
+    "Ingredients": [
+      {
+        "qty": 3.0,
+        "name": "Reinforced Iron Plate",
+        "speed": 3.0
+      },
+      {
+        "qty": 12.0,
+        "name": "Iron Rod",
+        "speed": 12.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 2.0,
+        "name": "Modular Frame",
+        "speed": 2.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "Motor",
+    "Crafting Time (sec)": 12.0,
+    "Ingredients": [
+      {
+        "qty": 2.0,
+        "name": "Rotor",
+        "speed": 10.0
+      },
+      {
+        "qty": 2.0,
+        "name": "Stator",
+        "speed": 10.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 1.0,
+        "name": "Motor",
+        "speed": 5.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "Nobelisk",
+    "Crafting Time (sec)": 20.0,
+    "Ingredients": [
+      {
+        "qty": 5.0,
+        "name": "Black Powder",
+        "speed": 15.0
+      },
+      {
+        "qty": 10.0,
+        "name": "Steel Pipe",
+        "speed": 30.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 1.0,
+        "name": "Nobelisk",
+        "speed": 3.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "alt Quickwire Cable",
+    "Crafting Time (sec)": 24.0,
+    "Ingredients": [
+      {
+        "qty": 3.0,
+        "name": "Quickwire",
+        "speed": 7.5
+      },
+      {
+        "qty": 2.0,
+        "name": "Rubber",
+        "speed": 5.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 11.0,
+        "name": "Cable",
+        "speed": 27.5
+      }
+    ]
+  },
+  {
+    "Recipe Name": "alt Quickwire Stator",
+    "Crafting Time (sec)": 15.0,
+    "Ingredients": [
+      {
+        "qty": 4.0,
+        "name": "Steel Pipe",
+        "speed": 16.0
+      },
+      {
+        "qty": 15.0,
+        "name": "Quickwire",
+        "speed": 60.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 2.0,
+        "name": "Stator",
+        "speed": 8.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "Reinforced Iron Plate",
+    "Crafting Time (sec)": 12.0,
+    "Ingredients": [
+      {
+        "qty": 6.0,
+        "name": "Iron Plate",
+        "speed": 30.0
+      },
+      {
+        "qty": 12.0,
+        "name": "Screw",
+        "speed": 60.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 1.0,
+        "name": "Reinforced Iron Plate",
+        "speed": 5.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "Rotor",
+    "Crafting Time (sec)": 15.0,
+    "Ingredients": [
+      {
+        "qty": 5.0,
+        "name": "Iron Rod",
+        "speed": 20.0
+      },
+      {
+        "qty": 25.0,
+        "name": "Screw",
+        "speed": 100.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 1.0,
+        "name": "Rotor",
+        "speed": 4.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "alt Rubber Concrete",
+    "Crafting Time (sec)": 12.0,
+    "Ingredients": [
+      {
+        "qty": 10.0,
+        "name": "Limestone",
+        "speed": 50.0
+      },
+      {
+        "qty": 2.0,
+        "name": "Rubber",
+        "speed": 10.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 9.0,
+        "name": "Concrete",
+        "speed": 45.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "alt Silicone Circuit Board",
+    "Crafting Time (sec)": 24.0,
+    "Ingredients": [
+      {
+        "qty": 11.0,
+        "name": "Copper Sheet",
+        "speed": 27.5
+      },
+      {
+        "qty": 11.0,
+        "name": "Silica",
+        "speed": 27.5
+      }
+    ],
+    "Products": [
+      {
+        "qty": 5.0,
+        "name": "Circuit Board",
+        "speed": 12.5
+      }
+    ]
+  },
+  {
+    "Recipe Name": "Smart Plating",
+    "Crafting Time (sec)": 30.0,
+    "Ingredients": [
+      {
+        "qty": 1.0,
+        "name": "Reinforced Iron Plate",
+        "speed": 2.0
+      },
+      {
+        "qty": 1.0,
+        "name": "Rotor",
+        "speed": 2.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 1.0,
+        "name": "Smart Plating",
+        "speed": 2.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "Stator",
+    "Crafting Time (sec)": 12.0,
+    "Ingredients": [
+      {
+        "qty": 3.0,
+        "name": "Steel Pipe",
+        "speed": 15.0
+      },
+      {
+        "qty": 8.0,
+        "name": "Wire",
+        "speed": 40.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 1.0,
+        "name": "Stator",
+        "speed": 5.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "alt Steel Coated Plate",
+    "Crafting Time (sec)": 24.0,
+    "Ingredients": [
+      {
+        "qty": 3.0,
+        "name": "Steel Ingot",
+        "speed": 7.5
+      },
+      {
+        "qty": 2.0,
+        "name": "Plastic",
+        "speed": 5.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 18.0,
+        "name": "Iron Plate",
+        "speed": 45.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "alt Steel Rotor",
+    "Crafting Time (sec)": 12.0,
+    "Ingredients": [
+      {
+        "qty": 2.0,
+        "name": "Steel Pipe",
+        "speed": 10.0
+      },
+      {
+        "qty": 6.0,
+        "name": "Wire",
+        "speed": 30.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 1.0,
+        "name": "Rotor",
+        "speed": 5.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "alt Steeled Frame",
+    "Crafting Time (sec)": 60.0,
+    "Ingredients": [
+      {
+        "qty": 2.0,
+        "name": "Reinforced Iron Plate",
+        "speed": 2.0
+      },
+      {
+        "qty": 10.0,
+        "name": "Steel Pipe",
+        "speed": 10.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 3.0,
+        "name": "Modular Frame",
+        "speed": 3.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "alt Stitched Iron Plate",
+    "Crafting Time (sec)": 32.0,
+    "Ingredients": [
+      {
+        "qty": 10.0,
+        "name": "Iron Plate",
+        "speed": 18.8
+      },
+      {
+        "qty": 20.0,
+        "name": "Wire",
+        "speed": 37.5
+      }
+    ],
+    "Products": [
+      {
+        "qty": 3.0,
+        "name": "Reinforced Iron Plate",
+        "speed": 5.6
+      }
+    ]
+  },
+  {
+    "Recipe Name": "Versatile Framework",
+    "Crafting Time (sec)": 24.0,
+    "Ingredients": [
+      {
+        "qty": 1.0,
+        "name": "Modular Frame",
+        "speed": 2.5
+      },
+      {
+        "qty": 12.0,
+        "name": "Steel Beam",
+        "speed": 30.0
+      }
+    ],
+    "Products": [
+      {
+        "qty": 2.0,
+        "name": "Versatile Framework",
+        "speed": 5.0
+      }
+    ]
+  }
+]
