@@ -35,14 +35,17 @@ struct Building {
     std::vector<std::string> outputs;
     std::vector<Recipe>      recipes;
 
-    std::vector<const char*> recipe_names(){
-        std::vector<const char*> names;
-        names.reserve(recipes.size());
+    std::vector<const char*> _cached_names;
 
-        for (auto& recipe: recipes){
-            names.push_back(recipe.recipe_name.c_str());
+    std::vector<const char*> const& recipe_names(){
+        if (_cached_names.size() == 0){
+            _cached_names.reserve(recipes.size());
+
+            for (auto& recipe: recipes){
+                _cached_names.push_back(recipe.recipe_name.c_str());
+            }
         }
-        return names;
+        return _cached_names;
     }
 };
 

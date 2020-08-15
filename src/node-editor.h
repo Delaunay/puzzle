@@ -586,7 +586,7 @@ struct NodeEditor{
         }
 
         ImGui::Combo(
-            "Recipe",
+            "Brush Recipe",
             &brush.recipe,
             brush.recipe_names.data(),
             brush.recipe_names.size());
@@ -643,7 +643,7 @@ struct NodeEditor{
     bool entity_panel_open = true;
     bool selected_panel = true;
 
-    std::vector<const char*> available_recipes;
+    std::vector<const char*> const* available_recipes;
 
     void draw_selected_info(){
         if (selected_node == nullptr){
@@ -661,26 +661,26 @@ struct NodeEditor{
         ImGui::BulletText("Dimension: %.0f x %.0f", b->w, b->l);
 
         // Select a new recipe
-        available_recipes = selected_node->descriptor->recipe_names();
+        available_recipes = &b->recipe_names();
+
         ImGui::Combo(
             "Recipe",
             &selected_node->recipe_idx,
-            available_recipes.data(),
-            available_recipes.size());
+            available_recipes->data(),
+            available_recipes->size());
 
         // display selected recipe
         auto selected_recipe = selected_node->recipe();
-
         draw_recipe_icon(selected_recipe, ImVec2(0.3f, 0.3f));
-
-        ImGui::Text("Outputs");
-        for (auto& out: selected_recipe->outputs){
-            ImGui::BulletText("%s (%5.2f item/min)", out.name.c_str(), out.speed);
-        }
 
         ImGui::Text("Inputs");
         for (auto& in: selected_recipe->inputs){
             ImGui::BulletText("%s (%5.2f item/min)", in.name.c_str(), in.speed);
+        }
+
+        ImGui::Text("Outputs");
+        for (auto& out: selected_recipe->outputs){
+            ImGui::BulletText("%s (%5.2f item/min)", out.name.c_str(), out.speed);
         }
     }
 
