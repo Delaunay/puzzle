@@ -123,7 +123,7 @@
         "l": 20,
         "h": 30,
         "inputs": [],
-        "outputs": ["C"]
+        "outputs": ["P"]
     },
     {
         "name": "Water Extractor",
@@ -132,7 +132,7 @@
         "l": 19.5,
         "h": 17,
         "inputs": [],
-        "outputs": ["C"]
+        "outputs": ["P"]
     },
     {
         "name": "Truck Station",

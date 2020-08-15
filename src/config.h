@@ -34,6 +34,16 @@ struct Building {
     std::vector<std::string> inputs;
     std::vector<std::string> outputs;
     std::vector<Recipe>      recipes;
+
+    std::vector<const char*> recipe_names(){
+        std::vector<const char*> names;
+        names.reserve(recipes.size());
+
+        for (auto& recipe: recipes){
+            names.push_back(recipe.recipe_name.c_str());
+        }
+        return names;
+    }
 };
 
 
@@ -45,9 +55,13 @@ void from_json(const json& j, Building& p);
 
 struct Resources {
     static Resources& instance(){
-        static auto rsc = Resources();
+        static Resources rsc;
         return rsc;
     }
+
+    Resources(){}
+
+    Resources(Resources const&) = delete;
 
     void load_configs(){
         auto path = puzzle::binary_path() + "/resources/buildings.json";
@@ -66,6 +80,19 @@ struct Resources {
         for(auto& building: buildings){
             load_recipes(building);
         }
+    }
+
+    std::vector<const char*> building_names(){
+        assert(buildings.size() > 0 && "Should have loaded buildings first");
+
+        std::vector<const char*> names;
+        names.reserve(buildings.size());
+
+        for (auto& building: buildings){
+            names.push_back(building.name.c_str());
+        }
+        debug("{}", names.size());
+        return names;
     }
 
     void load_recipes(Building& building){
@@ -93,6 +120,10 @@ struct Resources {
     }
 
     Image* load_texture(std::string path){
+        if (path.size() == 0) {
+            return nullptr;
+        }
+
         Image* img = _texture_cache[path].get();
         if (img != nullptr){
             return img;

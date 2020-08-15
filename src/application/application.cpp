@@ -248,6 +248,7 @@ void Application::transition_image_layout(VkImage image, VkFormat format, VkImag
 }
 
 DeviceImage* Application::load_texture_image(Image const& img){
+
     DeviceImage* device_img = &texture_cache[img.data];
     if (device_img->view != VK_NULL_HANDLE){
         return device_img;

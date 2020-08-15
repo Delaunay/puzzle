@@ -48,27 +48,31 @@ struct Node {
 
     std::vector<NPin> inputs;
     std::vector<NPin> outputs;
-    Building&         descriptor;
+    Building*         descriptor  = nullptr;
     int               recipe_idx = -1;
     static float constexpr  scaling = 10.f;
 
     Recipe* recipe(){
-        if (recipe_idx > -1 && recipe_idx < int(descriptor.recipes.size())){
-            return &descriptor.recipes[std::size_t(recipe_idx)];
+        if (descriptor == nullptr){
+            return nullptr;
+        }
+
+        if (recipe_idx > -1 && recipe_idx < int(descriptor->recipes.size())){
+            return &descriptor->recipes[std::size_t(recipe_idx)];
         }
         return nullptr;
     }
 
-    Node(Building& descriptor, const ImVec2& pos):
-        ID(next_id<std::size_t>()), descriptor(descriptor)
+    Node(Building* descriptor, const ImVec2& pos, int recipe_idx=-1):
+        ID(next_id<std::size_t>()), descriptor(descriptor), recipe_idx(recipe_idx)
     {
         Pos = pos;
-        inputs = std::vector<NPin>(descriptor.inputs.size());
-        outputs = std::vector<NPin>(descriptor.outputs.size());
+        inputs = std::vector<NPin>(descriptor->inputs.size());
+        outputs = std::vector<NPin>(descriptor->outputs.size());
     }
 
     void update_size(ImVec2 size){
-        ImVec2 base = {scaling * descriptor.l, scaling *descriptor.w};
+        ImVec2 base = {scaling * descriptor->l, scaling *descriptor->w};
         _size = base;
     }
 
@@ -159,8 +163,8 @@ struct LinkDragDropState {
                         std::swap(start_pin_slot, end_pin_slot);
                     }
 
-                    auto start_type = start_node->descriptor.inputs[start_pin_slot][0];
-                    auto end_type = end_node->descriptor.outputs[end_pin_slot][0];
+                    auto start_type = start_node->descriptor->outputs[start_pin_slot][0];
+                    auto end_type = end_node->descriptor->inputs[end_pin_slot][0];
 
                     if (start_type == end_type){
                         debug("Make Connection {} -> {}", start_node->ID, end_node->ID);
@@ -215,7 +219,28 @@ struct NodeEditor{
     }
 
     struct Brush {
-        Building* desc = nullptr;
+        int       building = 0;
+        int       recipe   = -1;
+
+        std::vector<const char*> building_names;
+        std::vector<const char*> recipe_names;
+
+        Building* building_descriptor(){
+            if (building == -1)
+                return nullptr;
+            return &Resources::instance().buildings[building];
+        }
+
+        Recipe* recipe_descriptor(){
+            if (recipe == -1)
+                return nullptr;
+
+            Building* building = building_descriptor();
+            if (!building)
+                return nullptr;
+
+            return &building->recipes[recipe];
+        }
     };
 
     Brush brush;
@@ -224,15 +249,24 @@ struct NodeEditor{
     std::vector<NodeLink> links;
     ImVec2 scrolling = ImVec2(0.0f, 0.0f);
 
+    // returns nodes that have no parents
+    std::vector<Node*> roots(){
+        for (auto& node: nodes){
+
+        }
+    }
+
     bool inited = false;
     bool show_grid = true;
-    int  node_selected = -1;
     bool opened = true;
 
     // Draw a list of nodes on the left side
     bool open_context_menu = false;
-    int node_hovered_in_list = -1;
-    int node_hovered_in_scene = -1;
+
+    // Node Selection
+    Node* node_selected         = nullptr;
+    Node* node_hovered_in_list  = nullptr;
+    Node* node_hovered_in_scene = nullptr;
 
     LinkDragDropState link_builder;
 
@@ -242,9 +276,9 @@ struct NodeEditor{
     void draw_pin(std::size_t slot_idx, Node const* node, NPin const& pin, ImDrawList* draw_list, ImVec2 offset, bool is_input, std::size_t node_idx){
         char type;
         if (is_input) {
-            type = node->descriptor.inputs[slot_idx][0];
+            type = node->descriptor->inputs[slot_idx][0];
         } else {
-            type = node->descriptor.outputs[slot_idx][0];
+            type = node->descriptor->outputs[slot_idx][0];
         }
 
         if (type != 'C' && type != 'P'){
@@ -301,29 +335,6 @@ struct NodeEditor{
         ImGui::PopID();
     }
 
-    void draw_node_list(){
-        ImGui::BeginChild("node_list", ImVec2(100, 0));
-        ImGui::Text("Nodes");
-        ImGui::Separator();
-
-        for (std::size_t node_idx = 0; node_idx < nodes.size(); node_idx++){
-            Node* node = get_node(node_idx);
-            ImGui::PushID(int(node->ID));
-
-            if (ImGui::Selectable(node->descriptor.name.c_str(), node->ID == node_selected)){
-                node_selected = node->ID;
-            }
-
-            if (ImGui::IsItemHovered()){
-                node_hovered_in_list = node->ID;
-                open_context_menu |= ImGui::IsMouseClicked(1);
-            }
-            ImGui::PopID();
-        }
-        ImGui::EndChild();
-        ImGui::SameLine();
-    }
-
     void draw_node(std::size_t node_idx, Node* node, ImDrawList* draw_list, ImVec2 offset){
         ImGuiIO& io = ImGui::GetIO();
 
@@ -337,10 +348,11 @@ struct NodeEditor{
         ImGui::SetCursorScreenPos(node_rect_min + NODE_WINDOW_PADDING);
         ImGui::BeginGroup(); // Lock horizontal position
 
-        ImGui::Text("%s", node->descriptor.name.c_str());
+        ImGui::Text("%s", node->descriptor->name.c_str());
         auto text_size = ImGui::GetItemRectSize();
 
         auto recipe = node->recipe();
+
         if (recipe != nullptr){
             if (recipe->texture.size() >  0){
                 auto cpu_img = Resources::instance().load_texture(recipe->texture);
@@ -354,12 +366,12 @@ struct NodeEditor{
                 }
 
                 auto img_size = ImVec2(cpu_img->x * 0.20f, cpu_img->y * 0.20f);
+                auto offset = (node->size() - img_size) * 0.5f;
 
-                auto pos = ImGui::GetCursorPos();
-                auto remaining_size = node->size() - ImVec2(0, text_size.y + 20);
-                auto offset = (remaining_size - img_size) * 0.5f;
+                auto pos = node_rect_min + offset;
+                pos.y = std::max(node_rect_min.y + text_size.y + 10, pos.y);
 
-                ImGui::SetCursorPos(pos + offset);
+                ImGui::SetCursorScreenPos(pos);
                 ImGui::Image(
                     device_img->descriptor_set,
                     img_size,
@@ -369,6 +381,18 @@ struct NodeEditor{
                     ImVec4(1, 1, 1, 0.25));
             }
         }
+
+        // Pin selection is on top of everything
+        for (std::size_t slot_idx = 0; slot_idx < node->inputs.size(); slot_idx++){
+            NPin& pin = node->inputs[slot_idx];
+            draw_pin(slot_idx, node, pin, draw_list, offset, true, node_idx);
+        }
+
+        for (std::size_t slot_idx = 0; slot_idx < node->outputs.size(); slot_idx++){
+            NPin& pin = node->outputs[slot_idx];
+            draw_pin(slot_idx, node, pin, draw_list, offset, false, node_idx);
+        }
+
         ImGui::EndGroup();
 
         // Save the size of what we have emitted and whether any of the widgets are being used
@@ -382,42 +406,32 @@ struct NodeEditor{
         ImGui::InvisibleButton("node", node->size());
 
         if (ImGui::IsItemHovered()){
-            node_hovered_in_scene = node->ID;
+            node_hovered_in_scene = node;
             open_context_menu |= ImGui::IsMouseClicked(1);
         }
 
         bool node_moving_active = ImGui::IsItemActive();
 
         if (node_widgets_active || node_moving_active)
-            node_selected = node->ID;
+            node_selected = node;
 
         if (node_moving_active && ImGui::IsMouseDragging(ImGuiMouseButton_Left))
             node->Pos = node->Pos + io.MouseDelta;
 
+
+        // Draw rectangle
         ImU32 node_bg_color = IM_COL32(60, 60, 60, 255);
-        if (node_hovered_in_list == node->ID || node_hovered_in_scene == node->ID || (node_hovered_in_list == -1 && node_selected == node->ID))
+        if (node_hovered_in_list == node || node_hovered_in_scene == node || (!node_hovered_in_list && node_selected == node))
             node_bg_color = IM_COL32(75, 75, 75, 255);
 
         draw_list->AddRectFilled(node_rect_min, node_rect_max, node_bg_color, 4.0f);
         draw_list->AddRect(node_rect_min, node_rect_max, IM_COL32(100, 100, 100, 255), 4.0f);
-
-
-        for (std::size_t slot_idx = 0; slot_idx < node->inputs.size(); slot_idx++){
-            NPin& pin = node->inputs[slot_idx];
-            draw_pin(slot_idx, node, pin, draw_list, offset, true, node_idx);
-        }
-
-        for (std::size_t slot_idx = 0; slot_idx < node->outputs.size(); slot_idx++){
-            NPin& pin = node->outputs[slot_idx];
-            draw_pin(slot_idx, node, pin, draw_list, offset, false, node_idx);
-        }
 
         ImGui::PopID();
     }
 
     void draw_workspace(){
         ImGuiIO& io = ImGui::GetIO();
-
         ImGui::BeginGroup();
 
         // Create our child canvas
@@ -464,12 +478,9 @@ struct NodeEditor{
             draw_list->AddBezierCurve(p1, p1 + ImVec2(+50, 0), p2 + ImVec2(-50, 0), p2, IM_COL32(200, 200, 100, 255), 3.0f);
         }
 
-
-
         // Display nodes
         for (std::size_t node_idx = 0; node_idx < nodes.size(); node_idx++){
             draw_node(node_idx, get_node(node_idx), draw_list, offset);
-
         }
 
         link_builder.draw_path(draw_list);
@@ -480,17 +491,24 @@ struct NodeEditor{
         // Open context menu
         if (ImGui::IsMouseReleased(ImGuiMouseButton_Right)){
             if (ImGui::IsWindowHovered(ImGuiHoveredFlags_AllowWhenBlockedByPopup) || !ImGui::IsAnyItemHovered()){
-                node_selected = node_hovered_in_list = node_hovered_in_scene = -1;
+                node_selected = node_hovered_in_list = node_hovered_in_scene = nullptr;
                 open_context_menu = true;
+            }
+        }
+
+        // Select node and show stats
+        if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)){
+            if (node_hovered_in_scene != nullptr) {
+                selected_node = node_hovered_in_scene;
             }
         }
 
         if (open_context_menu) {
             ImGui::OpenPopup("context_menu");
-            if (node_hovered_in_list != -1)
+            if (node_hovered_in_list != nullptr)
                 node_selected = node_hovered_in_list;
 
-            if (node_hovered_in_scene != -1)
+            if (node_hovered_in_scene != nullptr)
                 node_selected = node_hovered_in_scene;
         }
 
@@ -498,11 +516,7 @@ struct NodeEditor{
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(8, 8));
         if (ImGui::BeginPopup("context_menu"))
         {
-            Node* node = nullptr;
-            if (node_selected >= 0 && node_selected < nodes.size()){
-                node = get_node(node_selected);
-            }
-
+            Node* node = node_selected;
             ImVec2 scene_pos = ImGui::GetMousePosOnOpeningCurrentPopup() - offset;
 
             if (node)
@@ -516,9 +530,10 @@ struct NodeEditor{
             else
             {
                 if (ImGui::MenuItem("Add")) {
-                    if (brush.desc != nullptr){
+                    auto b = brush.building_descriptor();
+                    if (b != nullptr){
                         debug("New node");
-                        nodes.push_back(std::make_shared<Node>(*brush.desc, scene_pos));
+                        nodes.push_back(std::make_shared<Node>(b, scene_pos, brush.recipe));
                     }
                 }
                 if (ImGui::MenuItem("Paste", nullptr, false, false)) {
@@ -542,6 +557,152 @@ struct NodeEditor{
         ImGui::EndGroup();
     }
 
+
+    void draw_brush(){
+        // ImGui::Text("Brush");
+        // ImGui::Separator();
+
+        Resources& rsc = Resources::instance();
+        if (brush.building_names.size() == 0){
+            brush.building_names = rsc.building_names();
+        }
+
+        // debug("{} {}", brush.building_names.size(), rsc.building_names().size());
+
+        bool building_changed = ImGui::Combo(
+            "Building",
+            &brush.building,
+            brush.building_names.data(),
+            brush.building_names.size());
+
+        if (building_changed){
+            brush.recipe = -1;
+            brush.recipe_names.clear();
+        }
+
+        auto building = brush.building_descriptor();
+        if (brush.recipe_names.size() == 0 && building != nullptr){
+            brush.recipe_names = building->recipe_names();
+        }
+
+        ImGui::Combo(
+            "Recipe",
+            &brush.recipe,
+            brush.recipe_names.data(),
+            brush.recipe_names.size());
+
+        draw_recipe_icon(brush.recipe_descriptor(), ImVec2(0.3f, 0.3f));
+    }
+
+    Node* selected_node = nullptr;
+
+    void draw_recipe_icon(Recipe* recipe, ImVec2 scale){
+        if (recipe && recipe->texture.size() > 0){
+            Image* _ = Resources::instance().load_texture(recipe->texture);
+            auto image = app.load_texture_image(*_);
+
+            if (image->descriptor_set){
+                auto img_size = ImVec2(_->x * scale.x, _->y * scale.y);
+                ImGui::Image(
+                    image->descriptor_set,
+                    img_size,
+                    ImVec2(0.0f, 0.0f),
+                    ImVec2(1.0f, 1.0f),
+                    ImVec4(1, 1, 1, 1),
+                    ImVec4(1, 1, 1, 0.25));
+            }
+        } else {
+            ImGui::Button("Missing Image", ImVec2(256 * scale.x, 256 * scale.y));
+        }
+    }
+
+    void draw_node_list(){
+        // ImGui::BeginChild("node_list", ImVec2(100, 0));
+        // ImGui::Text("Nodes");
+        // ImGui::Separator();
+
+        for (std::size_t node_idx = 0; node_idx < nodes.size(); node_idx++){
+            Node* node = get_node(node_idx);
+            ImGui::PushID(int(node->ID));
+
+            if (ImGui::Selectable(node->descriptor->name.c_str(), node == node_selected)){
+                node_selected = node;
+            }
+
+            if (ImGui::IsItemHovered()){
+                node_hovered_in_list = node;
+                open_context_menu |= ImGui::IsMouseClicked(1);
+            }
+            ImGui::PopID();
+        }
+        // ImGui::EndChild();
+        // ImGui::SameLine();
+    }
+
+    bool brush_panel_open = true;
+    bool entity_panel_open = true;
+    bool selected_panel = true;
+
+    std::vector<const char*> available_recipes;
+
+    void draw_selected_info(){
+        if (selected_node == nullptr){
+            return;
+        }
+
+        Building* b = selected_node->descriptor;
+        if (b == nullptr){
+            return;
+        }
+
+        ImGui::Text("Building");
+        ImGui::BulletText("Name     : %s", b->name.c_str());
+        ImGui::BulletText("Energy   : %5.2f", b->energy);
+        ImGui::BulletText("Dimension: %.0f x %.0f", b->w, b->l);
+
+        // Select a new recipe
+        available_recipes = selected_node->descriptor->recipe_names();
+        ImGui::Combo(
+            "Recipe",
+            &selected_node->recipe_idx,
+            available_recipes.data(),
+            available_recipes.size());
+
+        // display selected recipe
+        auto selected_recipe = selected_node->recipe();
+
+        draw_recipe_icon(selected_recipe, ImVec2(0.3f, 0.3f));
+
+        ImGui::Text("Outputs");
+        for (auto& out: selected_recipe->outputs){
+            ImGui::BulletText("%s (%5.2f item/min)", out.name.c_str(), out.speed);
+        }
+
+        ImGui::Text("Inputs");
+        for (auto& in: selected_recipe->inputs){
+            ImGui::BulletText("%s (%5.2f item/min)", in.name.c_str(), in.speed);
+        }
+    }
+
+    void draw_tool_panel(){
+        ImGui::Begin("Tool box");
+        auto open = ImGuiTreeNodeFlags_DefaultOpen;
+
+        if (ImGui::CollapsingHeader("Brush", &brush_panel_open, open)){
+            draw_brush();
+        }
+
+        if (ImGui::CollapsingHeader("Selected Building", &selected_panel, open)){
+            draw_selected_info();
+        }
+
+        if (ImGui::CollapsingHeader("Entity List", &entity_panel_open, open)){
+            draw_node_list();
+        }
+
+        ImGui::End();
+    }
+
     void draw(){
         ImGui::SetNextWindowSize(ImVec2(700, 600), ImGuiCond_FirstUseEver);
         if (!ImGui::Begin("Example: Custom Node Graph", &opened))
@@ -550,8 +711,9 @@ struct NodeEditor{
             return;
         }
 
-        draw_node_list();
+        draw_tool_panel();
         draw_workspace();
+
         ImGui::End();
     }
 };
