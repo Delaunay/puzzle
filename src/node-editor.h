@@ -100,6 +100,106 @@ struct NodeLink{
     }
 };
 
+struct LinkDragDropState {
+    ImVec2      start_point;
+    bool        should_draw_path = false;
+    bool        release          = false;
+
+    int         start_pin_slot = -1;
+    int         start_node_id  = -1;
+    const Node* start_node     = nullptr;
+    bool        start_pin_type = false;
+
+    int         end_pin_slot   = -1;
+    int         end_node_id    = -1;
+    const Node* end_node       = nullptr;
+    bool        end_pin_type   = false;
+
+    void set_starting_point(ImVec2 pos, Node const* node, int node_id, int pin_slot, bool input){
+        should_draw_path = true;
+        start_point = pos;
+        start_node = node;
+        start_pin_slot = pin_slot;
+        start_pin_type = input;
+        start_node_id = node_id;
+        release = false;
+
+        debug("Starting new link from ({}, {})", start_node->ID, start_pin_slot);
+    }
+
+    void set_end_point(Node const* node, int node_id, int pin_slot, bool input){
+        if (should_draw_path && node != start_node && node != end_node){
+            end_node_id = node_id;
+            end_node = node;
+            end_pin_slot = pin_slot;
+            end_pin_type = input;
+            release = true;
+            debug("End new link to ({}, {}) {}", end_node->ID, end_pin_slot, release);
+        }
+    }
+
+    void reset(){
+        start_point = ImVec2(-1, -1);
+        should_draw_path = false;
+        release = false;
+        start_node = nullptr;
+        start_pin_slot = -1;
+        end_node = nullptr;
+        end_pin_slot = -1;
+        debug("Reset dragndrop");
+    }
+
+    void make_new_link(std::vector<NodeLink>& links){
+        if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
+            if (release){
+                if (start_pin_type != end_pin_type){
+                    // if it is not an input
+                    if (start_pin_type) {
+                        std::swap(start_node, end_node);
+                        std::swap(start_pin_slot, end_pin_slot);
+                    }
+
+                    auto start_type = start_node->descriptor.inputs[start_pin_slot][0];
+                    auto end_type = end_node->descriptor.outputs[end_pin_slot][0];
+
+                    if (start_type == end_type){
+                        debug("Make Connection {} -> {}", start_node->ID, end_node->ID);
+                        links.emplace_back(
+                            start_node_id,
+                            start_pin_slot,
+                            end_node_id,
+                            end_pin_slot);
+                    } else {
+                        debug("Cannot connect {} to {}!", start_type, end_type);
+                    }
+                } else {
+                    debug("Cannot connect input to input!");
+                }
+            }
+            reset();
+        }
+    }
+
+    void draw_path(ImDrawList* draw_list){
+        if (should_draw_path){
+            ImVec2 p1 = start_point;
+            ImVec2 p2 = ImGui::GetMousePos();
+
+            if (p1.x > p2.x) {
+                std::swap(p1, p2);
+            }
+
+            draw_list->AddBezierCurve(
+                p1,
+                p1 + ImVec2(+50, 0),
+                p2 + ImVec2(-50, 0),
+                p2,
+                IM_COL32(200, 200, 100, 255),
+                3.0f);
+        }
+    }
+};
+
 struct NodeEditor{
     using NodePtr = std::shared_ptr<Node>;
     puzzle::Application& app;
@@ -134,26 +234,10 @@ struct NodeEditor{
     int node_hovered_in_list = -1;
     int node_hovered_in_scene = -1;
 
+    LinkDragDropState link_builder;
+
     const float NODE_SLOT_RADIUS = 8.0f;
     const ImVec2 NODE_WINDOW_PADDING = {8.0f, 8.0f};
-
-    bool        pending_path   = false;
-    ImVec2      pending_path_start;
-    bool        pending_release = false;
-
-    std::size_t pending_pin_id = 0;
-    const NPin* pending_pin    = nullptr;
-    const Node* pending_node   = nullptr;
-    std::size_t pending_node_idx;
-    std::size_t pending_slot_idx;
-    bool        pending_pin_type = false;
-    //
-    std::size_t pending_pin_id_e = 0;
-    const NPin* pending_pin_e    = nullptr;
-    const Node* pending_node_e   = nullptr;
-    std::size_t pending_node_idx_e;
-    std::size_t pending_slot_idx_e;
-    bool        pending_pin_type_e = false;
 
     void draw_pin(std::size_t slot_idx, Node const* node, NPin const& pin, ImDrawList* draw_list, ImVec2 offset, bool is_input, std::size_t node_idx){
         char type;
@@ -206,33 +290,12 @@ struct NodeEditor{
 
         // Get Starting point
         if (pressed && ImGui::IsMouseDown(ImGuiMouseButton_Left)) {
-            pending_path_start = center;
-            pending_path = true;
-            pending_pin_id = pin.ID;
-            pending_pin = &pin;
-            pending_node = node;
-            pending_node_idx = node_idx;
-            pending_slot_idx = slot_idx;
-            pending_pin_type = is_input;
-
-            debug("Starting new link from ({}, {})", pending_node->ID, pending_slot_idx);
+            link_builder.set_starting_point(center, node, node_idx, slot_idx, is_input);
         }
 
-        // Set Endingpoint
-        if (pending_path && hovered && pending_pin_id != pin.ID) {
-            if (pin.ID != pending_pin_id_e){
-                pending_release = true;
-                pending_pin_id_e = pin.ID;
-                pending_pin_e = &pin;
-                pending_node_e = node;
-                pending_node_idx_e = node_idx;
-                pending_slot_idx_e = slot_idx;
-                pending_pin_type_e = is_input;
-
-                debug("End new link to ({}, {})", pending_node_e->ID, pending_slot_idx_e);
-            }
-        } else if (!hovered && pin.ID == pending_pin_id_e) {
-            pending_release = false;
+        // Set Ending point
+        if (hovered) {
+            link_builder.set_end_point(node, node_idx, slot_idx, is_input);
         }
 
         ImGui::PopID();
@@ -339,29 +402,6 @@ struct NodeEditor{
         draw_list->AddRect(node_rect_min, node_rect_max, IM_COL32(100, 100, 100, 255), 4.0f);
 
 
-        if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
-            if (pending_release){
-                if (pending_pin_type != pending_pin_type_e){
-                    // if it is not an input
-                    if (pending_pin_type) {
-                        std::swap(pending_node_idx, pending_node_idx_e);
-                        std::swap(pending_slot_idx, pending_slot_idx_e);
-                    }
-                    debug("Make Connection {} -> {}", pending_node->ID, node->ID);
-                    links.push_back(NodeLink(pending_node_idx, pending_slot_idx, pending_node_idx_e, pending_slot_idx_e));
-                } else {
-                    debug("Cannot connect input to input!");
-                }
-
-                pending_pin_id_e = -1;
-                pending_release = false;
-            }
-
-            pending_path = false;
-            pending_pin_id = -1;
-            pending_node = nullptr;
-        }
-
         for (std::size_t slot_idx = 0; slot_idx < node->inputs.size(); slot_idx++){
             NPin& pin = node->inputs[slot_idx];
             draw_pin(slot_idx, node, pin, draw_list, offset, true, node_idx);
@@ -424,10 +464,17 @@ struct NodeEditor{
             draw_list->AddBezierCurve(p1, p1 + ImVec2(+50, 0), p2 + ImVec2(-50, 0), p2, IM_COL32(200, 200, 100, 255), 3.0f);
         }
 
+
+
         // Display nodes
         for (std::size_t node_idx = 0; node_idx < nodes.size(); node_idx++){
             draw_node(node_idx, get_node(node_idx), draw_list, offset);
+
         }
+
+        link_builder.draw_path(draw_list);
+        link_builder.make_new_link(links);
+
         draw_list->ChannelsMerge();
 
         // Open context menu
@@ -487,23 +534,6 @@ struct NodeEditor{
         // Scrolling
         if (ImGui::IsWindowHovered() && !ImGui::IsAnyItemActive() && ImGui::IsMouseDragging(ImGuiMouseButton_Middle, 0.0f))
             scrolling = scrolling + io.MouseDelta;
-
-        if (pending_path){
-            ImVec2 p1 = pending_path_start;
-            ImVec2 p2 = ImGui::GetMousePos();
-
-            if (p1.x > p2.x) {
-                std::swap(p1, p2);
-            }
-
-            draw_list->AddBezierCurve(
-                p1,
-                p1 + ImVec2(+50, 0),
-                p2 + ImVec2(-50, 0),
-                p2,
-                IM_COL32(200, 200, 100, 255),
-                3.0f);
-        }
 
         ImGui::PopItemWidth();
         ImGui::EndChild();
