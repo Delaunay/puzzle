@@ -79,51 +79,44 @@ int main() {
     }
 
     {
-        Building* desc = &resources.buildings[0];
-        auto new_node = std::make_shared<Node>(desc, ImVec2( 40,  50));
+        auto new_node = std::make_shared<Node>(0, ImVec2( 40,  50));
         new_node->recipe_idx = 0;
         app.editor.nodes.push_back(new_node);
     }
 
     {
-        Building* desc = &resources.buildings[0];
-        auto n1 = std::make_shared<Node>(desc, ImVec2( 40, 150));
+        auto n1 = std::make_shared<Node>(0, ImVec2( 40, 150));
         n1->recipe_idx = 0;
         app.editor.nodes.push_back(n1);
     }
 
     {
-        Building* desc = &resources.buildings[1];
-        auto n2 = std::make_shared<Node>(desc, ImVec2(270,  80));
+        auto n2 = std::make_shared<Node>(1, ImVec2(270,  80));
         n2->recipe_idx = 0;
         app.editor.nodes.push_back(n2);
     }
 
     {
-        Building* desc = &resources.buildings[2];
-        auto n2 = std::make_shared<Node>(desc, ImVec2(370,  100));
+        auto n2 = std::make_shared<Node>(2, ImVec2(370,  100));
         n2->recipe_idx = 0;
         app.editor.nodes.push_back(n2);
     }
 
     {
-        Building* desc = &resources.buildings[3];
-        auto n2 = std::make_shared<Node>(desc, ImVec2(470,  120));
+        auto n2 = std::make_shared<Node>(3, ImVec2(470,  120));
         n2->recipe_idx = 0;
         app.editor.nodes.push_back(n2);
     }
 
     {
-        Building* desc = &resources.buildings[4];
-        auto n2 = std::make_shared<Node>(desc, ImVec2(570,  140));
+        auto n2 = std::make_shared<Node>(4, ImVec2(570,  140));
         n2->recipe_idx = 0;
         app.editor.nodes.push_back(n2);
     }
 
 
     {
-        Building* desc = &resources.buildings[5];
-        auto n2 = std::make_shared<Node>(desc, ImVec2(570,  160));
+        auto n2 = std::make_shared<Node>(5, ImVec2(570,  160));
         n2->recipe_idx = 0;
         app.editor.nodes.push_back(n2);
     }

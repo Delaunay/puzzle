@@ -504,6 +504,14 @@ bool Application::init_imgui(){
 
 void Application::init_fonts(){
     debug("loading fonts");
+    /*
+    AddFontFromFileTTF(
+        const char* filename,
+        float size_pixels,
+        const ImFontConfig* font_cfg_template,
+        const ImWchar* glyph_ranges)
+    */
+    // ImGui::GetIO().Fonts->AddFontFromFileTTF("");
 
     // Use any command queue
     VkCommandPool command_pool = cmd_pool;

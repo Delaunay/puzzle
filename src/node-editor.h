@@ -21,6 +21,8 @@
 #include <imgui.h>
 #include <math.h> // fmodf
 
+#include <SDL2/SDL_keycode.h>
+
 // NB: You can use math functions/operators on ImVec2 if you #define IMGUI_DEFINE_MATH_OPERATORS and #include "imgui_internal.h"
 // Here we only declare simple +/- operators so others don't leak into the demo code.
 // static inline ImVec2 operator+(const ImVec2& lhs, const ImVec2& rhs) { return ImVec2(lhs.x + rhs.x, lhs.y + rhs.y); }
@@ -39,33 +41,77 @@ struct NPin {
 };
 
 
+template <typename T> float sgn(T val) {
+    return (T(0) < val) - (val < T(0));
+}
+
+
+// Draw a bezier curve using only 2 points
+// derive the two other points needed from the starting points
+// they derived points change in function of their relative position
+void draw_bezier(ImDrawList* draw_list, ImVec2 p1, ImVec2 p2, ImU32 color){
+    if (p1.x > p2.x) {
+        std::swap(p1, p2);
+    }
+
+    auto offset = ImVec2((p2.x - p1.x + 1) / 2.f , 0);
+    auto y_offset = sgn(p2.y - p1.y) * (p2.y - p1.y) / 2.f;
+
+    if (p2.y - p1.y > p2.x - p1.x){
+        offset = ImVec2(0, y_offset);
+    }
+
+    draw_list->AddBezierCurve(
+        p1,
+        p1 + offset,
+        p2 - offset,
+        p2,
+        color,
+        // Conveyor belt are w=2
+        10.f * 2.f);
+}
+
+
+// R: Rotate
+// Q: Copy building
 struct Node {
+    static float constexpr scaling = 10.f;
+
     std::size_t ID;
-    ImVec2  Pos;
-    ImVec2  _size;
-    float   Value;
-    ImVec4  Color;
+    ImVec2      Pos;
+    ImVec2      _size;
+    float       Value;
+    ImVec4      Color;
 
     std::vector<NPin> inputs;
     std::vector<NPin> outputs;
-    Building*         descriptor  = nullptr;
+    Building*         descriptor = nullptr;
+    int               building   = -1;
     int               recipe_idx = -1;
-    static float constexpr  scaling = 10.f;
+    int               rotation   = 0;
 
     Recipe* recipe(){
         if (descriptor == nullptr){
             return nullptr;
         }
 
-        if (recipe_idx > -1 && recipe_idx < int(descriptor->recipes.size())){
+        if (recipe_idx < 0){
+            return nullptr;
+        }
+
+        if (recipe_idx < int(descriptor->recipes.size())){
             return &descriptor->recipes[std::size_t(recipe_idx)];
         }
+
         return nullptr;
     }
 
-    Node(Building* descriptor, const ImVec2& pos, int recipe_idx=-1):
-        ID(next_id<std::size_t>()), descriptor(descriptor), recipe_idx(recipe_idx)
+    Node(int building, const ImVec2& pos, int recipe_idx=-1, int rotation=0):
+        ID(next_id<std::size_t>()), building(building), recipe_idx(recipe_idx), rotation(rotation)
     {
+        if (building >= 0){
+            descriptor = &Resources::instance().buildings[building];
+        }
         Pos = pos;
         inputs = std::vector<NPin>(descriptor->inputs.size());
         outputs = std::vector<NPin>(descriptor->outputs.size());
@@ -77,19 +123,89 @@ struct Node {
     }
 
     ImVec2 size() const {
-        return _size;
+        switch (Direction(rotation)){
+        case LeftToRight:
+        case RightToLeft:
+            return _size;
+
+        case TopToBottom:
+        case BottomToTop:
+            return ImVec2(_size.y, _size.x);
+        }
     }
 
-    ImVec2 GetInputSlotPos(std::size_t slot_no) const {
+    //                  [b]
+    //     *-------------------------------*
+    //     |                               |
+    // --->x                               |
+    // [a] |                               x--->  [c]
+    // --->x                               |
+    //     |                               |
+    //     *-------------------------------*
+    //                  [d]
+    //
+
+    enum Direction {
+        LeftToRight,
+        TopToBottom,
+        RightToLeft,
+        BottomToTop
+    };
+
+    ImVec2 left_slots(float num, float count) const {
         return ImVec2(
             Pos.x,
-            Pos.y + size().y * (float(slot_no + 1)) / (float(inputs.size() + 1)));
+            Pos.y + size().y * (float(num + 1)) / (float(count + 1)));
     }
 
-    ImVec2 GetOutputSlotPos(std::size_t slot_no) const {
+    ImVec2 right_slots(float num, float count) const {
         return ImVec2(
             Pos.x + size().x,
-            Pos.y + size().y * (float(slot_no + 1)) / (float(outputs.size() + 1)));
+            Pos.y + size().y * (float(num + 1)) / (float(count + 1)));
+    }
+
+    ImVec2 top_slots(float num, float count) const {
+        return ImVec2(
+            Pos.x + size().x * (float(num + 1)) / (float(count + 1)),
+            Pos.y);
+    }
+
+    ImVec2 bottom_slots(float num, float count) const {
+        return ImVec2(
+            Pos.x + size().x * (float(num + 1)) / (float(count + 1)),
+            Pos.y + size().y);
+    }
+
+    ImVec2 get_input_slot_position(std::size_t slot_no) const {
+        switch (Direction(rotation)){
+        case LeftToRight:
+            return left_slots(float(slot_no), float(inputs.size()));
+
+        case RightToLeft:
+            return right_slots(float(slot_no), float(inputs.size()));
+
+        case BottomToTop:
+            return bottom_slots(float(slot_no), float(inputs.size()));
+
+        case TopToBottom:
+            return top_slots(float(slot_no), float(inputs.size()));
+        }
+    }
+
+    ImVec2 get_output_slot_position(std::size_t slot_no) const {
+        switch (Direction(rotation)){
+        case LeftToRight:
+            return right_slots(float(slot_no), float(outputs.size()));
+
+        case RightToLeft:
+            return left_slots(float(slot_no), float(outputs.size()));
+
+        case BottomToTop:
+            return top_slots(float(slot_no), float(outputs.size()));
+
+        case TopToBottom:
+            return bottom_slots(float(slot_no), float(outputs.size()));
+        }
     }
 };
 
@@ -189,17 +305,12 @@ struct LinkDragDropState {
             ImVec2 p1 = start_point;
             ImVec2 p2 = ImGui::GetMousePos();
 
-            if (p1.x > p2.x) {
-                std::swap(p1, p2);
-            }
-
-            draw_list->AddBezierCurve(
+            draw_bezier(
+                draw_list,
                 p1,
-                p1 + ImVec2(+50, 0),
-                p2 + ImVec2(-50, 0),
                 p2,
-                IM_COL32(200, 200, 100, 255),
-                3.0f);
+                IM_COL32(200, 200, 100, 255)
+            );
         }
     }
 };
@@ -221,6 +332,7 @@ struct NodeEditor{
     struct Brush {
         int       building = 0;
         int       recipe   = -1;
+        int       rotation = 0;
 
         std::vector<const char*> building_names;
         std::vector<const char*> recipe_names;
@@ -240,6 +352,19 @@ struct NodeEditor{
                 return nullptr;
 
             return &building->recipes[recipe];
+        }
+
+        void set(int b, int r, int rot = 0){
+            building = b;
+            rotation = rot;
+
+            if (b >= 0){
+                recipe_names = building_descriptor()->recipe_names();
+            } else {
+                recipe_names.clear();
+            }
+
+            recipe = r;
         }
     };
 
@@ -270,8 +395,8 @@ struct NodeEditor{
 
     LinkDragDropState link_builder;
 
-    const float NODE_SLOT_RADIUS = 8.0f;
-    const ImVec2 NODE_WINDOW_PADDING = {8.0f, 8.0f};
+    const float NODE_SLOT_RADIUS = 2.0f * 10.f * 0.75f;
+    const ImVec2 NODE_WINDOW_PADDING = {10.0f, 10.0f};
 
     void draw_pin(std::size_t slot_idx, Node const* node, NPin const& pin, ImDrawList* draw_list, ImVec2 offset, bool is_input, std::size_t node_idx){
         char type;
@@ -291,10 +416,10 @@ struct NodeEditor{
         ImU32 color;
 
         if (is_input){
-            center = offset + node->GetInputSlotPos(slot_idx);
+            center = offset + node->get_input_slot_position(slot_idx);
             color = IM_COL32(255, 179, 119, 255);
         } else{
-            center = offset + node->GetOutputSlotPos(slot_idx);
+            center = offset + node->get_output_slot_position(slot_idx);
             color = IM_COL32(84, 252, 193, 255);
         }
 
@@ -348,39 +473,13 @@ struct NodeEditor{
         ImGui::SetCursorScreenPos(node_rect_min + NODE_WINDOW_PADDING);
         ImGui::BeginGroup(); // Lock horizontal position
 
-        ImGui::Text("%s", node->descriptor->name.c_str());
-        auto text_size = ImGui::GetItemRectSize();
+        //ImGui::Text("%s", node->descriptor->name.c_str());
+        // auto text_size = ImGui::GetItemRectSize();
 
         auto recipe = node->recipe();
 
-        if (recipe != nullptr){
-            if (recipe->texture.size() >  0){
-                auto cpu_img = Resources::instance().load_texture(recipe->texture);
-                auto device_img = app.load_texture_image(*cpu_img);
-
-                if (device_img->descriptor_set == nullptr){
-                    device_img->descriptor_set = ImGui_ImplVulkan_AddTexture(
-                        device_img->sampler,
-                        device_img->view,
-                        VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-                }
-
-                auto img_size = ImVec2(cpu_img->x * 0.20f, cpu_img->y * 0.20f);
-                auto offset = (node->size() - img_size) * 0.5f;
-
-                auto pos = node_rect_min + offset;
-                pos.y = std::max(node_rect_min.y + text_size.y + 10, pos.y);
-
-                ImGui::SetCursorScreenPos(pos);
-                ImGui::Image(
-                    device_img->descriptor_set,
-                    img_size,
-                    ImVec2(0.0f, 0.0f),
-                    ImVec2(1.0f, 1.0f),
-                    ImVec4(1, 1, 1, 1),
-                    ImVec4(1, 1, 1, 0.25));
-            }
-        }
+        ImGui::SetCursorScreenPos(node_rect_min);
+        draw_recipe_icon(recipe, ImVec2(0.2f, 0.2f), node->size());
 
         // Pin selection is on top of everything
         for (std::size_t slot_idx = 0; slot_idx < node->inputs.size(); slot_idx++){
@@ -418,6 +517,16 @@ struct NodeEditor{
         if (node_moving_active && ImGui::IsMouseDragging(ImGuiMouseButton_Left))
             node->Pos = node->Pos + io.MouseDelta;
 
+        // Shortcuts
+        if (ImGui::IsItemHovered()) {
+            if (ImGui::IsKeyReleased(SDL_SCANCODE_R)){
+                node->rotation = (node->rotation + 1) % 4;
+            }
+
+            if (ImGui::IsKeyReleased(SDL_SCANCODE_Q)){
+                brush.set(node->building, node->recipe_idx, node->rotation);
+            }
+        }
 
         // Draw rectangle
         ImU32 node_bg_color = IM_COL32(60, 60, 60, 255);
@@ -452,7 +561,8 @@ struct NodeEditor{
         if (show_grid)
         {
             ImU32 GRID_COLOR = IM_COL32(200, 200, 200, 40);
-            float GRID_SZ = 64.0f;
+            // Foundation is 8 x 8 and we scale by 10
+            float GRID_SZ = 8.f * 10.0f;
             ImVec2 win_pos = ImGui::GetCursorScreenPos();
             ImVec2 canvas_sz = ImGui::GetWindowSize();
 
@@ -472,10 +582,15 @@ struct NodeEditor{
             Node* node_inp = get_node(link->InputIdx);
             Node* node_out = get_node(link->OutputIdx);
 
-            ImVec2 p1 = offset + node_inp->GetOutputSlotPos(link->InputSlot);
-            ImVec2 p2 = offset + node_out->GetInputSlotPos(link->OutputSlot);
+            ImVec2 p1 = offset + node_inp->get_output_slot_position(link->InputSlot);
+            ImVec2 p2 = offset + node_out->get_input_slot_position(link->OutputSlot);
 
-            draw_list->AddBezierCurve(p1, p1 + ImVec2(+50, 0), p2 + ImVec2(-50, 0), p2, IM_COL32(200, 200, 100, 255), 3.0f);
+            draw_bezier(
+                draw_list,
+                p1,
+                p2,
+                IM_COL32(200, 200, 100, 255)
+            );
         }
 
         // Display nodes
@@ -530,11 +645,8 @@ struct NodeEditor{
             else
             {
                 if (ImGui::MenuItem("Add")) {
-                    auto b = brush.building_descriptor();
-                    if (b != nullptr){
-                        debug("New node");
-                        nodes.push_back(std::make_shared<Node>(b, scene_pos, brush.recipe));
-                    }
+                    debug("New node");
+                    nodes.push_back(std::make_shared<Node>(brush.building, scene_pos, brush.recipe, brush.rotation % 4));
                 }
                 if (ImGui::MenuItem("Paste", nullptr, false, false)) {
 
@@ -557,6 +669,11 @@ struct NodeEditor{
         ImGui::EndGroup();
     }
 
+    bool insert_shortcuts(){
+        // Insert r into ImGui KeyMap
+        // puzzle::add_new_key<SDLK_r>();
+        return true;
+    }
 
     void draw_brush(){
         // ImGui::Text("Brush");
@@ -575,9 +692,13 @@ struct NodeEditor{
             brush.building_names.data(),
             brush.building_names.size());
 
+        if (ImGui::InputInt("Rotation", &brush.rotation)){
+            brush.rotation = brush.rotation % 4;
+        }
+
+
         if (building_changed){
-            brush.recipe = -1;
-            brush.recipe_names.clear();
+            brush.set(brush.building, -1);
         }
 
         auto building = brush.building_descriptor();
@@ -591,18 +712,41 @@ struct NodeEditor{
             brush.recipe_names.data(),
             brush.recipe_names.size());
 
-        draw_recipe_icon(brush.recipe_descriptor(), ImVec2(0.3f, 0.3f));
+        draw_recipe_icon(
+            brush.recipe_descriptor(),
+            ImVec2(0.3f, 0.3f),
+            ImVec2(ImGui::GetWindowWidth(), 0))
+        ;
     }
 
     Node* selected_node = nullptr;
 
-    void draw_recipe_icon(Recipe* recipe, ImVec2 scale){
+    void draw_recipe_icon(Recipe* recipe, ImVec2 scale, ImVec2 size = ImVec2(0, 0)){
+        auto offset = ImVec2(0, 0);
+        auto img_size = ImVec2(256, 256) * scale;
+        auto pos = ImGui::GetCursorScreenPos();
+
         if (recipe && recipe->texture.size() > 0){
             Image* _ = Resources::instance().load_texture(recipe->texture);
             auto image = app.load_texture_image(*_);
 
+            if (image->descriptor_set == nullptr){
+                image->descriptor_set = ImGui_ImplVulkan_AddTexture(
+                    image->sampler,
+                    image->view,
+                    VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+            }
+
+            img_size = ImVec2(_->x, _->y) * scale;
+            if (size.x + size.y > 0){
+                offset = (size - img_size) * ImVec2(
+                             0.5f * float(size.x != 0),
+                             0.5f * float(size.y != 0));
+            }
+
+            ImGui::SetCursorScreenPos(pos + offset);
+
             if (image->descriptor_set){
-                auto img_size = ImVec2(_->x * scale.x, _->y * scale.y);
                 ImGui::Image(
                     image->descriptor_set,
                     img_size,
@@ -611,8 +755,16 @@ struct NodeEditor{
                     ImVec4(1, 1, 1, 1),
                     ImVec4(1, 1, 1, 0.25));
             }
+        // Placeholder code
         } else {
-            ImGui::Button("Missing Image", ImVec2(256 * scale.x, 256 * scale.y));
+            if (size.x + size.y > 0){
+                offset = (size - img_size) * ImVec2(
+                             0.5f * float(size.x != 0),
+                             0.5f * float(size.y != 0));
+            }
+
+            ImGui::SetCursorScreenPos(pos + offset);
+            ImGui::Button("Missing Image", img_size);
         }
     }
 
@@ -655,10 +807,26 @@ struct NodeEditor{
             return;
         }
 
-        ImGui::Text("Building");
-        ImGui::BulletText("Name     : %s", b->name.c_str());
-        ImGui::BulletText("Energy   : %5.2f", b->energy);
-        ImGui::BulletText("Dimension: %.0f x %.0f", b->w, b->l);
+        {
+            ImGui::Text("Building Spec");
+            ImGui::Columns(2, "spec-cols", true);
+            ImGui::Separator();
+
+            ImGui::Text("Name");
+            ImGui::Text("Energy");
+            ImGui::Text("Dimension");
+
+            ImGui::NextColumn();
+
+            ImGui::Text("%s", b->name.c_str());
+            ImGui::Text("%.2f", b->energy);
+            ImGui::Text("%.0f x %.0f", b->w, b->l);
+
+            ImGui::Separator();
+        }
+
+        // back to normal mode
+        ImGui::Columns(1);
 
         // Select a new recipe
         available_recipes = &b->recipe_names();
@@ -671,16 +839,50 @@ struct NodeEditor{
 
         // display selected recipe
         auto selected_recipe = selected_node->recipe();
-        draw_recipe_icon(selected_recipe, ImVec2(0.3f, 0.3f));
+        draw_recipe_icon(selected_recipe, ImVec2(0.3f, 0.3f), ImVec2(ImGui::GetWindowWidth(), 0));
 
-        ImGui::Text("Inputs");
-        for (auto& in: selected_recipe->inputs){
-            ImGui::BulletText("%s (%5.2f item/min)", in.name.c_str(), in.speed);
-        }
+        if (selected_recipe != nullptr){
+            ImGui::Text("Inputs");
+            ImGui::Separator();
+            ImGui::Columns(2, "inputs-cols", true);
 
-        ImGui::Text("Outputs");
-        for (auto& out: selected_recipe->outputs){
-            ImGui::BulletText("%s (%5.2f item/min)", out.name.c_str(), out.speed);
+            ImGui::Text("Name");
+            for (auto& in: selected_recipe->inputs){
+                ImGui::Text("%s", in.name.c_str());
+            }
+
+            ImGui::NextColumn();
+            ImGui::Text("Speed (item/min)");
+            ImGui::Separator();
+            for (auto& in: selected_recipe->inputs){
+                ImGui::Text("%.2f", in.speed);
+            }
+
+            ImGui::Separator();
+            ImGui::Columns(1);
+            // Finished
+
+            ImGui::Spacing();
+
+            ImGui::Text("Outputs");
+            ImGui::Separator();
+            ImGui::Columns(2, "outputs-cols", true);
+
+            ImGui::Text("Name");
+            for (auto& out: selected_recipe->outputs){
+                ImGui::Text("%s", out.name.c_str());
+            }
+
+            ImGui::NextColumn();
+            ImGui::Text("Speed (item/min)");
+            ImGui::Separator();
+            for (auto& out: selected_recipe->outputs){
+                ImGui::Text("%.2f", out.speed);
+            }
+
+            ImGui::Separator();
+            ImGui::Columns(1);
+            // Finished
         }
     }
 
@@ -704,6 +906,8 @@ struct NodeEditor{
     }
 
     void draw(){
+        static bool _ = insert_shortcuts();
+
         ImGui::SetNextWindowSize(ImVec2(700, 600), ImGuiCond_FirstUseEver);
         if (!ImGui::Begin("Example: Custom Node Graph", &opened))
         {

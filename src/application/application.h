@@ -241,6 +241,32 @@ public:
     }
 };
 
+inline
+int new_key_index(){
+    static int count = ImGuiKey_COUNT;
+    return count++;
+}
+
+template <int Key>
+int key_id(){
+    static int id = new_key_index();
+    return id;
+}
+
+template<int Key>
+bool _add_new_key(){
+    ImGuiIO& io = ImGui::GetIO();
+    io.KeyMap[key_id<Key>()] = Key;
+    return true;
+}
+
+template<int Key>
+bool add_new_key(){
+    static bool _ = _add_new_key<Key>();
+    return _;
+}
+
+
 }
 
 #endif

@@ -63,6 +63,26 @@
         "outputs": []
     },
     {
+        "name": "Conveyor Merger",
+        "energy": 0,
+        "w": 4,
+        "l": 4,
+        "h": 2,
+        "inputs": ["C", "C", "C"],
+        "outputs": ["C"],
+        "tier": 1
+    },
+    {
+        "name": "Conveyor Splitter",
+        "energy": 0,
+        "w": 4,
+        "l": 4,
+        "h": 2,
+        "inputs": ["C"],
+        "outputs": ["C", "C", "C"],
+        "tier": 1
+    },
+    {
         "name": "Coal Generator",
         "energy": 75,
         "w": 10,
