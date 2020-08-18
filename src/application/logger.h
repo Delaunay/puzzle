@@ -6,6 +6,7 @@
 // Do not include spdlog directly
 // only use the fmt header
 #include <spdlog/fmt/bundled/core.h>
+#include <cassert>
 
 namespace sym
 {
@@ -55,6 +56,16 @@ void log(LogLevel level, CodeLocation const& loc, const char* fmt, const Args& .
     spdlog_log(level, msg);
 }
 
+template<typename ... Args>
+void new_assert(bool cond, CodeLocation const& loc, const char* pred, const char* fmt, const Args& ... args){
+    if (!cond){
+        auto msg = fmt::format("{} - {}", pred, fmt::format(fmt, args...));
+        // externed
+        __assert_fail(msg.c_str(), loc.filename.c_str(), loc.line, loc.function_name.c_str());
+    }
+}
+
+
 #define SYM_LOG_HELPER(level, ...) log(level, LOC, __VA_ARGS__)
 
 #define info(...)       SYM_LOG_HELPER(sym::LogLevel::INFO, __VA_ARGS__)
@@ -88,5 +99,9 @@ private:
         {}\
     };
 }
+
+// assertf(a > f, "Should happen")
+#define assertf(cond, ...)\
+    sym::new_assert(cond, LOC, #cond, __VA_ARGS__)
 
 #endif

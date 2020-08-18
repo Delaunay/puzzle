@@ -26,6 +26,8 @@ struct Recipe {
 };
 
 struct Building {
+    using Layout = std::unordered_map<std::string, std::vector<std::string>>;
+
     std::string name;
     float       energy;
     float       w;
@@ -34,7 +36,7 @@ struct Building {
     std::vector<std::string> inputs;
     std::vector<std::string> outputs;
     std::vector<Recipe>      recipes;
-
+    Layout                   layout;
     std::vector<const char*> _cached_names;
 
     std::vector<const char*> const& recipe_names(){

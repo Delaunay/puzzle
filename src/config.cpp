@@ -26,11 +26,34 @@ void from_json(const json& j, Building& p) {
     j.at("l").get_to(p.l);
     j.at("h").get_to(p.h);
 
+
     if (j.contains("inputs")){
         j.at("inputs").get_to(p.inputs);
+
+        auto result = p.layout.insert_or_assign("left", std::vector<std::string>());
+        std::vector<std::string>& inputs = result.first->second;
+
+        // Convert to the new layout format
+        for(auto& out: p.inputs){
+            inputs.push_back(out + "I");
+        }
+        p.inputs.clear();
     }
 
     if (j.contains("outputs")){
         j.at("outputs").get_to(p.outputs);
+
+        auto result = p.layout.insert_or_assign("right", std::vector<std::string>());
+        std::vector<std::string>& outputs = result.first->second;
+
+        // Convert to the new layout format
+        for(auto& out: p.outputs){
+            outputs.push_back(out + "O");
+        }
+        p.outputs.clear();
+    }
+
+    if (j.contains("layout")){
+        j.at("layout").get_to(p.layout);
     }
 }

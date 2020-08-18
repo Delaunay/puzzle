@@ -68,8 +68,12 @@
         "w": 4,
         "l": 4,
         "h": 2,
-        "inputs": ["C", "C", "C"],
-        "outputs": ["C"],
+        "layout": {
+          "left"  : ["CO"],
+          "top"   : ["CI"],
+          "right" : ["CI"],
+          "bottom": ["CI"]
+        },
         "tier": 1
     },
     {
@@ -78,8 +82,12 @@
         "w": 4,
         "l": 4,
         "h": 2,
-        "inputs": ["C"],
-        "outputs": ["C", "C", "C"],
+        "layout": {
+          "left"  : ["CI"],
+          "top"   : ["CO"],
+          "right" : ["CO"],
+          "bottom": ["CO"]
+        },
         "tier": 1
     },
     {
@@ -97,8 +105,8 @@
         "w": 6,
         "l": 6,
         "h": 8,
-        "inputs": ["C"],
-        "outputs": ["C"]
+        "inputs": ["P"],
+        "outputs": ["P"]
     },
     {
         "name": "Geo Thermal Generator",

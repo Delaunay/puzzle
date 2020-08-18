@@ -9,7 +9,7 @@
 // - v0.04 (2020-03): minor tweaks
 // - v0.03 (2018-03): fixed grid offset issue, inverted sign of 'scrolling'
 
-
+#include <sstream>
 
 #include "config.h"
 #include "application/application.h"
@@ -20,8 +20,16 @@
 
 #include <imgui.h>
 #include <math.h> // fmodf
+#include <list>
 
 #include <SDL2/SDL_keycode.h>
+
+#ifdef IM_COL32
+#undef IM_COL32
+#endif
+
+#define IM_COL32(R,G,B,A)\
+    (ImU32(ImU32(A)<<IM_COL32_A_SHIFT) | ImU32(ImU32(B)<<IM_COL32_B_SHIFT) | ImU32(ImU32(G)<<IM_COL32_G_SHIFT) | ImU32(ImU32(R)<<IM_COL32_R_SHIFT))
 
 // NB: You can use math functions/operators on ImVec2 if you #define IMGUI_DEFINE_MATH_OPERATORS and #include "imgui_internal.h"
 // Here we only declare simple +/- operators so others don't leak into the demo code.
@@ -32,13 +40,13 @@
 // Note that we storing links as indices (not ID) to make example code shorter.
 
 
-struct NPin {
-    std::size_t ID;
-
-    NPin():
-        ID(next_id<std::size_t>())
-    {}
-};
+int get_side(std::string const& name){
+    if (name == "left")   return 0;
+    if (name == "top")    return 1;
+    if (name == "right")  return 2;
+    if (name == "bottom") return 3;
+    return 0;
+}
 
 
 template <typename T> float sgn(T val) {
@@ -46,49 +54,59 @@ template <typename T> float sgn(T val) {
 }
 
 
-// Draw a bezier curve using only 2 points
-// derive the two other points needed from the starting points
-// they derived points change in function of their relative position
-void draw_bezier(ImDrawList* draw_list, ImVec2 p1, ImVec2 p2, ImU32 color){
-    if (p1.x > p2.x) {
-        std::swap(p1, p2);
-    }
+struct Node;
 
-    auto offset = ImVec2((p2.x - p1.x + 1) / 2.f , 0);
-    auto y_offset = sgn(p2.y - p1.y) * (p2.y - p1.y) / 2.f;
+struct NPin {
+    const std::size_t ID;
+    char belt_type = ' ';
+    bool is_input  = ' ';
 
-    if (p2.y - p1.y > p2.x - p1.x){
-        offset = ImVec2(0, y_offset);
-    }
+    int   side         = 0;
+    int   index        = 0;
+    int   count        = 0;
 
-    draw_list->AddBezierCurve(
-        p1,
-        p1 + offset,
-        p2 - offset,
-        p2,
-        color,
-        // Conveyor belt are w=2
-        10.f * 2.f);
-}
+    Node* const parent = nullptr;
+    Node* child        = nullptr;
 
+    // Pins are assigned to Nodes, they should not be created outside them
+    NPin(NPin const&) = delete;
+
+    // We need move for std::vector resize event though it should never get resized
+    NPin(NPin const&& obj) noexcept;
+
+    // Holds all the data necessary for it to compute its position
+    ImVec2 position() const;
+
+    NPin(char type, bool is_input, int side, int index, int count, Node* parent):
+        ID(next_id<std::size_t>()), belt_type(type), is_input(is_input),
+        side(side), index(index), count(count), parent(parent)
+    {}
+};
+
+
+NPin::NPin(NPin const&& obj) noexcept:
+    ID(obj.ID), belt_type(obj.belt_type), side(obj.side), index(obj.index),
+    count(obj.count), parent(obj.parent), child(obj.child)
+{}
+
+std::ostream& operator<<(std::ostream& out, NPin const& pin);
 
 // R: Rotate
 // Q: Copy building
 struct Node {
     static float constexpr scaling = 10.f;
 
-    std::size_t ID;
-    ImVec2      Pos;
-    ImVec2      _size;
-    float       Value;
-    ImVec4      Color;
-
-    std::vector<NPin> inputs;
-    std::vector<NPin> outputs;
+    const std::size_t ID;
+    ImVec2            Pos;
+    ImVec2            _size;
+    float             Value;
+    ImVec4            Color;
     Building*         descriptor = nullptr;
     int               building   = -1;
     int               recipe_idx = -1;
-    int               rotation   = 0;
+    int               rotation   =  0;
+
+    std::array<std::vector<NPin>, 4> pins;
 
     Recipe* recipe(){
         if (descriptor == nullptr){
@@ -109,15 +127,46 @@ struct Node {
     Node(int building, const ImVec2& pos, int recipe_idx=-1, int rotation=0):
         ID(next_id<std::size_t>()), building(building), recipe_idx(recipe_idx), rotation(rotation)
     {
-        if (building >= 0){
-            descriptor = &Resources::instance().buildings[building];
+        assertf(building >= 0, "Node shoudl have a building");
+
+        descriptor = &Resources::instance().buildings[std::size_t(building)];
+
+        for(auto& side: descriptor->layout){
+            int pin_side = get_side(side.first);
+            std::vector<std::string>& pin_str = side.second;
+
+            std::vector<NPin>& side_pins = pins[std::size_t(get_side(side.first))];
+            side_pins.reserve(side.second.size());
+
+            for(int i = 0, n = pin_str.size(); i < n; ++i) {
+                auto& p = pin_str[std::size_t(i)];
+                assertf(p.size() == 2,
+                        "Pin descriptor is of size 2");
+
+                assertf(p[0] == 'C' || p[0] == 'P' || p[0] == 'N',
+                        "Pin type should be defined");
+
+                assertf(p[1] == 'I' || p[1] == 'O',
+                        "Pin type should be defined");
+
+                side_pins.emplace_back(
+                    p[0],           // Belt Type
+                    p[1] == 'I',    // Input
+                    pin_side,       // Pin Side
+                    i,              // Pin Index
+                    n,              // Pin Count on that side
+                    this);          // Parent
+
+                const NPin& pin = *side_pins.rbegin();
+                std::stringstream ss;
+                ss << pin;
+                debug("{}", ss.str());
+            }
         }
         Pos = pos;
-        inputs = std::vector<NPin>(descriptor->inputs.size());
-        outputs = std::vector<NPin>(descriptor->outputs.size());
     }
 
-    void update_size(ImVec2 size){
+    void update_size(ImVec2){
         ImVec2 base = {scaling * descriptor->l, scaling *descriptor->w};
         _size = base;
     }
@@ -132,6 +181,8 @@ struct Node {
         case BottomToTop:
             return ImVec2(_size.y, _size.x);
         }
+
+        __builtin_unreachable();
     }
 
     //                  [b]
@@ -176,85 +227,117 @@ struct Node {
             Pos.y + size().y);
     }
 
-    ImVec2 get_input_slot_position(std::size_t slot_no) const {
-        switch (Direction(rotation)){
+    ImVec2 slot_position(int side, float num, float count) const {
+        side = (side + rotation) % 4;
+
+        switch (Direction(side)){
         case LeftToRight:
-            return left_slots(float(slot_no), float(inputs.size()));
+            return left_slots(num, count);
 
         case RightToLeft:
-            return right_slots(float(slot_no), float(inputs.size()));
+            return right_slots(num, count);
 
         case BottomToTop:
-            return bottom_slots(float(slot_no), float(inputs.size()));
+            return bottom_slots(num, count);
 
         case TopToBottom:
-            return top_slots(float(slot_no), float(inputs.size()));
+            return top_slots(num, count);
         }
-    }
 
-    ImVec2 get_output_slot_position(std::size_t slot_no) const {
-        switch (Direction(rotation)){
-        case LeftToRight:
-            return right_slots(float(slot_no), float(outputs.size()));
-
-        case RightToLeft:
-            return left_slots(float(slot_no), float(outputs.size()));
-
-        case BottomToTop:
-            return top_slots(float(slot_no), float(outputs.size()));
-
-        case TopToBottom:
-            return bottom_slots(float(slot_no), float(outputs.size()));
-        }
+        __builtin_unreachable();
     }
 };
+
+
+// Draw a bezier curve using only 2 points
+// derive the two other points needed from the starting points
+// they derived points change in function of their relative position
+void draw_bezier(ImDrawList* draw_list, ImVec2 p1, ImVec2 p2, ImU32 color){
+    if (p1.x > p2.x) {
+        std::swap(p1, p2);
+    }
+
+    auto offset = ImVec2((p2.x - p1.x + 1) / 2.f , 0);
+    auto y_offset = sgn(p2.y - p1.y) * (p2.y - p1.y) / 2.f;
+
+    if (p2.y - p1.y > p2.x - p1.x){
+        offset = ImVec2(0, y_offset);
+    }
+
+    draw_list->AddBezierCurve(
+        p1,
+        p1 + offset,
+        p2 - offset,
+        p2,
+        color,
+        // Conveyor belt are w=2
+        Node::scaling * 2.f);
+}
+
+
+
+ImVec2 NPin::position() const {
+    return parent->slot_position(side, float(index), float(count));
+}
+
+std::ostream& operator<<(std::ostream& out, NPin const& pin){
+    return out << fmt::format(
+               "Pin(ID={}, type={}, input={}, side={}, index={}, count={}, parent={})",
+               pin.ID, pin.belt_type, pin.is_input, pin.side, pin.index, pin.count, pin.parent->ID);
+}
 
 struct NodeLink{
-    int InputIdx, InputSlot, OutputIdx, OutputSlot;
+    NPin const* start; // outputs
+    NPin const* end;   // inputs
 
-    NodeLink(int input_idx, int input_slot, int output_idx, int output_slot) {
-        InputIdx   = input_idx;
-        InputSlot  = input_slot;
-        OutputIdx  = output_idx;
-        OutputSlot = output_slot;
+    NodeLink(NPin const* s, NPin const* e):
+        start(s), end(e)
+    {
+        assertf(start != nullptr, "start cannot be null");
+        assertf(end   != nullptr, "end cannot be null");
+    }
+
+    bool operator== (NodeLink const& obj){
+        return obj.start == this->start && obj.end == this->end;
     }
 };
 
+
+struct NodeEditor;
+
+// Link builder helper
 struct LinkDragDropState {
-    ImVec2      start_point;
-    bool        should_draw_path = false;
-    bool        release          = false;
+    ImVec2      start_point;                // Starting point of the drawing
+    bool        should_draw_path = false;   // Should draw the pending path
+    bool        release          = false;   // Is ready to be released
+    bool        is_hovering      = false;   // Did we hover over something NOW
+                                            // if not we cancel the linking
+    NPin const* start = nullptr;  // Output pin
+    NPin const* end   = nullptr;  // Input pin
 
-    int         start_pin_slot = -1;
-    int         start_node_id  = -1;
-    const Node* start_node     = nullptr;
-    bool        start_pin_type = false;
-
-    int         end_pin_slot   = -1;
-    int         end_node_id    = -1;
-    const Node* end_node       = nullptr;
-    bool        end_pin_type   = false;
-
-    void set_starting_point(ImVec2 pos, Node const* node, int node_id, int pin_slot, bool input){
-        should_draw_path = true;
-        start_point = pos;
-        start_node = node;
-        start_pin_slot = pin_slot;
-        start_pin_type = input;
-        start_node_id = node_id;
-        release = false;
-
-        debug("Starting new link from ({}, {})", start_node->ID, start_pin_slot);
+    void start_drag(){
+        is_hovering = false;
     }
 
-    void set_end_point(Node const* node, int node_id, int pin_slot, bool input){
-        if (should_draw_path && node != start_node && node != end_node){
-            end_node_id = node_id;
-            end_node = node;
-            end_pin_slot = pin_slot;
-            end_pin_type = input;
+    void set_starting_point(ImVec2 pos, NPin const* s){
+        if (s != nullptr) {
+            should_draw_path = true;
+            start_point = pos;
+            start = s;
+            release = false;
+            debug("Starting new link from ({}, {})", s->parent->ID, s->index);
+        }
+    }
+
+    void set_end_point(NPin const* e){
+        if (should_draw_path && e->parent != start->parent){
+            if (end != nullptr && end->ID != e->ID){
+                debug("End new link to ({}, {}) {}", e->parent->ID, e->index, release);
+            }
+
+            end = e;
             release = true;
-            debug("End new link to ({}, {}) {}", end_node->ID, end_pin_slot, release);
+            is_hovering = true;
         }
     }
 
@@ -262,43 +345,12 @@ struct LinkDragDropState {
         start_point = ImVec2(-1, -1);
         should_draw_path = false;
         release = false;
-        start_node = nullptr;
-        start_pin_slot = -1;
-        end_node = nullptr;
-        end_pin_slot = -1;
+        start = nullptr;
+        end = nullptr;
         debug("Reset dragndrop");
     }
 
-    void make_new_link(std::vector<NodeLink>& links){
-        if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
-            if (release){
-                if (start_pin_type != end_pin_type){
-                    // if it is not an input
-                    if (start_pin_type) {
-                        std::swap(start_node, end_node);
-                        std::swap(start_pin_slot, end_pin_slot);
-                    }
-
-                    auto start_type = start_node->descriptor->outputs[start_pin_slot][0];
-                    auto end_type = end_node->descriptor->inputs[end_pin_slot][0];
-
-                    if (start_type == end_type){
-                        debug("Make Connection {} -> {}", start_node->ID, end_node->ID);
-                        links.emplace_back(
-                            start_node_id,
-                            start_pin_slot,
-                            end_node_id,
-                            end_pin_slot);
-                    } else {
-                        debug("Cannot connect {} to {}!", start_type, end_type);
-                    }
-                } else {
-                    debug("Cannot connect input to input!");
-                }
-            }
-            reset();
-        }
-    }
+    void make_new_link(NodeEditor* editor);
 
     void draw_path(ImDrawList* draw_list){
         if (should_draw_path){
@@ -315,6 +367,48 @@ struct LinkDragDropState {
     }
 };
 
+
+// Building brush
+struct Brush {
+    int       building = 0;
+    int       recipe   = -1;
+    int       rotation = 0;
+
+    std::vector<const char*> building_names;
+    std::vector<const char*> recipe_names;
+
+    Building* building_descriptor(){
+        if (building < 0)
+            return nullptr;
+        return &Resources::instance().buildings[std::size_t(building)];
+    }
+
+    Recipe* recipe_descriptor(){
+        if (recipe < 0)
+            return nullptr;
+
+        Building* building = building_descriptor();
+        if (!building)
+            return nullptr;
+
+        return &building->recipes[std::size_t(recipe)];
+    }
+
+    void set(int b, int r, int rot = 0){
+        building = b;
+        rotation = rot;
+
+        if (b >= 0){
+            recipe_names = building_descriptor()->recipe_names();
+        } else {
+            recipe_names.clear();
+        }
+
+        recipe = r;
+    }
+};
+
+
 struct NodeEditor{
     using NodePtr = std::shared_ptr<Node>;
     puzzle::Application& app;
@@ -329,58 +423,16 @@ struct NodeEditor{
         return nodes[idx].get();
     }
 
-    struct Brush {
-        int       building = 0;
-        int       recipe   = -1;
-        int       rotation = 0;
-
-        std::vector<const char*> building_names;
-        std::vector<const char*> recipe_names;
-
-        Building* building_descriptor(){
-            if (building == -1)
-                return nullptr;
-            return &Resources::instance().buildings[building];
-        }
-
-        Recipe* recipe_descriptor(){
-            if (recipe == -1)
-                return nullptr;
-
-            Building* building = building_descriptor();
-            if (!building)
-                return nullptr;
-
-            return &building->recipes[recipe];
-        }
-
-        void set(int b, int r, int rot = 0){
-            building = b;
-            rotation = rot;
-
-            if (b >= 0){
-                recipe_names = building_descriptor()->recipe_names();
-            } else {
-                recipe_names.clear();
-            }
-
-            recipe = r;
-        }
-    };
-
     Brush brush;
 
-    std::vector<NodePtr>  nodes;
-    std::vector<NodeLink> links;
     ImVec2 scrolling = ImVec2(0.0f, 0.0f);
+    std::vector<NodePtr>  nodes;
 
-    // returns nodes that have no parents
-    std::vector<Node*> roots(){
-        for (auto& node: nodes){
+private:
+    std::list<NodeLink> links;
+    std::unordered_map<std::size_t, NodeLink*> lookup;
 
-        }
-    }
-
+public:
     bool inited = false;
     bool show_grid = true;
     bool opened = true;
@@ -392,41 +444,125 @@ struct NodeEditor{
     Node* node_selected         = nullptr;
     Node* node_hovered_in_list  = nullptr;
     Node* node_hovered_in_scene = nullptr;
+    Node* selected_node         = nullptr;
+    NodeLink* selected_link     = nullptr;
+    // Link selection has precedence over node selection
+    // but node selection happens after so we use this flag to guard
+    // overriding the selection
+    bool link_selected          = false;
 
     LinkDragDropState link_builder;
 
-    const float NODE_SLOT_RADIUS = 2.0f * 10.f * 0.75f;
+    const float NODE_SLOT_RADIUS     = 1.0f * Node::scaling;
     const ImVec2 NODE_WINDOW_PADDING = {10.0f, 10.0f};
 
-    void draw_pin(std::size_t slot_idx, Node const* node, NPin const& pin, ImDrawList* draw_list, ImVec2 offset, bool is_input, std::size_t node_idx){
-        char type;
-        if (is_input) {
-            type = node->descriptor->inputs[slot_idx][0];
-        } else {
-            type = node->descriptor->outputs[slot_idx][0];
+    // check if a pin is connected only once
+    // if not remove it and make the new connection
+    void remove_pin_link(NPin const* p){
+        auto iter = lookup.find(p->ID);
+        if (iter != lookup.end()){
+            remove_link(iter->second);
+        }
+    }
+
+    NodeLink* new_link(NPin const* s, NPin const* e){
+        remove_pin_link(e);
+        remove_pin_link(s);
+
+        links.emplace_back(s, e);
+        auto* link = &(*links.rbegin());
+        lookup[s->ID] = link;
+        lookup[e->ID] = link;
+
+        select_link(link);
+        return link;
+    }
+
+    void select_link(NPin const* p){
+        auto result = lookup.find(p->ID);
+        if (result != lookup.end()){
+            select_link((*result).second);
+        }
+    }
+
+    void select_link(NodeLink* link){
+        selected_link = link;
+        selected_node = nullptr;
+        link_selected = true;
+    }
+
+    void select_node(Node* node){
+        if (!link_selected){
+            selected_node = node;
+            selected_link = nullptr;
+            debug("node selected");
+        }
+    }
+
+    void remove_link(NodeLink* link){
+        debug("Removing link");
+        if (link == nullptr){
+            return;
         }
 
-        if (type != 'C' && type != 'P'){
+        if (link == selected_link){
+            selected_link = nullptr;
+        }
+
+        debug("{}", link->start->ID);
+        debug("{}", link->end->ID);
+
+        lookup.erase(link->start->ID);
+        lookup.erase(link->end->ID);
+        links.remove(*link);
+    }
+
+    void remove_node(Node* node){
+        // remove all pins
+        for(auto& side: node->pins){
+            for(auto& pin: side){
+                remove_pin_link(&pin);
+            }
+        }
+
+        // remove node from the vector
+        for(auto i = 0u; i < nodes.size(); ++i){
+            if (nodes[i].get() == node){
+                nodes.erase(nodes.begin() + i);
+                return;
+            }
+        }
+    }
+    // returns nodes that have no parents
+    std::vector<Node*> roots(){
+        std::vector<Node*> root_nodes;
+        for (auto& node: nodes){
+
+        }
+
+        return root_nodes;
+    }
+
+    void draw_pin(ImDrawList* draw_list, ImVec2 offset, NPin const& pin) {
+        if (pin.belt_type != 'C' && pin.belt_type != 'P'){
+            // debug("Ignored {}", pin.belt_type);
             return;
         }
 
         ImGui::PushID(int(pin.ID));
-
-        ImVec2 center;
         ImU32 color;
+        auto center = offset + pin.position();
 
-        if (is_input){
-            center = offset + node->get_input_slot_position(slot_idx);
+        if (pin.is_input){
             color = IM_COL32(255, 179, 119, 255);
         } else{
-            center = offset + node->get_output_slot_position(slot_idx);
             color = IM_COL32(84, 252, 193, 255);
         }
 
         auto rad = ImVec2(NODE_SLOT_RADIUS, NODE_SLOT_RADIUS);
         ImRect bb(center - ImVec2(rad), center + rad);
 
-        if (type == 'C') {
+        if (pin.belt_type == 'C') {
             draw_list->AddRectFilled(
                 center - ImVec2(rad),
                 center + rad,
@@ -434,7 +570,7 @@ struct NodeEditor{
                 4.0f,
                 ImDrawCornerFlags_All);
         }
-        else if (type == 'P') {
+        else if (pin.belt_type == 'P') {
             draw_list->AddCircleFilled(
                 center,
                 NODE_SLOT_RADIUS,
@@ -444,23 +580,26 @@ struct NodeEditor{
         bool hovered;
         bool held;
         auto flags = ImGuiButtonFlags_PressedOnClick;
-
         bool pressed = ImGui::ButtonBehavior(bb, unsigned(pin.ID), &hovered, &held, flags);
 
         // Get Starting point
         if (pressed && ImGui::IsMouseDown(ImGuiMouseButton_Left)) {
-            link_builder.set_starting_point(center, node, node_idx, slot_idx, is_input);
+            link_builder.set_starting_point(center, &pin);
         }
 
         // Set Ending point
-        if (hovered) {
-            link_builder.set_end_point(node, node_idx, slot_idx, is_input);
+        else if (hovered) {
+            link_builder.set_end_point(&pin);
+        }
+
+        if (pressed) {
+            select_link(&pin);
         }
 
         ImGui::PopID();
     }
 
-    void draw_node(std::size_t node_idx, Node* node, ImDrawList* draw_list, ImVec2 offset){
+    void draw_node(Node* node, ImDrawList* draw_list, ImVec2 offset){
         ImGuiIO& io = ImGui::GetIO();
 
         ImGui::PushID(node->ID);
@@ -481,18 +620,13 @@ struct NodeEditor{
         ImGui::SetCursorScreenPos(node_rect_min);
         draw_recipe_icon(recipe, ImVec2(0.2f, 0.2f), node->size());
 
-        // Pin selection is on top of everything
-        for (std::size_t slot_idx = 0; slot_idx < node->inputs.size(); slot_idx++){
-            NPin& pin = node->inputs[slot_idx];
-            draw_pin(slot_idx, node, pin, draw_list, offset, true, node_idx);
-        }
-
-        for (std::size_t slot_idx = 0; slot_idx < node->outputs.size(); slot_idx++){
-            NPin& pin = node->outputs[slot_idx];
-            draw_pin(slot_idx, node, pin, draw_list, offset, false, node_idx);
-        }
-
         ImGui::EndGroup();
+
+        for(auto& side: node->pins){
+            for(NPin const& pin: side){
+                draw_pin(draw_list, offset, pin);
+            }
+        }
 
         // Save the size of what we have emitted and whether any of the widgets are being used
         bool node_widgets_active = (!old_any_active && ImGui::IsAnyItemActive());
@@ -539,7 +673,14 @@ struct NodeEditor{
         ImGui::PopID();
     }
 
+    void reset(){
+        node_hovered_in_scene = nullptr;
+        link_selected = false;
+    }
+
     void draw_workspace(){
+        reset();
+
         ImGuiIO& io = ImGui::GetIO();
         ImGui::BeginGroup();
 
@@ -561,8 +702,8 @@ struct NodeEditor{
         if (show_grid)
         {
             ImU32 GRID_COLOR = IM_COL32(200, 200, 200, 40);
-            // Foundation is 8 x 8 and we scale by 10
-            float GRID_SZ = 8.f * 10.0f;
+            // Foundation is 8 x 8
+            float GRID_SZ = 8.f * Node::scaling;
             ImVec2 win_pos = ImGui::GetCursorScreenPos();
             ImVec2 canvas_sz = ImGui::GetWindowSize();
 
@@ -576,30 +717,40 @@ struct NodeEditor{
         // Display links
         draw_list->ChannelsSplit(2);
         draw_list->ChannelsSetCurrent(0); // Background
-        for (int link_idx = 0; link_idx < links.size(); link_idx++)
-        {
-            NodeLink* link = &links[link_idx];
-            Node* node_inp = get_node(link->InputIdx);
-            Node* node_out = get_node(link->OutputIdx);
 
-            ImVec2 p1 = offset + node_inp->get_output_slot_position(link->InputSlot);
-            ImVec2 p2 = offset + node_out->get_input_slot_position(link->OutputSlot);
+        for(auto iter = links.begin(); iter != links.end(); ++iter){
+            NodeLink* link = &*iter;
+
+            auto p1 = offset + link->start->position();
+            auto p2 = offset + link->end->position();
+
+            auto color = IM_COL32(200, 200, 100, 200);
+
+            if (link->start->belt_type == 'P'){
+                color = IM_COL32(168, 123, 50, 200);
+            }
+
+            if (link == selected_link){
+                color = color | Uint32(255 << IM_COL32_A_SHIFT);
+            }
 
             draw_bezier(
                 draw_list,
                 p1,
                 p2,
-                IM_COL32(200, 200, 100, 255)
+                color
             );
         }
 
         // Display nodes
-        for (std::size_t node_idx = 0; node_idx < nodes.size(); node_idx++){
-            draw_node(node_idx, get_node(node_idx), draw_list, offset);
+        link_builder.start_drag();
+
+        for (auto& node: nodes){
+            draw_node(node.get(), draw_list, offset);
         }
 
         link_builder.draw_path(draw_list);
-        link_builder.make_new_link(links);
+        link_builder.make_new_link(this);
 
         draw_list->ChannelsMerge();
 
@@ -614,7 +765,7 @@ struct NodeEditor{
         // Select node and show stats
         if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)){
             if (node_hovered_in_scene != nullptr) {
-                selected_node = node_hovered_in_scene;
+                select_node(node_hovered_in_scene);
             }
         }
 
@@ -636,7 +787,7 @@ struct NodeEditor{
 
             if (node)
             {
-                ImGui::Text("Node '%ul'", node->ID);
+                ImGui::Text("Node '%lu'", node->ID);
                 ImGui::Separator();
                 if (ImGui::MenuItem("Rename..", nullptr, false, false)) {}
                 if (ImGui::MenuItem("Delete", nullptr, false, false)) {}
@@ -719,8 +870,6 @@ struct NodeEditor{
         ;
     }
 
-    Node* selected_node = nullptr;
-
     void draw_recipe_icon(Recipe* recipe, ImVec2 scale, ImVec2 size = ImVec2(0, 0)){
         auto offset = ImVec2(0, 0);
         auto img_size = ImVec2(256, 256) * scale;
@@ -756,7 +905,7 @@ struct NodeEditor{
                     ImVec4(1, 1, 1, 0.25));
             }
         // Placeholder code
-        } else {
+        } /*else {
             if (size.x + size.y > 0){
                 offset = (size - img_size) * ImVec2(
                              0.5f * float(size.x != 0),
@@ -765,7 +914,7 @@ struct NodeEditor{
 
             ImGui::SetCursorScreenPos(pos + offset);
             ImGui::Button("Missing Image", img_size);
-        }
+        }*/
     }
 
     void draw_node_list(){
@@ -790,10 +939,6 @@ struct NodeEditor{
         // ImGui::EndChild();
         // ImGui::SameLine();
     }
-
-    bool brush_panel_open = true;
-    bool entity_panel_open = true;
-    bool selected_panel = true;
 
     std::vector<const char*> const* available_recipes;
 
@@ -890,15 +1035,15 @@ struct NodeEditor{
         ImGui::Begin("Tool box");
         auto open = ImGuiTreeNodeFlags_DefaultOpen;
 
-        if (ImGui::CollapsingHeader("Brush", &brush_panel_open, open)){
+        if (ImGui::CollapsingHeader("Brush", open)){
             draw_brush();
         }
 
-        if (ImGui::CollapsingHeader("Selected Building", &selected_panel, open)){
+        if (ImGui::CollapsingHeader("Selected Building", open)){
             draw_selected_info();
         }
 
-        if (ImGui::CollapsingHeader("Entity List", &entity_panel_open, open)){
+        if (ImGui::CollapsingHeader("Entity List", open)){
             draw_node_list();
         }
 
@@ -906,8 +1051,6 @@ struct NodeEditor{
     }
 
     void draw(){
-        static bool _ = insert_shortcuts();
-
         ImGui::SetNextWindowSize(ImVec2(700, 600), ImGuiCond_FirstUseEver);
         if (!ImGui::Begin("Example: Custom Node Graph", &opened))
         {
@@ -921,5 +1064,28 @@ struct NodeEditor{
         ImGui::End();
     }
 };
+
+void LinkDragDropState::make_new_link(NodeEditor* editor){
+    if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
+        if (release && is_hovering){
+            if (start->is_input != end->is_input){
+                // if it is not an input
+                if (!start->is_input) {
+                    std::swap(start, end);
+                }
+
+                if (start->belt_type == end->belt_type){
+                    debug("Make Connection {} -> {}", start->ID, end->ID);
+                    editor->new_link(start, end);
+                } else {
+                    debug("Cannot connect {} to {}!", start->belt_type, end->belt_type);
+                }
+            } else {
+                debug("Cannot connect input to input!");
+            }
+        }
+        reset();
+    }
+}
 
 #endif

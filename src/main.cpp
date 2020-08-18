@@ -121,13 +121,23 @@ int main() {
         app.editor.nodes.push_back(n2);
     }
 
-    app.editor.links.push_back(NodeLink(0, 0, 2, 0));
-    app.editor.links.push_back(NodeLink(1, 0, 2, 1));
+    {
+        auto outpin = &app.editor.nodes[0]->pins[Node::RightToLeft][0];
+        auto inpin  = &app.editor.nodes[2]->pins[Node::LeftToRight][0];
+        app.editor.new_link(outpin, inpin);
+    }
+
+    {
+        auto outpin = &app.editor.nodes[1]->pins[Node::RightToLeft][0];
+        auto inpin  = &app.editor.nodes[2]->pins[Node::LeftToRight][1];
+        app.editor.new_link(outpin, inpin);
+    }
     app.editor.inited = true;
 
     try {
         app.run();
-    } catch (const std::exception&) {
+    } catch (const std::exception& error) {
+        debug("{}", error.what());
         return EXIT_FAILURE;
     }
 
