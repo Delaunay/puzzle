@@ -37,8 +37,9 @@ ENDFUNCTION()
 asset_dir("resources")
 
 FILE(GLOB MAIN_SRC *.cpp *.h)
+FILE(GLOB EDITOR_SRC editor/*.cpp editor/*.h)
 
-ADD_EXECUTABLE(main ${MAIN_SRC})
+ADD_EXECUTABLE(main ${MAIN_SRC} ${EDITOR_SRC})
 TARGET_LINK_LIBRARIES(main glm::glm spdlog::spdlog SDL2 Vulkan::Vulkan vkApplication nlohmann_json::nlohmann_json)
 ADD_DEPENDENCIES(main asset_dirs)
 

@@ -1,413 +1,21 @@
 #ifndef PUZZLE_EDITOR_HEADER
 #define PUZZLE_EDITOR_HEADER
-// Creating a node graph editor for Dear ImGui
-// Quick sample, not production code! This is more of a demo of how to use Dear ImGui to create custom stuff.
-// See https://github.com/ocornut/imgui/issues/306 for details
-// And more fancy node editors: https://github.com/ocornut/imgui/wiki#Useful-widgets--references
-
-// Changelog
-// - v0.04 (2020-03): minor tweaks
-// - v0.03 (2018-03): fixed grid offset issue, inverted sign of 'scrolling'
 
 #include <sstream>
 
 #include "config.h"
+
 #include "application/application.h"
 #include "application/utils.h"
 
-#define IMGUI_DEFINE_MATH_OPERATORS
-#include <imgui_internal.h>
-
-#include <imgui.h>
-#include <math.h> // fmodf
-#include <list>
-
-#include <SDL2/SDL_keycode.h>
-
-#ifdef IM_COL32
-#undef IM_COL32
-#endif
-
-#define IM_COL32(R,G,B,A)\
-    (ImU32(ImU32(A)<<IM_COL32_A_SHIFT) | ImU32(ImU32(B)<<IM_COL32_B_SHIFT) | ImU32(ImU32(G)<<IM_COL32_G_SHIFT) | ImU32(ImU32(R)<<IM_COL32_R_SHIFT))
-
-// NB: You can use math functions/operators on ImVec2 if you #define IMGUI_DEFINE_MATH_OPERATORS and #include "imgui_internal.h"
-// Here we only declare simple +/- operators so others don't leak into the demo code.
-// static inline ImVec2 operator+(const ImVec2& lhs, const ImVec2& rhs) { return ImVec2(lhs.x + rhs.x, lhs.y + rhs.y); }
-// static inline ImVec2 operator-(const ImVec2& lhs, const ImVec2& rhs) { return ImVec2(lhs.x - rhs.x, lhs.y - rhs.y); }
-
-// Dummy data structure provided for the example.
-// Note that we storing links as indices (not ID) to make example code shorter.
-
-
-int get_side(std::string const& name){
-    if (name == "left")   return 0;
-    if (name == "top")    return 1;
-    if (name == "right")  return 2;
-    if (name == "bottom") return 3;
-    return 0;
-}
-
-
-template <typename T> float sgn(T val) {
-    return (T(0) < val) - (val < T(0));
-}
-
-
-struct Node;
-
-struct NPin {
-    const std::size_t ID;
-    char belt_type = ' ';
-    bool is_input  = ' ';
-
-    int   side         = 0;
-    int   index        = 0;
-    int   count        = 0;
-
-    Node* const parent = nullptr;
-    Node* child        = nullptr;
-
-    // Pins are assigned to Nodes, they should not be created outside them
-    NPin(NPin const&) = delete;
-
-    // We need move for std::vector resize event though it should never get resized
-    NPin(NPin const&& obj) noexcept;
-
-    // Holds all the data necessary for it to compute its position
-    ImVec2 position() const;
-
-    NPin(char type, bool is_input, int side, int index, int count, Node* parent):
-        ID(next_id<std::size_t>()), belt_type(type), is_input(is_input),
-        side(side), index(index), count(count), parent(parent)
-    {}
-};
-
-
-NPin::NPin(NPin const&& obj) noexcept:
-    ID(obj.ID), belt_type(obj.belt_type), side(obj.side), index(obj.index),
-    count(obj.count), parent(obj.parent), child(obj.child)
-{}
-
-std::ostream& operator<<(std::ostream& out, NPin const& pin);
-
-// R: Rotate
-// Q: Copy building
-struct Node {
-    static float constexpr scaling = 10.f;
-
-    const std::size_t ID;
-    ImVec2            Pos;
-    ImVec2            _size;
-    float             Value;
-    ImVec4            Color;
-    Building*         descriptor = nullptr;
-    int               building   = -1;
-    int               recipe_idx = -1;
-    int               rotation   =  0;
-
-    std::array<std::vector<NPin>, 4> pins;
-
-    Recipe* recipe(){
-        if (descriptor == nullptr){
-            return nullptr;
-        }
-
-        if (recipe_idx < 0){
-            return nullptr;
-        }
-
-        if (recipe_idx < int(descriptor->recipes.size())){
-            return &descriptor->recipes[std::size_t(recipe_idx)];
-        }
-
-        return nullptr;
-    }
-
-    Node(int building, const ImVec2& pos, int recipe_idx=-1, int rotation=0):
-        ID(next_id<std::size_t>()), building(building), recipe_idx(recipe_idx), rotation(rotation)
-    {
-        assertf(building >= 0, "Node shoudl have a building");
-
-        descriptor = &Resources::instance().buildings[std::size_t(building)];
-
-        for(auto& side: descriptor->layout){
-            int pin_side = get_side(side.first);
-            std::vector<std::string>& pin_str = side.second;
-
-            std::vector<NPin>& side_pins = pins[std::size_t(get_side(side.first))];
-            side_pins.reserve(side.second.size());
-
-            for(int i = 0, n = pin_str.size(); i < n; ++i) {
-                auto& p = pin_str[std::size_t(i)];
-                assertf(p.size() == 2,
-                        "Pin descriptor is of size 2");
-
-                assertf(p[0] == 'C' || p[0] == 'P' || p[0] == 'N',
-                        "Pin type should be defined");
-
-                assertf(p[1] == 'I' || p[1] == 'O',
-                        "Pin type should be defined");
-
-                side_pins.emplace_back(
-                    p[0],           // Belt Type
-                    p[1] == 'I',    // Input
-                    pin_side,       // Pin Side
-                    i,              // Pin Index
-                    n,              // Pin Count on that side
-                    this);          // Parent
-
-                const NPin& pin = *side_pins.rbegin();
-                std::stringstream ss;
-                ss << pin;
-                debug("{}", ss.str());
-            }
-        }
-        Pos = pos;
-    }
-
-    void update_size(ImVec2){
-        ImVec2 base = {scaling * descriptor->l, scaling *descriptor->w};
-        _size = base;
-    }
-
-    ImVec2 size() const {
-        switch (Direction(rotation)){
-        case LeftToRight:
-        case RightToLeft:
-            return _size;
-
-        case TopToBottom:
-        case BottomToTop:
-            return ImVec2(_size.y, _size.x);
-        }
-
-        __builtin_unreachable();
-    }
-
-    //                  [b]
-    //     *-------------------------------*
-    //     |                               |
-    // --->x                               |
-    // [a] |                               x--->  [c]
-    // --->x                               |
-    //     |                               |
-    //     *-------------------------------*
-    //                  [d]
-    //
-
-    enum Direction {
-        LeftToRight,
-        TopToBottom,
-        RightToLeft,
-        BottomToTop
-    };
-
-    ImVec2 left_slots(float num, float count) const {
-        return ImVec2(
-            Pos.x,
-            Pos.y + size().y * (float(num + 1)) / (float(count + 1)));
-    }
-
-    ImVec2 right_slots(float num, float count) const {
-        return ImVec2(
-            Pos.x + size().x,
-            Pos.y + size().y * (float(num + 1)) / (float(count + 1)));
-    }
-
-    ImVec2 top_slots(float num, float count) const {
-        return ImVec2(
-            Pos.x + size().x * (float(num + 1)) / (float(count + 1)),
-            Pos.y);
-    }
-
-    ImVec2 bottom_slots(float num, float count) const {
-        return ImVec2(
-            Pos.x + size().x * (float(num + 1)) / (float(count + 1)),
-            Pos.y + size().y);
-    }
-
-    ImVec2 slot_position(int side, float num, float count) const {
-        side = (side + rotation) % 4;
-
-        switch (Direction(side)){
-        case LeftToRight:
-            return left_slots(num, count);
-
-        case RightToLeft:
-            return right_slots(num, count);
-
-        case BottomToTop:
-            return bottom_slots(num, count);
-
-        case TopToBottom:
-            return top_slots(num, count);
-        }
-
-        __builtin_unreachable();
-    }
-};
-
+#include "brush.h"
+#include "node.h"
+#include "link.h"
 
 // Draw a bezier curve using only 2 points
 // derive the two other points needed from the starting points
 // they derived points change in function of their relative position
-void draw_bezier(ImDrawList* draw_list, ImVec2 p1, ImVec2 p2, ImU32 color){
-    if (p1.x > p2.x) {
-        std::swap(p1, p2);
-    }
-
-    auto offset = ImVec2((p2.x - p1.x + 1) / 2.f , 0);
-    auto y_offset = sgn(p2.y - p1.y) * (p2.y - p1.y) / 2.f;
-
-    if (p2.y - p1.y > p2.x - p1.x){
-        offset = ImVec2(0, y_offset);
-    }
-
-    draw_list->AddBezierCurve(
-        p1,
-        p1 + offset,
-        p2 - offset,
-        p2,
-        color,
-        // Conveyor belt are w=2
-        Node::scaling * 2.f);
-}
-
-
-
-ImVec2 NPin::position() const {
-    return parent->slot_position(side, float(index), float(count));
-}
-
-std::ostream& operator<<(std::ostream& out, NPin const& pin){
-    return out << fmt::format(
-               "Pin(ID={}, type={}, input={}, side={}, index={}, count={}, parent={})",
-               pin.ID, pin.belt_type, pin.is_input, pin.side, pin.index, pin.count, pin.parent->ID);
-}
-
-struct NodeLink{
-    NPin const* start; // outputs
-    NPin const* end;   // inputs
-
-    NodeLink(NPin const* s, NPin const* e):
-        start(s), end(e)
-    {
-        assertf(start != nullptr, "start cannot be null");
-        assertf(end   != nullptr, "end cannot be null");
-    }
-
-    bool operator== (NodeLink const& obj){
-        return obj.start == this->start && obj.end == this->end;
-    }
-};
-
-
-struct NodeEditor;
-
-// Link builder helper
-struct LinkDragDropState {
-    ImVec2      start_point;                // Starting point of the drawing
-    bool        should_draw_path = false;   // Should draw the pending path
-    bool        release          = false;   // Is ready to be released
-    bool        is_hovering      = false;   // Did we hover over something NOW
-                                            // if not we cancel the linking
-    NPin const* start = nullptr;  // Output pin
-    NPin const* end   = nullptr;  // Input pin
-
-    void start_drag(){
-        is_hovering = false;
-    }
-
-    void set_starting_point(ImVec2 pos, NPin const* s){
-        if (s != nullptr) {
-            should_draw_path = true;
-            start_point = pos;
-            start = s;
-            release = false;
-            debug("Starting new link from ({}, {})", s->parent->ID, s->index);
-        }
-    }
-
-    void set_end_point(NPin const* e){
-        if (should_draw_path && e->parent != start->parent){
-            if (end != nullptr && end->ID != e->ID){
-                debug("End new link to ({}, {}) {}", e->parent->ID, e->index, release);
-            }
-
-            end = e;
-            release = true;
-            is_hovering = true;
-        }
-    }
-
-    void reset(){
-        start_point = ImVec2(-1, -1);
-        should_draw_path = false;
-        release = false;
-        start = nullptr;
-        end = nullptr;
-        debug("Reset dragndrop");
-    }
-
-    void make_new_link(NodeEditor* editor);
-
-    void draw_path(ImDrawList* draw_list){
-        if (should_draw_path){
-            ImVec2 p1 = start_point;
-            ImVec2 p2 = ImGui::GetMousePos();
-
-            draw_bezier(
-                draw_list,
-                p1,
-                p2,
-                IM_COL32(200, 200, 100, 255)
-            );
-        }
-    }
-};
-
-
-// Building brush
-struct Brush {
-    int       building = 0;
-    int       recipe   = -1;
-    int       rotation = 0;
-
-    std::vector<const char*> building_names;
-    std::vector<const char*> recipe_names;
-
-    Building* building_descriptor(){
-        if (building < 0)
-            return nullptr;
-        return &Resources::instance().buildings[std::size_t(building)];
-    }
-
-    Recipe* recipe_descriptor(){
-        if (recipe < 0)
-            return nullptr;
-
-        Building* building = building_descriptor();
-        if (!building)
-            return nullptr;
-
-        return &building->recipes[std::size_t(recipe)];
-    }
-
-    void set(int b, int r, int rot = 0){
-        building = b;
-        rotation = rot;
-
-        if (b >= 0){
-            recipe_names = building_descriptor()->recipe_names();
-        } else {
-            recipe_names.clear();
-        }
-
-        recipe = r;
-    }
-};
-
+void draw_bezier(ImDrawList* draw_list, ImVec2 p1, ImVec2 p2, ImU32 color);
 
 struct NodeEditor{
     using NodePtr = std::shared_ptr<Node>;
@@ -458,14 +66,14 @@ public:
 
     // check if a pin is connected only once
     // if not remove it and make the new connection
-    void remove_pin_link(NPin const* p){
+    void remove_pin_link(Pin const* p){
         auto iter = lookup.find(p->ID);
         if (iter != lookup.end()){
             remove_link(iter->second);
         }
     }
 
-    NodeLink* new_link(NPin const* s, NPin const* e){
+    NodeLink* new_link(Pin const* s, Pin const* e){
         remove_pin_link(e);
         remove_pin_link(s);
 
@@ -478,7 +86,7 @@ public:
         return link;
     }
 
-    void select_link(NPin const* p){
+    void select_link(Pin const* p){
         auto result = lookup.find(p->ID);
         if (result != lookup.end()){
             select_link((*result).second);
@@ -543,7 +151,7 @@ public:
         return root_nodes;
     }
 
-    void draw_pin(ImDrawList* draw_list, ImVec2 offset, NPin const& pin) {
+    void draw_pin(ImDrawList* draw_list, ImVec2 offset, Pin const& pin) {
         if (pin.belt_type != 'C' && pin.belt_type != 'P'){
             // debug("Ignored {}", pin.belt_type);
             return;
@@ -623,7 +231,7 @@ public:
         ImGui::EndGroup();
 
         for(auto& side: node->pins){
-            for(NPin const& pin: side){
+            for(Pin const& pin: side){
                 draw_pin(draw_list, offset, pin);
             }
         }
@@ -1065,27 +673,5 @@ public:
     }
 };
 
-void LinkDragDropState::make_new_link(NodeEditor* editor){
-    if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
-        if (release && is_hovering){
-            if (start->is_input != end->is_input){
-                // if it is not an input
-                if (!start->is_input) {
-                    std::swap(start, end);
-                }
-
-                if (start->belt_type == end->belt_type){
-                    debug("Make Connection {} -> {}", start->ID, end->ID);
-                    editor->new_link(start, end);
-                } else {
-                    debug("Cannot connect {} to {}!", start->belt_type, end->belt_type);
-                }
-            } else {
-                debug("Cannot connect input to input!");
-            }
-        }
-        reset();
-    }
-}
 
 #endif

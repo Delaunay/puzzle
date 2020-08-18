@@ -1,6 +1,6 @@
 #include "application/application.h"
 #include "application/vertex.h"
-#include "node-editor.h"
+#include "editor/node-editor.h"
 
 #include <memory>
 
@@ -122,14 +122,14 @@ int main() {
     }
 
     {
-        auto outpin = &app.editor.nodes[0]->pins[Node::RightToLeft][0];
-        auto inpin  = &app.editor.nodes[2]->pins[Node::LeftToRight][0];
+        auto outpin = &app.editor.nodes[0]->pins[RightToLeft][0];
+        auto inpin  = &app.editor.nodes[2]->pins[LeftToRight][0];
         app.editor.new_link(outpin, inpin);
     }
 
     {
-        auto outpin = &app.editor.nodes[1]->pins[Node::RightToLeft][0];
-        auto inpin  = &app.editor.nodes[2]->pins[Node::LeftToRight][1];
+        auto outpin = &app.editor.nodes[1]->pins[RightToLeft][0];
+        auto inpin  = &app.editor.nodes[2]->pins[LeftToRight][1];
         app.editor.new_link(outpin, inpin);
     }
     app.editor.inited = true;
