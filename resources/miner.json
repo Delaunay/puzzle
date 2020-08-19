@@ -11,5 +11,109 @@
         "speed": 60.0
       }
     ]
+  },
+  {
+    "Recipe Name": "Bauxite",
+    "Crafting Time (sec)": 1.0,
+    "texture": "resources/assets/bauxite.png",
+    "Ingredients": [],
+    "Products": [
+      {
+        "qty": 1.0,
+        "name": "Bauxite",
+        "speed": 60.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "Caterium Ore",
+    "Crafting Time (sec)": 1.0,
+    "texture": "resources/assets/bauxite.png",
+    "Ingredients": [],
+    "Products": [
+      {
+        "qty": 1.0,
+        "name": "Caterium Ore",
+        "speed": 60.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "Coal",
+    "Crafting Time (sec)": 1.0,
+    "texture": "resources/assets/coal.png",
+    "Ingredients": [],
+    "Products": [
+      {
+        "qty": 1.0,
+        "name": "Bauxite",
+        "speed": 60.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "Copper Ore",
+    "Crafting Time (sec)": 1.0,
+    "texture": "resources/assets/copper_ore.png",
+    "Ingredients": [],
+    "Products": [
+      {
+        "qty": 1.0,
+        "name": "Copper Ore",
+        "speed": 60.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "Limestone",
+    "Crafting Time (sec)": 1.0,
+    "texture": "resources/assets/bauxite.png",
+    "Ingredients": [],
+    "Products": [
+      {
+        "qty": 1.0,
+        "name": "Limestone",
+        "speed": 60.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "Raw Quartz",
+    "Crafting Time (sec)": 1.0,
+    "texture": "resources/assets/raw_quartz.png",
+    "Ingredients": [],
+    "Products": [
+      {
+        "qty": 1.0,
+        "name": "Raw Quartz",
+        "speed": 60.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "Sulfur",
+    "Crafting Time (sec)": 1.0,
+    "texture": "resources/assets/sulfur.png",
+    "Ingredients": [],
+    "Products": [
+      {
+        "qty": 1.0,
+        "name": "Sulfur",
+        "speed": 60.0
+      }
+    ]
+  },
+  {
+    "Recipe Name": "Uranium",
+    "Crafting Time (sec)": 1.0,
+    "texture": "resources/assets/uranium.png",
+    "Ingredients": [],
+    "Products": [
+      {
+        "qty": 1.0,
+        "name": "uranium",
+        "speed": 60.0
+      }
+    ]
   }
 ]

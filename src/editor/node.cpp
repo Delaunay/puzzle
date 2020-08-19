@@ -178,10 +178,6 @@ void NodeEditor::draw_node(Node* node, ImDrawList* draw_list, ImVec2 offset){
         if (ImGui::IsKeyReleased(SDL_SCANCODE_R)){
             node->rotation = (node->rotation + 1) % 4;
         }
-
-        if (ImGui::IsKeyReleased(SDL_SCANCODE_Q)){
-            brush.set(node->building, node->recipe_idx, node->rotation);
-        }
     }
 
     // Draw rectangle

@@ -9,6 +9,9 @@ NodeLink::NodeLink(Pin const* s, Pin const* e):
 {
     assertf(start != nullptr, "start cannot be null");
     assertf(end   != nullptr, "end cannot be null");
+
+    assertf(!start->is_input, "Start the the output of a node");
+    assertf(end->is_input   , "End   the the output of a node");
 }
 
 void LinkDragDropState::start_drag(){
@@ -29,8 +32,8 @@ void LinkDragDropState::make_new_link(NodeEditor* editor){
     if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
         if (release && is_hovering){
             if (start->is_input != end->is_input){
-                // if it is not an input
-                if (!start->is_input) {
+                // Start needs to be the output of a node
+                if (start->is_input) {
                     std::swap(start, end);
                 }
 

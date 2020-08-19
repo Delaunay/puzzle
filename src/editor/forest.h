@@ -26,11 +26,16 @@ struct NodeProduction {
 // Safe Get
 template<typename K, typename V>
 V* get(std::unordered_map<K, V>& map, K const& k){
-    try {
-        return &map.at(k);
-    } catch (std::out_of_range&) {
+    if (map.count(k) == 0){
         return nullptr;
     }
+    return &map[k];
+
+//    try {
+//        return &map.at(k);
+//    } catch (std::out_of_range&) {
+//        return nullptr;
+//    }
 }
 
 // Data structure to manage and query the graph drawn on the screen
@@ -222,6 +227,7 @@ public:
     }
 
     void _compute_node_production(Node const* node, ProductionStats& stats) const {
+
         if (node == nullptr) {
             debug("nullptr was passed!");
             return;
@@ -233,14 +239,20 @@ public:
             return;
         }
 
+        debug("Compute production for {}:{}", node->ID, node->descriptor->name);
+
         // TODO: add logic for splitter/merger
+        // std::unordered_map<std::string, DoubleEntry>;
         ProductionBook node_prod;
 
         // Add the ingredients we need
         auto recipe = node->recipe();
         if (recipe){
+
             for (auto& in: recipe->inputs){
-                node_prod[in.name].consumed = in.speed;
+                DoubleEntry v;
+                v.consumed = in.speed;
+                node_prod.insert(std::make_pair(in.name, v));
             }
         }
 
@@ -327,6 +339,15 @@ public:
                     float total_production = out.speed * efficiency;
                     // this is incorrect a connection could be consuming less
                     // but we need to go down stream and up again to know that
+
+                    // to compute this correctly we need:
+                    //    - put the partial total in each
+                    //    - traverse down each and see if anyone is not using it in to its fullest
+                    //    - move unused quantities to the other branches
+                    //
+                    // Obviously this would cost a lot of resources to compute
+                    // might mitigate the cost if we could compute that in reverse
+                    // leaves send up what they need and from that we know if the max will be reached or not
                     float prod_by_link = total_production / out_pin.size();
 
                     for (auto& pin: out_pin){

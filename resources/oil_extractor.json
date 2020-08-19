@@ -1,0 +1,16 @@
+[
+  {
+    "Recipe Name": "Crude Oil",
+    "Crafting Time (sec)": 1.0,
+    "texture": "resources/assets/crude_oil.png",
+    "Ingredients": [],
+    "Products": [
+      {
+        "qty": 1.0,
+        "name": "Crude Oil",
+        "speed": 120.0,
+        "type": "L"
+      }
+    ]
+  }
+]

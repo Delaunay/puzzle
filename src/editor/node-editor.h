@@ -18,8 +18,16 @@
 // they derived points change in function of their relative position
 void draw_bezier(ImDrawList* draw_list, ImVec2 p1, ImVec2 p2, ImU32 color);
 
+
+
+
 // R: Rotate
-// Q: Copy building
+// Q: Copy building to brush
+//
+// TODO:
+//  - DEL : rm selected
+//  - WASD: move scroll area
+
 struct NodeEditor{
     puzzle::Application& app;
     Forest               graph;
@@ -189,6 +197,10 @@ struct NodeEditor{
             if (node_hovered_in_scene != nullptr) {
                 select_node(node_hovered_in_scene);
             }
+        }
+
+        if (ImGui::IsKeyReleased(SDL_SCANCODE_Q) && selected_node != nullptr){
+            brush.set(selected_node->building, selected_node->recipe_idx, selected_node->rotation);
         }
 
         if (open_context_menu) {
@@ -457,18 +469,21 @@ struct NodeEditor{
     void show_production_stat(){
         auto data = graph.compute_production();
 
-        debug("    {:>20}: {:>8} {:>8} {:>8}", "", "consumed", "produced", "received");
+        debug("    {:>20}: {:>10} {:>10} {:>10}", "", "consumed", "produced", "received");
         for(auto& entity: data){
             debug("{}:", entity.first);
             for(auto& item: entity.second){
-                debug("    {:>20}: {:5.2f} {:5.2f} {:5.2f}", item.first, item.second.consumed, item.second.produced, item.second.received);
+                debug("    {:>20}: {:10.2f} {:10.2f} {:10.2f}", item.first, item.second.consumed, item.second.produced, item.second.received);
             }
         }
 
         debug("Bilan");
+        debug("{:>20}: {:>10} | {:>10} | {:>10}",
+              "resource", "produced", "consumed","remaining");
+
         auto bilan = graph.production_statement();
         for(auto& item: bilan){
-            debug("{:>20}: {:5.2f} | {:5.2f} | {:5.2f}",
+            debug("{:>20}: {:10.2f} | {:10.2f} | {:10.2f}",
                   item.first,
                   item.second.produced,
                   item.second.consumed,

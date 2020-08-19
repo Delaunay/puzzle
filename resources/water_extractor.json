@@ -1,0 +1,16 @@
+[
+  {
+    "Recipe Name": "Water",
+    "Crafting Time (sec)": 1.0,
+    "texture": "resources/assets/water.png",
+    "Ingredients": [],
+    "Products": [
+      {
+        "qty": 1.0,
+        "name": "Water",
+        "speed": 120.0,
+        "type": "L"
+      }
+    ]
+  }
+]
