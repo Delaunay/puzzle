@@ -72,66 +72,62 @@ int main() {
     MyGame app;
 
     assert(resources.buildings.size() > 0);
+    int miner  = resources.find_building("Miner");
+    int iron_ore = resources.find_recipe(miner, "Iron Ore");
 
+    int smelter  = resources.find_building("Smelter");
+    int iron_ingot = resources.find_recipe(smelter, "Iron Ingot");
 
+    int constructor  = resources.find_building("Constructor");
+    int iron_plate = resources.find_recipe(constructor, "Iron Plate");
+
+    assertf(miner >= 0, "miner should be found");
+    assertf(iron_ore >= 0, "iron ore should be found");
+    assertf(smelter >= 0, "smelter should be found");
+    assertf(iron_ingot >= 0, "iron ingot");
+    assertf(constructor >= 0, "constructor");
+    assertf(iron_plate >= 0, "iron plate");
+
+    Node* n0 = app.editor.new_node(ImVec2(40 ,  50), miner, iron_ore);
+    Node* n1 = app.editor.new_node(ImVec2(240 , 50), smelter, iron_ingot);
+    Node* n2 = app.editor.new_node(ImVec2(440,  50), constructor, iron_plate);
+
+    // Ore to smelter
     {
-        app.editor.brush.building = 0;
+        auto outpin = &n0->pins[RightToLeft][0];
+        auto inpin  = &n1->pins[LeftToRight][0];
+        app.editor.new_link(outpin, inpin);
     }
 
+    // Ingot to constructor
     {
-        auto new_node = std::make_shared<Node>(0, ImVec2( 40,  50));
-        new_node->recipe_idx = 0;
-        app.editor.nodes.push_back(new_node);
-    }
-
-    {
-        auto n1 = std::make_shared<Node>(0, ImVec2( 40, 150));
-        n1->recipe_idx = 0;
-        app.editor.nodes.push_back(n1);
-    }
-
-    {
-        auto n2 = std::make_shared<Node>(1, ImVec2(270,  80));
-        n2->recipe_idx = 0;
-        app.editor.nodes.push_back(n2);
-    }
-
-    {
-        auto n2 = std::make_shared<Node>(2, ImVec2(370,  100));
-        n2->recipe_idx = 0;
-        app.editor.nodes.push_back(n2);
-    }
-
-    {
-        auto n2 = std::make_shared<Node>(3, ImVec2(470,  120));
-        n2->recipe_idx = 0;
-        app.editor.nodes.push_back(n2);
-    }
-
-    {
-        auto n2 = std::make_shared<Node>(4, ImVec2(570,  140));
-        n2->recipe_idx = 0;
-        app.editor.nodes.push_back(n2);
+        auto outpin = &n1->pins[RightToLeft][0];
+        auto inpin  = &n2->pins[LeftToRight][0];
+        app.editor.new_link(outpin, inpin);
     }
 
 
-    {
-        auto n2 = std::make_shared<Node>(5, ImVec2(570,  160));
-        n2->recipe_idx = 0;
-        app.editor.nodes.push_back(n2);
-    }
+    /*
+    Node* n0 = app.editor.new_node(ImVec2(40 ,  50), 0, 0);
+    Node* n1 = app.editor.new_node(ImVec2(40 , 150), 0, 0);
+    Node* n2 = app.editor.new_node(ImVec2(270,  80), 1, 0);
+
+               app.editor.new_node(ImVec2(370, 100), 2, 0);
+               app.editor.new_node(ImVec2(470, 120), 3, 0);
+               app.editor.new_node(ImVec2(570, 140), 4, 0);
+               app.editor.new_node(ImVec2(570, 160), 5, 0);
 
     {
-        auto outpin = &app.editor.nodes[0]->pins[RightToLeft][0];
-        auto inpin  = &app.editor.nodes[2]->pins[LeftToRight][0];
+        auto outpin = &n0->pins[RightToLeft][0];
+        auto inpin  = &n2->pins[LeftToRight][0];
         app.editor.new_link(outpin, inpin);
     }
 
     {
-        auto outpin = &app.editor.nodes[1]->pins[RightToLeft][0];
-        auto inpin  = &app.editor.nodes[2]->pins[LeftToRight][1];
+        auto outpin = &n1->pins[RightToLeft][0];
+        auto inpin  = &n2->pins[LeftToRight][1];
         app.editor.new_link(outpin, inpin);
-    }
+    }*/
     app.editor.inited = true;
 
     try {

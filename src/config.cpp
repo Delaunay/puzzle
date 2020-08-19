@@ -6,6 +6,12 @@ void from_json(const json& j, Item& p) {
     j.at("name").get_to(p.name);
     j.at("qty").get_to(p.qty);
     j.at("speed").get_to(p.speed);
+
+    if (j.contains("type")){
+        std::string result;
+        j.at("type").get_to(result);
+        p.type = result[0];
+    }
 }
 
 void from_json(const json& j, Recipe& p) {

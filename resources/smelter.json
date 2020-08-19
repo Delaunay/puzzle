@@ -38,6 +38,7 @@
   {
     "Recipe Name": "Iron Ingot",
     "Crafting Time (sec)": 2.0,
+    "texture": "resources/assets/iron_ingot.png",
     "Ingredients": [
       {
         "qty": 1.0,

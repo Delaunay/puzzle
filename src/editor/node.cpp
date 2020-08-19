@@ -117,3 +117,80 @@ Recipe* Node::recipe() const {
 
     return nullptr;
 }
+
+
+#include "node-editor.h"
+
+void NodeEditor::draw_node(Node* node, ImDrawList* draw_list, ImVec2 offset){
+    ImGuiIO& io = ImGui::GetIO();
+
+    ImGui::PushID(node->ID);
+    ImVec2 node_rect_min = offset + node->Pos;
+
+    // Display node contents first
+    draw_list->ChannelsSetCurrent(1); // Foreground
+
+    bool old_any_active = ImGui::IsAnyItemActive();
+    ImGui::SetCursorScreenPos(node_rect_min + NODE_WINDOW_PADDING);
+    ImGui::BeginGroup(); // Lock horizontal position
+
+    //ImGui::Text("%s", node->descriptor->name.c_str());
+    // auto text_size = ImGui::GetItemRectSize();
+
+    auto recipe = node->recipe();
+
+    ImGui::SetCursorScreenPos(node_rect_min);
+    draw_recipe_icon(recipe, ImVec2(0.2f, 0.2f), node->size());
+
+    ImGui::EndGroup();
+
+    for(auto& side: node->pins){
+        for(Pin const& pin: side){
+            draw_pin(draw_list, offset, pin);
+        }
+    }
+
+    // Save the size of what we have emitted and whether any of the widgets are being used
+    bool node_widgets_active = (!old_any_active && ImGui::IsAnyItemActive());
+    node->update_size(ImGui::GetItemRectSize() + NODE_WINDOW_PADDING + NODE_WINDOW_PADDING);
+    ImVec2 node_rect_max = node_rect_min + node->size();
+
+    // Display node box
+    draw_list->ChannelsSetCurrent(0); // Background
+    ImGui::SetCursorScreenPos(node_rect_min);
+    ImGui::InvisibleButton("node", node->size());
+
+    if (ImGui::IsItemHovered()){
+        node_hovered_in_scene = node;
+        open_context_menu |= ImGui::IsMouseClicked(1);
+    }
+
+    bool node_moving_active = ImGui::IsItemActive();
+
+    if (node_widgets_active || node_moving_active)
+        node_selected = node;
+
+    if (node_moving_active && ImGui::IsMouseDragging(ImGuiMouseButton_Left))
+        node->Pos = node->Pos + io.MouseDelta;
+
+    // Shortcuts
+    if (ImGui::IsItemHovered()) {
+        if (ImGui::IsKeyReleased(SDL_SCANCODE_R)){
+            node->rotation = (node->rotation + 1) % 4;
+        }
+
+        if (ImGui::IsKeyReleased(SDL_SCANCODE_Q)){
+            brush.set(node->building, node->recipe_idx, node->rotation);
+        }
+    }
+
+    // Draw rectangle
+    ImU32 node_bg_color = IM_COL32(60, 60, 60, 255);
+    if (node_hovered_in_list == node || node_hovered_in_scene == node || (!node_hovered_in_list && node_selected == node))
+        node_bg_color = IM_COL32(75, 75, 75, 255);
+
+    draw_list->AddRectFilled(node_rect_min, node_rect_max, node_bg_color, 4.0f);
+    draw_list->AddRect(node_rect_min, node_rect_max, IM_COL32(100, 100, 100, 255), 4.0f);
+
+    ImGui::PopID();
+}

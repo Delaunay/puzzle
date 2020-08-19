@@ -1,0 +1,15 @@
+[
+  {
+    "Recipe Name": "Iron Ore",
+    "Crafting Time (sec)": 1.0,
+    "texture": "resources/assets/iron_ore.png",
+    "Ingredients": [],
+    "Products": [
+      {
+        "qty": 1.0,
+        "name": "Iron Ore",
+        "speed": 60.0
+      }
+    ]
+  }
+]

@@ -12,9 +12,10 @@
 using json = nlohmann::json;
 
 struct Item {
-    std::string name;   // Item Name
-    float       qty;    // qty
-    float       speed;  // qty/min
+    std::string name;       // Item Name
+    float       qty;        // qty
+    float       speed;      // qty/min
+    char        type = 'S'; // Item Type Solid/Liquid
 };
 
 struct Recipe {
@@ -140,6 +141,28 @@ struct Resources {
         auto p = std::make_shared<Image>(absolute_path);
         _texture_cache[path] = p;
         return p.get();
+    }
+
+    int find_building(std::string const& name){
+        for(auto i = 0u; i < buildings.size(); ++i){
+            if (buildings[i].name == name)
+                return int(i);
+        }
+        return -1;
+    }
+
+    int find_recipe(int building, std::string const& name){
+        if (building < 0){
+            return -1;
+        }
+
+        auto recipes = buildings[std::size_t(building)].recipes;
+
+        for(auto i = 0u; i < recipes.size(); ++i){
+            if (recipes[i].recipe_name == name)
+                return int(i);
+        }
+        return -1;
     }
 
     std::vector<Building> buildings;

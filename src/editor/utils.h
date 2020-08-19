@@ -33,4 +33,20 @@ enum Direction {
     BottomToTop
 };
 
+template<typename T>
+struct Iterator{
+    T s;
+    T e;
+
+    Iterator(T s, T e):
+        s(s), e(e)
+    {}
+
+    T begin() { return s; }
+    T end  () { return e; }
+
+    T begin() const { return s; }
+    T end  () const { return e; }
+};
+
 #endif

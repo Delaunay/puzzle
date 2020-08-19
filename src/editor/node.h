@@ -7,8 +7,6 @@
 
 #include <array>
 
-// R: Rotate
-// Q: Copy building
 struct Node {
     // TODO: make this configurable
     // building scale
@@ -40,6 +38,10 @@ struct Node {
 
     // Slot position taking rotation into account
     ImVec2 slot_position(int side, float num, float count) const;
+
+    bool operator== (Node const& obj){
+        return obj.ID == ID;
+    }
 };
 
 #endif

@@ -255,6 +255,7 @@
   {
     "Recipe Name": "Iron Plate",
     "Crafting Time (sec)": 6.0,
+    "texture": "resources/assets/iron_plate.png",
     "Ingredients": [
       {
         "qty": 3.0,

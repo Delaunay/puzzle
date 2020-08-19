@@ -11,14 +11,16 @@
       {
         "qty": 10.0,
         "name": "Water",
-        "speed": 100.0
+        "speed": 100.0,
+        "type": "L"
       }
     ],
     "Products": [
       {
         "qty": 8.0,
         "name": "Alumina Solution",
-        "speed": 80.0
+        "speed": 80.0,
+        "type": "L"
       },
       {
         "qty": 2.0,
@@ -34,7 +36,8 @@
       {
         "qty": 4.0,
         "name": "Alumina Solution",
-        "speed": 240.0
+        "speed": 240.0,
+        "type": "L"
       },
       {
         "qty": 1.0,
@@ -51,7 +54,8 @@
       {
         "qty": 1.0,
         "name": "Water",
-        "speed": 60.0
+        "speed": 60.0,
+        "type": "L"
       }
     ]
   },
@@ -67,7 +71,8 @@
       {
         "qty": 2.0,
         "name": "Heavy Oil Residue",
-        "speed": 15.0
+        "speed": 15.0,
+        "type": "L"
       }
     ],
     "Products": [
@@ -85,7 +90,8 @@
       {
         "qty": 1.0,
         "name": "Heavy Oil Residue",
-        "speed": 30.0
+        "speed": 30.0,
+        "type": "L"
       },
       {
         "qty": 2.0,
@@ -108,7 +114,8 @@
       {
         "qty": 3.0,
         "name": "Alumina Solution",
-        "speed": 90.0
+        "speed": 90.0,
+        "type": "L"
       },
       {
         "qty": 1.0,
@@ -125,7 +132,8 @@
       {
         "qty": 1.0,
         "name": "Water",
-        "speed": 30.0
+        "speed": 30.0,
+        "type": "L"
       }
     ]
   },
@@ -136,14 +144,16 @@
       {
         "qty": 6.0,
         "name": "Crude Oil",
-        "speed": 60.0
+        "speed": 60.0,
+        "type": "L"
       }
     ],
     "Products": [
       {
         "qty": 4.0,
         "name": "Fuel",
-        "speed": 40.0
+        "speed": 40.0,
+        "type": "L"
       },
       {
         "qty": 3.0,
@@ -159,14 +169,16 @@
       {
         "qty": 3.0,
         "name": "Crude Oil",
-        "speed": 30.0
+        "speed": 30.0,
+        "type": "L"
       }
     ],
     "Products": [
       {
         "qty": 4.0,
         "name": "Heavy Oil Residue",
-        "speed": 40.0
+        "speed": 40.0,
+        "type": "L"
       },
       {
         "qty": 2.0,
@@ -187,14 +199,16 @@
       {
         "qty": 3.0,
         "name": "Water",
-        "speed": 45.0
+        "speed": 45.0,
+        "type": "L"
       }
     ],
     "Products": [
       {
         "qty": 4.0,
         "name": "Liquid Biofuel",
-        "speed": 60.0
+        "speed": 60.0,
+        "type": "L"
       }
     ]
   },
@@ -205,7 +219,8 @@
       {
         "qty": 2.0,
         "name": "Fuel",
-        "speed": 40.0
+        "speed": 40.0,
+        "type": "L"
       },
       {
         "qty": 2.0,
@@ -228,7 +243,8 @@
       {
         "qty": 2.0,
         "name": "Heavy Oil Residue",
-        "speed": 30.0
+        "speed": 30.0,
+        "type": "L"
       },
       {
         "qty": 2.0,
@@ -251,7 +267,8 @@
       {
         "qty": 2.0,
         "name": "Liquid Biofuel",
-        "speed": 40.0
+        "speed": 40.0,
+        "type": "L"
       },
       {
         "qty": 2.0,
@@ -274,7 +291,8 @@
       {
         "qty": 2.0,
         "name": "Crude Oil",
-        "speed": 30.0
+        "speed": 30.0,
+        "type": "L"
       },
       {
         "qty": 2.0,
@@ -297,7 +315,8 @@
       {
         "qty": 2.0,
         "name": "Turbofuel",
-        "speed": 20.0
+        "speed": 20.0,
+        "type": "L"
       },
       {
         "qty": 2.0,
@@ -320,7 +339,8 @@
       {
         "qty": 2.0,
         "name": "Water",
-        "speed": 60.0
+        "speed": 60.0,
+        "type": "L"
       },
       {
         "qty": 2.0,
@@ -343,7 +363,8 @@
       {
         "qty": 4.0,
         "name": "Heavy Oil Residue",
-        "speed": 40.0
+        "speed": 40.0,
+        "type": "L"
       }
     ],
     "Products": [
@@ -361,7 +382,8 @@
       {
         "qty": 3.0,
         "name": "Crude Oil",
-        "speed": 30.0
+        "speed": 30.0,
+        "type": "L"
       }
     ],
     "Products": [
@@ -373,7 +395,8 @@
       {
         "qty": 1.0,
         "name": "Heavy Oil Residue",
-        "speed": 10.0
+        "speed": 10.0,
+        "type": "L"
       }
     ]
   },
@@ -389,7 +412,8 @@
       {
         "qty": 10.0,
         "name": "Water",
-        "speed": 50.0
+        "speed": 50.0,
+        "type": "L"
       }
     ],
     "Products": [
@@ -407,7 +431,8 @@
       {
         "qty": 6.0,
         "name": "Crude Oil",
-        "speed": 60.0
+        "speed": 60.0,
+        "type": "L"
       }
     ],
     "Products": [
@@ -419,7 +444,8 @@
       {
         "qty": 2.0,
         "name": "Heavy Oil Residue",
-        "speed": 20.0
+        "speed": 20.0,
+        "type": "L"
       }
     ]
   },
@@ -435,7 +461,8 @@
       {
         "qty": 2.0,
         "name": "Water",
-        "speed": 24.0
+        "speed": 24.0,
+        "type": "L"
       }
     ],
     "Products": [
@@ -458,7 +485,8 @@
       {
         "qty": 4.0,
         "name": "Water",
-        "speed": 10.0
+        "speed": 10.0,
+        "type": "L"
       }
     ],
     "Products": [
@@ -481,7 +509,8 @@
       {
         "qty": 4.0,
         "name": "Water",
-        "speed": 20.0
+        "speed": 20.0,
+        "type": "L"
       }
     ],
     "Products": [
@@ -504,7 +533,8 @@
       {
         "qty": 5.0,
         "name": "Water",
-        "speed": 37.5
+        "speed": 37.5,
+        "type": "L"
       }
     ],
     "Products": [
@@ -527,7 +557,8 @@
       {
         "qty": 6.0,
         "name": "Fuel",
-        "speed": 30.0
+        "speed": 30.0,
+        "type": "L"
       }
     ],
     "Products": [
@@ -550,7 +581,8 @@
       {
         "qty": 6.0,
         "name": "Fuel",
-        "speed": 30.0
+        "speed": 30.0,
+        "type": "L"
       }
     ],
     "Products": [
@@ -568,14 +600,16 @@
       {
         "qty": 6.0,
         "name": "Heavy Oil Residue",
-        "speed": 60.0
+        "speed": 60.0,
+        "type": "L"
       }
     ],
     "Products": [
       {
         "qty": 4.0,
         "name": "Fuel",
-        "speed": 40.0
+        "speed": 40.0,
+        "type": "L"
       }
     ]
   },
@@ -591,7 +625,8 @@
       {
         "qty": 2.0,
         "name": "Water",
-        "speed": 20.0
+        "speed": 20.0,
+        "type": "L"
       }
     ],
     "Products": [
@@ -614,7 +649,8 @@
       {
         "qty": 4.0,
         "name": "Water",
-        "speed": 40.0
+        "speed": 40.0,
+        "type": "L"
       }
     ],
     "Products": [
@@ -632,7 +668,8 @@
       {
         "qty": 3.0,
         "name": "Crude Oil",
-        "speed": 30.0
+        "speed": 30.0,
+        "type": "L"
       }
     ],
     "Products": [
@@ -644,7 +681,8 @@
       {
         "qty": 2.0,
         "name": "Heavy Oil Residue",
-        "speed": 20.0
+        "speed": 20.0,
+        "type": "L"
       }
     ]
   },
@@ -660,7 +698,8 @@
       {
         "qty": 3.0,
         "name": "Water",
-        "speed": 22.5
+        "speed": 22.5,
+        "type": "L"
       }
     ],
     "Products": [
@@ -683,14 +722,16 @@
       {
         "qty": 5.0,
         "name": "Water",
-        "speed": 50.0
+        "speed": 50.0,
+        "type": "L"
       }
     ],
     "Products": [
       {
         "qty": 10.0,
         "name": "Sulfuric Acid",
-        "speed": 100.0
+        "speed": 100.0,
+        "type": "L"
       }
     ]
   },
@@ -701,7 +742,8 @@
       {
         "qty": 5.0,
         "name": "Heavy Oil Residue",
-        "speed": 37.5
+        "speed": 37.5,
+        "type": "L"
       },
       {
         "qty": 4.0,
@@ -713,7 +755,8 @@
       {
         "qty": 4.0,
         "name": "Turbofuel",
-        "speed": 30.0
+        "speed": 30.0,
+        "type": "L"
       }
     ]
   },
@@ -724,7 +767,8 @@
       {
         "qty": 6.0,
         "name": "Fuel",
-        "speed": 22.5
+        "speed": 22.5,
+        "type": "L"
       },
       {
         "qty": 4.0,
@@ -736,7 +780,8 @@
       {
         "qty": 5.0,
         "name": "Turbofuel",
-        "speed": 18.8
+        "speed": 18.8,
+        "type": "L"
       }
     ]
   },
@@ -754,7 +799,8 @@
       {
         "qty": 2.0,
         "name": "Fuel",
-        "speed": 60.0
+        "speed": 60.0,
+        "type": "L"
       },
       {
         "qty": 2.0,
@@ -777,7 +823,8 @@
       {
         "qty": 2.0,
         "name": "Heavy Oil Residue",
-        "speed": 20.0
+        "speed": 20.0,
+        "type": "L"
       },
       {
         "qty": 2.0,
@@ -800,7 +847,8 @@
       {
         "qty": 2.0,
         "name": "Liquid Biofuel",
-        "speed": 60.0
+        "speed": 60.0,
+        "type": "L"
       },
       {
         "qty": 2.0,
@@ -823,7 +871,8 @@
       {
         "qty": 2.0,
         "name": "Crude Oil",
-        "speed": 60.0
+        "speed": 60.0,
+        "type": "L"
       },
       {
         "qty": 2.0,
@@ -846,7 +895,8 @@
       {
         "qty": 2.0,
         "name": "Turbofuel",
-        "speed": 20.0
+        "speed": 20.0,
+        "type": "L"
       },
       {
         "qty": 2.0,
@@ -869,7 +919,8 @@
       {
         "qty": 2.0,
         "name": "Water",
-        "speed": 120.0
+        "speed": 120.0,
+        "type": "L"
       },
       {
         "qty": 2.0,
@@ -890,7 +941,8 @@
       {
         "qty": 8.0,
         "name": "Sulfuric Acid",
-        "speed": 80.0
+        "speed": 80.0,
+        "type": "L"
       }
     ],
     "Products": [
@@ -902,7 +954,8 @@
       {
         "qty": 2.0,
         "name": "Sulfuric Acid",
-        "speed": 20.0
+        "speed": 20.0,
+        "type": "L"
       }
     ]
   },
@@ -918,7 +971,8 @@
       {
         "qty": 5.0,
         "name": "Water",
-        "speed": 100.0
+        "speed": 100.0,
+        "type": "L"
       }
     ],
     "Products": [

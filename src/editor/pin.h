@@ -9,7 +9,7 @@ struct Node;
 struct Pin {
     const std::size_t ID;
     char belt_type = ' ';
-    bool is_input  = ' ';
+    bool is_input  = false;
 
     int   side         = 0;
     int   index        = 0;

@@ -1,6 +1,16 @@
 #include "link.h"
 #include "node-editor.h"
 
+#include "application/logger.h"
+
+
+NodeLink::NodeLink(Pin const* s, Pin const* e):
+    ID(next_id<std::size_t>()), start(s), end(e)
+{
+    assertf(start != nullptr, "start cannot be null");
+    assertf(end   != nullptr, "end cannot be null");
+}
+
 void LinkDragDropState::start_drag(){
     is_hovering = false;
 }

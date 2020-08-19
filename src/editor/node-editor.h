@@ -11,15 +11,21 @@
 #include "brush.h"
 #include "node.h"
 #include "link.h"
+#include "forest.h"
 
 // Draw a bezier curve using only 2 points
 // derive the two other points needed from the starting points
 // they derived points change in function of their relative position
 void draw_bezier(ImDrawList* draw_list, ImVec2 p1, ImVec2 p2, ImU32 color);
 
+// R: Rotate
+// Q: Copy building
 struct NodeEditor{
-    using NodePtr = std::shared_ptr<Node>;
     puzzle::Application& app;
+    Forest               graph;
+    Brush                brush;
+    ImVec2               scrolling = ImVec2(0.0f, 0.0f);
+    LinkDragDropState    link_builder;
 
     NodeEditor(puzzle::Application& app):
         app(app)
@@ -27,20 +33,6 @@ struct NodeEditor{
         inited = true;
     }
 
-    Node* get_node(std::size_t idx) {
-        return nodes[idx].get();
-    }
-
-    Brush brush;
-
-    ImVec2 scrolling = ImVec2(0.0f, 0.0f);
-    std::vector<NodePtr>  nodes;
-
-private:
-    std::list<NodeLink> links;
-    std::unordered_map<std::size_t, NodeLink*> lookup;
-
-public:
     bool inited = false;
     bool show_grid = true;
     bool opened = true;
@@ -59,38 +51,15 @@ public:
     // overriding the selection
     bool link_selected          = false;
 
-    LinkDragDropState link_builder;
-
-    const float NODE_SLOT_RADIUS     = 1.0f * Node::scaling;
+    const float  NODE_SLOT_RADIUS     = 1.0f * Node::scaling;
     const ImVec2 NODE_WINDOW_PADDING = {10.0f, 10.0f};
 
-    // check if a pin is connected only once
-    // if not remove it and make the new connection
-    void remove_pin_link(Pin const* p){
-        auto iter = lookup.find(p->ID);
-        if (iter != lookup.end()){
-            remove_link(iter->second);
-        }
-    }
-
-    NodeLink* new_link(Pin const* s, Pin const* e){
-        remove_pin_link(e);
-        remove_pin_link(s);
-
-        links.emplace_back(s, e);
-        auto* link = &(*links.rbegin());
-        lookup[s->ID] = link;
-        lookup[e->ID] = link;
-
-        select_link(link);
-        return link;
-    }
-
-    void select_link(Pin const* p){
-        auto result = lookup.find(p->ID);
-        if (result != lookup.end()){
-            select_link((*result).second);
-        }
+    // Forest functionality forwarding for a nicer API
+    NodeLink* new_link   (Pin const* s, Pin const* e){  return graph.new_link(s, e);     }
+    void      remove_link(NodeLink* link)            {  return graph.remove_link(link);  }
+    void      remove_node(Node* node)                {  return graph.remove_node(node);  }
+    Node*     new_node   (ImVec2 pos, int building, int recipe, int rotation = 0){
+        return graph.new_node(pos, building, recipe, rotation);
     }
 
     void select_link(NodeLink* link){
@@ -107,179 +76,24 @@ public:
         }
     }
 
-    void remove_link(NodeLink* link){
-        debug("Removing link");
-        if (link == nullptr){
-            return;
-        }
-
-        if (link == selected_link){
-            selected_link = nullptr;
-        }
-
-        debug("{}", link->start->ID);
-        debug("{}", link->end->ID);
-
-        lookup.erase(link->start->ID);
-        lookup.erase(link->end->ID);
-        links.remove(*link);
+    void select_link(Pin const* p){
+        auto result = graph.find_link(p);
+        select_link(result);
     }
 
-    void remove_node(Node* node){
-        // remove all pins
-        for(auto& side: node->pins){
-            for(auto& pin: side){
-                remove_pin_link(&pin);
-            }
-        }
-
-        // remove node from the vector
-        for(auto i = 0u; i < nodes.size(); ++i){
-            if (nodes[i].get() == node){
-                nodes.erase(nodes.begin() + i);
-                return;
-            }
-        }
-    }
     // returns nodes that have no parents
     std::vector<Node*> roots(){
         std::vector<Node*> root_nodes;
-        for (auto& node: nodes){
+        for (auto& node: graph.iter_nodes()){
 
         }
 
         return root_nodes;
     }
 
-    void draw_pin(ImDrawList* draw_list, ImVec2 offset, Pin const& pin) {
-        if (pin.belt_type != 'C' && pin.belt_type != 'P'){
-            // debug("Ignored {}", pin.belt_type);
-            return;
-        }
-
-        ImGui::PushID(int(pin.ID));
-        ImU32 color;
-        auto center = offset + pin.position();
-
-        if (pin.is_input){
-            color = IM_COL32(255, 179, 119, 255);
-        } else{
-            color = IM_COL32(84, 252, 193, 255);
-        }
-
-        auto rad = ImVec2(NODE_SLOT_RADIUS, NODE_SLOT_RADIUS);
-        ImRect bb(center - ImVec2(rad), center + rad);
-
-        if (pin.belt_type == 'C') {
-            draw_list->AddRectFilled(
-                center - ImVec2(rad),
-                center + rad,
-                color,
-                4.0f,
-                ImDrawCornerFlags_All);
-        }
-        else if (pin.belt_type == 'P') {
-            draw_list->AddCircleFilled(
-                center,
-                NODE_SLOT_RADIUS,
-                color);
-        }
-
-        bool hovered;
-        bool held;
-        auto flags = ImGuiButtonFlags_PressedOnClick;
-        bool pressed = ImGui::ButtonBehavior(bb, unsigned(pin.ID), &hovered, &held, flags);
-
-        // Get Starting point
-        if (pressed && ImGui::IsMouseDown(ImGuiMouseButton_Left)) {
-            link_builder.set_starting_point(center, &pin);
-        }
-
-        // Set Ending point
-        else if (hovered) {
-            link_builder.set_end_point(&pin);
-        }
-
-        if (pressed) {
-            select_link(&pin);
-        }
-
-        ImGui::PopID();
-    }
-
-    void draw_node(Node* node, ImDrawList* draw_list, ImVec2 offset){
-        ImGuiIO& io = ImGui::GetIO();
-
-        ImGui::PushID(node->ID);
-        ImVec2 node_rect_min = offset + node->Pos;
-
-        // Display node contents first
-        draw_list->ChannelsSetCurrent(1); // Foreground
-
-        bool old_any_active = ImGui::IsAnyItemActive();
-        ImGui::SetCursorScreenPos(node_rect_min + NODE_WINDOW_PADDING);
-        ImGui::BeginGroup(); // Lock horizontal position
-
-        //ImGui::Text("%s", node->descriptor->name.c_str());
-        // auto text_size = ImGui::GetItemRectSize();
-
-        auto recipe = node->recipe();
-
-        ImGui::SetCursorScreenPos(node_rect_min);
-        draw_recipe_icon(recipe, ImVec2(0.2f, 0.2f), node->size());
-
-        ImGui::EndGroup();
-
-        for(auto& side: node->pins){
-            for(Pin const& pin: side){
-                draw_pin(draw_list, offset, pin);
-            }
-        }
-
-        // Save the size of what we have emitted and whether any of the widgets are being used
-        bool node_widgets_active = (!old_any_active && ImGui::IsAnyItemActive());
-        node->update_size(ImGui::GetItemRectSize() + NODE_WINDOW_PADDING + NODE_WINDOW_PADDING);
-        ImVec2 node_rect_max = node_rect_min + node->size();
-
-        // Display node box
-        draw_list->ChannelsSetCurrent(0); // Background
-        ImGui::SetCursorScreenPos(node_rect_min);
-        ImGui::InvisibleButton("node", node->size());
-
-        if (ImGui::IsItemHovered()){
-            node_hovered_in_scene = node;
-            open_context_menu |= ImGui::IsMouseClicked(1);
-        }
-
-        bool node_moving_active = ImGui::IsItemActive();
-
-        if (node_widgets_active || node_moving_active)
-            node_selected = node;
-
-        if (node_moving_active && ImGui::IsMouseDragging(ImGuiMouseButton_Left))
-            node->Pos = node->Pos + io.MouseDelta;
-
-        // Shortcuts
-        if (ImGui::IsItemHovered()) {
-            if (ImGui::IsKeyReleased(SDL_SCANCODE_R)){
-                node->rotation = (node->rotation + 1) % 4;
-            }
-
-            if (ImGui::IsKeyReleased(SDL_SCANCODE_Q)){
-                brush.set(node->building, node->recipe_idx, node->rotation);
-            }
-        }
-
-        // Draw rectangle
-        ImU32 node_bg_color = IM_COL32(60, 60, 60, 255);
-        if (node_hovered_in_list == node || node_hovered_in_scene == node || (!node_hovered_in_list && node_selected == node))
-            node_bg_color = IM_COL32(75, 75, 75, 255);
-
-        draw_list->AddRectFilled(node_rect_min, node_rect_max, node_bg_color, 4.0f);
-        draw_list->AddRect(node_rect_min, node_rect_max, IM_COL32(100, 100, 100, 255), 4.0f);
-
-        ImGui::PopID();
-    }
+    void draw_pin(ImDrawList* draw_list, ImVec2 offset, Pin const& pin);
+    
+    void draw_node(Node* node, ImDrawList* draw_list, ImVec2 offset);
 
     void reset(){
         node_hovered_in_scene = nullptr;
@@ -326,8 +140,8 @@ public:
         draw_list->ChannelsSplit(2);
         draw_list->ChannelsSetCurrent(0); // Background
 
-        for(auto iter = links.begin(); iter != links.end(); ++iter){
-            NodeLink* link = &*iter;
+        for(auto& iter: graph.iter_links()){
+            NodeLink* link = &iter;
 
             auto p1 = offset + link->start->position();
             auto p2 = offset + link->end->position();
@@ -353,8 +167,8 @@ public:
         // Display nodes
         link_builder.start_drag();
 
-        for (auto& node: nodes){
-            draw_node(node.get(), draw_list, offset);
+        for (auto& node: graph.iter_nodes()){
+            draw_node(&node, draw_list, offset);
         }
 
         link_builder.draw_path(draw_list);
@@ -405,7 +219,7 @@ public:
             {
                 if (ImGui::MenuItem("Add")) {
                     debug("New node");
-                    nodes.push_back(std::make_shared<Node>(brush.building, scene_pos, brush.recipe, brush.rotation % 4));
+                    graph.new_node(scene_pos, brush.building, brush.recipe, brush.rotation % 4);
                 }
                 if (ImGui::MenuItem("Paste", nullptr, false, false)) {
 
@@ -530,8 +344,9 @@ public:
         // ImGui::Text("Nodes");
         // ImGui::Separator();
 
-        for (std::size_t node_idx = 0; node_idx < nodes.size(); node_idx++){
-            Node* node = get_node(node_idx);
+        // for (std::size_t node_idx = 0; node_idx < nodes.size(); node_idx++){
+        for (auto& iter: graph.iter_nodes()){
+            Node* node = &iter;
             ImGui::PushID(int(node->ID));
 
             if (ImGui::Selectable(node->descriptor->name.c_str(), node == node_selected)){
@@ -639,9 +454,36 @@ public:
         }
     }
 
+    void show_production_stat(){
+        auto data = graph.compute_production();
+
+        debug("    {:>20}: {:>8} {:>8} {:>8}", "", "consumed", "produced", "received");
+        for(auto& entity: data){
+            debug("{}:", entity.first);
+            for(auto& item: entity.second){
+                debug("    {:>20}: {:5.2f} {:5.2f} {:5.2f}", item.first, item.second.consumed, item.second.produced, item.second.received);
+            }
+        }
+
+        debug("Bilan");
+        auto bilan = graph.production_statement();
+        for(auto& item: bilan){
+            debug("{:>20}: {:5.2f} | {:5.2f} | {:5.2f}",
+                  item.first,
+                  item.second.produced,
+                  item.second.consumed,
+                  item.second.produced - item.second.consumed
+                  );
+        }
+    }
+
     void draw_tool_panel(){
         ImGui::Begin("Tool box");
         auto open = ImGuiTreeNodeFlags_DefaultOpen;
+
+        if (ImGui::Button("Show Stats")){
+            show_production_stat();
+        }
 
         if (ImGui::CollapsingHeader("Brush", open)){
             draw_brush();

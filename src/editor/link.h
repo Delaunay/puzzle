@@ -2,27 +2,34 @@
 #define PUZZLE_EDITOR_LINK_HEADER
 
 #include "pin.h"
-#include "application/logger.h"
 
 // Link between two pins
 struct NodeLink{
-    Pin const* start; // outputs
-    Pin const* end;   // inputs
+    const std::size_t ID;
 
-    NodeLink(Pin const* s, Pin const* e):
-        start(s), end(e)
-    {
-        assertf(start != nullptr, "start cannot be null");
-        assertf(end   != nullptr, "end cannot be null");
+    Pin const* start; // Node outputs
+    Pin const* end;   // Node inputs
+
+    Pin const* node_output(){
+        return start;
     }
+
+    Pin const* node_input(){
+        return end;
+    }
+
+    NodeLink(Pin const* s, Pin const* e);
 
     bool operator== (NodeLink const& obj){
         return obj.start == this->start && obj.end == this->end;
     }
+
+    char link_type(){
+        return start->belt_type;
+    }
 };
 
 struct NodeEditor;
-
 
 // Link builder helper
 // do manage drag and droping links between pins
