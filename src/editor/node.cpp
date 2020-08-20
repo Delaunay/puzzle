@@ -170,8 +170,11 @@ void NodeEditor::draw_node(Node* node, ImDrawList* draw_list, ImVec2 offset){
     if (node_widgets_active || node_moving_active)
         node_selected = node;
 
-    if (node_moving_active && ImGui::IsMouseDragging(ImGuiMouseButton_Left))
+    if (node_moving_active && ImGui::IsMouseDragging(ImGuiMouseButton_Left)){
         node->Pos = node->Pos + io.MouseDelta;
+    } else {
+        node->Pos = snap(node->Pos);
+    }
 
     // Shortcuts
     if (ImGui::IsItemHovered()) {

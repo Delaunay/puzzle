@@ -18,7 +18,14 @@
 // they derived points change in function of their relative position
 void draw_bezier(ImDrawList* draw_list, ImVec2 p1, ImVec2 p2, ImU32 color);
 
-
+// Foundation is 8 x 8 and we scale by 10
+// float GRID_SZ = 8.f * Node::scaling;
+// Grid Size: 80x80
+inline
+ImVec2 snap(ImVec2 pos, float snap_factor = 20.f){
+    return ImVec2(std::round(pos.x / snap_factor),
+                  std::round(pos.y / snap_factor)) * snap_factor;
+}
 
 
 // R: Rotate
@@ -231,7 +238,7 @@ struct NodeEditor{
             {
                 if (ImGui::MenuItem("Add")) {
                     debug("New node");
-                    graph.new_node(scene_pos, brush.building, brush.recipe, brush.rotation % 4);
+                    graph.new_node(snap(scene_pos), brush.building, brush.recipe, brush.rotation % 4);
                 }
                 if (ImGui::MenuItem("Paste", nullptr, false, false)) {
 
