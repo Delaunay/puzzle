@@ -8,12 +8,13 @@ struct DoubleEntry{
     float consumed = 0;
     float produced = 0;
     float received = 0;
+    float overflow = 0;
 };
 
 struct Engery{
-    std::unordered_map<Building*, float> stats;
     float consumed = 0;
     float produced = 0;
+    std::unordered_map<Building*, float> stats;
 };
 
 using ProductionBook = std::unordered_map<std::string, DoubleEntry>;
@@ -229,31 +230,30 @@ public:
         }
     }
 
-    void _compute_node_production(Node const* node, ProductionStats& stats) const {
+    ProductionBook _compute_node_production(Node const* node, ProductionStats& stats) const {
+        // TODO: add logic for splitter/merger
+        // std::unordered_map<std::string, DoubleEntry>;
+
+
         if (node == nullptr) {
             debug("nullptr was passed!");
-            return;
+            return ProductionBook();
         }
 
         if (stats.count(node->ID) > 0) {
             // we are recursively computing node prod
             // so some nodes might get computed before we reach them
-            return;
+            return ProductionBook();
         }
 
         debug("Compute production for {}:{}", node->ID, node->descriptor->name);
 
-        // TODO: add logic for splitter/merger
-        // std::unordered_map<std::string, DoubleEntry>;
-        ProductionBook node_prod;
-
         // register it now to avoid infinite recursion
-        stats[node->ID] = node_prod;
+        ProductionBook& node_prod = stats[node->ID];
 
         // Add the ingredients we need
         auto recipe = node->recipe();
         if (recipe){
-
             for (auto& in: recipe->inputs){
                 DoubleEntry v;
                 v.consumed = in.speed;
@@ -344,14 +344,23 @@ public:
             for (auto& out: recipe->outputs){
                 std::vector<Pin const*> out_pin;
 
+                float total_production = out.speed * efficiency;
+
+                // Set the production info the the node itself as well
+                // Building can consume & produce the same good!
+                DoubleEntry& node_prod_entry = node_prod[out.name];
+                node_prod_entry.produced = total_production;
+
+                // set production to the correct pin
                 if (out.type == 'S') {
                     out_pin = solid_output;
                 } else if (out.type == 'L') {
                     out_pin = liquid_output;
+                } else {
+                    debug("{} output not known", out.type);
                 }
 
                 if (out_pin.size() > 0) {
-                    float total_production = out.speed * efficiency;
                     // this is incorrect a connection could be consuming less
                     // but we need to go downstream and up again to know that
 
@@ -376,14 +385,60 @@ public:
 
                         stats[link->ID] = link_prod;
                     }
+                } else {
+                    debug("No valid output pin found for {}", node->ID);
                 }
             }
+        } else {
+            // Merger/Splitter logic
+            // Find out how much items are passing through this
+            for(auto& inpin: input_pins){
+                auto link = find_link(inpin);
+                if (!link)
+                    continue;
+
+                ProductionBook* link_prod = get(stats, link->ID);
+                for(auto& item_received: *link_prod){
+                    node_prod[item_received.first].received += item_received.second.produced;
+                }
+            }
+
+            std::vector<Pin const*> out_pin;
+
+            // set production to the correct pin
+            if (solid_output.size() > 0) {
+                out_pin = solid_output;
+            } else {
+                out_pin = liquid_output;
+            }
+
+            for(auto& outpin: out_pin){
+                auto link = find_link(outpin);
+                if (!link)
+                    continue;
+
+                ProductionBook link_prod;
+
+                for(auto& produced_item: node_prod){
+                    if (produced_item.second.received > 0){
+                        DoubleEntry out_prod;
+                        out_prod.produced = produced_item.second.received / float(out_pin.size());
+                        link_prod[produced_item.first] = out_prod;
+                    }
+                }
+
+                stats[link->ID] = link_prod;
+            }
         }
+
+        return node_prod;
     }
 
     void save(std::string const& filename, bool override=false);
 
-    void load(std::string const& filename);
+    void load(std::string const& filename, bool clear=false);
+
+    void clear();
 
 private:
     // We are using list because we want to use pointer as optional reference to a Node/NodeLink

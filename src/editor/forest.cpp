@@ -150,14 +150,24 @@ void Forest::save(std::string const& filename, bool override){
     save_file << forest;
 }
 
+void Forest::clear(){
+    nodes.clear();
+    links.clear();
+    lookup.clear();
+}
 
-void Forest::load(std::string const& filename){
+
+void Forest::load(std::string const& filename, bool clear){
     auto path = puzzle::binary_path() + "/saves/" + filename + ".json";
     std::ifstream save_file(path, std::ios::in | std::ios::binary);
 
     if (!save_file){
         warn("File was not found:{} ", path);
         return;
+    }
+
+    if (clear){
+        this->clear();
     }
 
     json forest;

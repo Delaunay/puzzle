@@ -86,6 +86,9 @@ public:
         VK_KHR_SWAPCHAIN_EXTENSION_NAME
     };
 
+    // TODO
+    void save_screenshot(std::string const& filename);
+
     uint32_t     WIDTH;
     uint32_t     HEIGHT;
     const size_t MAX_FRAMES_IN_FLIGHT     = 2;

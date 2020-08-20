@@ -26,6 +26,7 @@
   {
     "Recipe Name": "alt Adhered Iron Plate",
     "Crafting Time (sec)": 16.0,
+    "texture": "resources/assets/iron_plate.png",
     "Ingredients": [
       {
         "qty": 3.0,
@@ -141,6 +142,7 @@
   {
     "Recipe Name": "alt Bolted Iron Plate",
     "Crafting Time (sec)": 12.0,
+    "texture": "resources/assets/reinforced_iron_plate.png",
     "Ingredients": [
       {
         "qty": 18.0,
@@ -279,6 +281,7 @@
   {
     "Recipe Name": "alt Copper Rotor",
     "Crafting Time (sec)": 16.0,
+    "texture": "resources/assets/rotor.png",
     "Ingredients": [
       {
         "qty": 6.0,
@@ -532,6 +535,7 @@
   {
     "Recipe Name": "alt Fused Wire",
     "Crafting Time (sec)": 20.0,
+    "texture": "resources/assets/wire.png",
     "Ingredients": [
       {
         "qty": 4.0,
@@ -786,6 +790,7 @@
   {
     "Recipe Name": "Rotor",
     "Crafting Time (sec)": 15.0,
+    "texture": "resources/assets/rotor.png",
     "Ingredients": [
       {
         "qty": 5.0,
@@ -878,6 +883,7 @@
   {
     "Recipe Name": "Stator",
     "Crafting Time (sec)": 12.0,
+    "texture": "resources/assets/stator.png",
     "Ingredients": [
       {
         "qty": 3.0,

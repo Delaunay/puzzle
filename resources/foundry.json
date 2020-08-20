@@ -25,6 +25,7 @@
   {
     "Recipe Name": "alt Coke Steel Ingot",
     "Crafting Time (sec)": 12.0,
+    "texture": "resources/assets/steel_ingot.png",
     "Ingredients": [
       {
         "qty": 15.0,
@@ -48,6 +49,7 @@
   {
     "Recipe Name": "alt Compacted Steel Ingot",
     "Crafting Time (sec)": 16.0,
+    "texture": "resources/assets/steel_ingot.png",
     "Ingredients": [
       {
         "qty": 6.0,
@@ -117,6 +119,7 @@
   {
     "Recipe Name": "alt Solid Steel Ingot",
     "Crafting Time (sec)": 3.0,
+    "texture": "resources/assets/steel_ingot.png",
     "Ingredients": [
       {
         "qty": 2.0,
@@ -140,6 +143,7 @@
   {
     "Recipe Name": "Steel Ingot",
     "Crafting Time (sec)": 4.0,
+    "texture": "resources/assets/steel_ingot.png",
     "Ingredients": [
       {
         "qty": 3.0,

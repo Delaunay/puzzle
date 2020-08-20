@@ -1,8 +1,7 @@
-puzzle_vulkan
-================
+Statisafactory Planner
+======================
 
-Simple Puzzle Game
-
+![Preview](/preview/factory_planer.png)
 
 # Build
 
@@ -14,5 +13,7 @@ Simple Puzzle Game
     make -j 8
 
 
-    
+# Assets
 
+assets are not redistributed as they are the property of Coffe Stain studio.
+You will have to extract them an place them inside `resources/assets`

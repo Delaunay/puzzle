@@ -474,6 +474,7 @@
   {
     "Recipe Name": "Steel Beam",
     "Crafting Time (sec)": 4.0,
+    "texture": "resources/assets/steel_beam.png",
     "Ingredients": [
       {
         "qty": 4.0,
@@ -492,6 +493,7 @@
   {
     "Recipe Name": "Steel Pipe",
     "Crafting Time (sec)": 6.0,
+    "texture": "resources/assets/steel_pipe.png",
     "Ingredients": [
       {
         "qty": 3.0,
@@ -546,6 +548,7 @@
   {
     "Recipe Name": "Wire",
     "Crafting Time (sec)": 4.0,
+    "texture": "resources/assets/wire.png",
     "Ingredients": [
       {
         "qty": 1.0,

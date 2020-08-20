@@ -32,8 +32,18 @@ ImVec2 snap(ImVec2 pos, float snap_factor = 20.f){
 // Q: Copy building to brush
 //
 // TODO:
-//  - DEL : rm selected
 //  - WASD: move scroll area
+
+namespace ImGui{
+inline
+bool TreeNode(const char* label, ImGuiTreeNodeFlags flag)
+{
+    ImGuiWindow* window = GetCurrentWindow();
+    if (window->SkipItems)
+        return false;
+    return TreeNodeBehavior(window->GetID(label), flag, label, NULL);
+}
+}
 
 struct NodeEditor{
     puzzle::Application& app;
@@ -70,9 +80,9 @@ struct NodeEditor{
     const ImVec2 NODE_WINDOW_PADDING = {10.0f, 10.0f};
 
     // Forest functionality forwarding for a nicer API
-    NodeLink* new_link   (Pin const* s, Pin const* e){  return graph.new_link(s, e);     }
-    void      remove_link(NodeLink* link)            {  return graph.remove_link(link);  }
-    void      remove_node(Node* node)                {  return graph.remove_node(node);  }
+    NodeLink* new_link   (Pin const* s, Pin const* e){  need_recompute_prod = true; return graph.new_link(s, e);     }
+    void      remove_link(NodeLink* link)            {  need_recompute_prod = true; return graph.remove_link(link);  }
+    void      remove_node(Node* node)                {  need_recompute_prod = true; return graph.remove_node(node);  }
     Node*     new_node   (ImVec2 pos, int building, int recipe, int rotation = 0){
         return graph.new_node(pos, building, recipe, rotation);
     }
@@ -94,16 +104,6 @@ struct NodeEditor{
     void select_link(Pin const* p){
         auto result = graph.find_link(p);
         select_link(result);
-    }
-
-    // returns nodes that have no parents
-    std::vector<Node*> roots(){
-        std::vector<Node*> root_nodes;
-        for (auto& node: graph.iter_nodes()){
-
-        }
-
-        return root_nodes;
     }
 
     void draw_pin(ImDrawList* draw_list, ImVec2 offset, Pin const& pin);
@@ -250,7 +250,7 @@ struct NodeEditor{
             {
                 if (ImGui::MenuItem("Add")) {
                     debug("New node");
-                    graph.new_node(snap(scene_pos), brush.building, brush.recipe, brush.rotation % 4);
+                    new_node(snap(scene_pos), brush.building, brush.recipe, brush.rotation % 4);
                 }
                 if (ImGui::MenuItem("Paste", nullptr, false, false)) {
 
@@ -322,6 +322,8 @@ struct NodeEditor{
             ImVec2(ImGui::GetWindowWidth(), 0))
         ;
     }
+
+    float compute_overal_efficiency();
 
     void draw_recipe_icon(Recipe* recipe, ImVec2 scale, ImVec2 size = ImVec2(0, 0)){
         auto offset = ImVec2(0, 0);
@@ -396,94 +398,7 @@ struct NodeEditor{
 
     std::vector<const char*> const* available_recipes;
 
-    void draw_selected_info(){
-        if (selected_node == nullptr){
-            return;
-        }
-
-        Building* b = selected_node->descriptor;
-        if (b == nullptr){
-            return;
-        }
-
-        {
-            ImGui::Text("Building Spec");
-            ImGui::Columns(2, "spec-cols", true);
-            ImGui::Separator();
-
-            ImGui::Text("Name");
-            ImGui::Text("Energy");
-            ImGui::Text("Dimension");
-
-            ImGui::NextColumn();
-
-            ImGui::Text("%s", b->name.c_str());
-            ImGui::Text("%.2f", b->energy);
-            ImGui::Text("%.0f x %.0f", b->w, b->l);
-
-            ImGui::Separator();
-        }
-
-        // back to normal mode
-        ImGui::Columns(1);
-
-        // Select a new recipe
-        available_recipes = &b->recipe_names();
-
-        ImGui::Combo(
-            "Recipe",
-            &selected_node->recipe_idx,
-            available_recipes->data(),
-            available_recipes->size());
-
-        // display selected recipe
-        auto selected_recipe = selected_node->recipe();
-        draw_recipe_icon(selected_recipe, ImVec2(0.3f, 0.3f), ImVec2(ImGui::GetWindowWidth(), 0));
-
-        if (selected_recipe != nullptr){
-            ImGui::Text("Inputs");
-            ImGui::Separator();
-            ImGui::Columns(2, "inputs-cols", true);
-
-            ImGui::Text("Name");
-            for (auto& in: selected_recipe->inputs){
-                ImGui::Text("%s", in.name.c_str());
-            }
-
-            ImGui::NextColumn();
-            ImGui::Text("Speed (item/min)");
-            ImGui::Separator();
-            for (auto& in: selected_recipe->inputs){
-                ImGui::Text("%.2f", in.speed);
-            }
-
-            ImGui::Separator();
-            ImGui::Columns(1);
-            // Finished
-
-            ImGui::Spacing();
-
-            ImGui::Text("Outputs");
-            ImGui::Separator();
-            ImGui::Columns(2, "outputs-cols", true);
-
-            ImGui::Text("Name");
-            for (auto& out: selected_recipe->outputs){
-                ImGui::Text("%s", out.name.c_str());
-            }
-
-            ImGui::NextColumn();
-            ImGui::Text("Speed (item/min)");
-            ImGui::Separator();
-            for (auto& out: selected_recipe->outputs){
-                ImGui::Text("%.2f", out.speed);
-            }
-
-            ImGui::Separator();
-            ImGui::Columns(1);
-            // Finished
-        }
-    }
+    void draw_selected_info();
 
     void show_production_stat(){
         auto data = graph.compute_production();
@@ -513,19 +428,49 @@ struct NodeEditor{
 
     std::string save_name = std::string(256, '\0');
     bool override_save = false;
+    bool clear_on_load = false;
+    bool need_recompute_prod = true;
+    Forest::ProductionStats prod_stats;
 
     void draw_save_box(){
         ImGui::InputText("Save name", save_name.data(), save_name.size());
-        ImGui::Checkbox("Override", &override_save);
 
-        if (ImGui::Button("Save")){
-            graph.save(std::string(save_name.c_str()), override_save);
-        }
+        ImGui::BeginGroup();
+            ImGui::Checkbox("Override", &override_save);
+            ImGui::SameLine();
+            ImGui::Checkbox("Clear on Load", &clear_on_load);
+        ImGui::EndGroup();
 
-        ImGui::SameLine();
+        auto width = (ImGui::GetWindowWidth() - 20) / 2.f;
 
-        if (ImGui::Button("Load")){
-            graph.load(std::string(save_name.c_str()));
+        ImGui::BeginGroup();
+            if (ImGui::Button("Save", ImVec2(width, 0))){
+                graph.save(std::string(save_name.c_str()), override_save);
+                override_save = false;
+            }
+
+            ImGui::SameLine();
+
+            if (ImGui::Button("Load", ImVec2(width, 0))){
+                graph.load(std::string(save_name.c_str()), clear_on_load);
+                clear_on_load = false;
+
+                // Reset everything to not point to a deleted node
+                selected_node = nullptr;
+                selected_link = nullptr;
+                node_selected = nullptr;
+                node_hovered_in_list = nullptr;
+                node_hovered_in_scene = nullptr;
+                need_recompute_prod = true;
+            }
+        ImGui::EndGroup();
+    }
+
+    void draw_production(std::size_t id, bool link=false);
+
+    void draw_debug(){
+        if (ImGui::Button("Show Stats")){
+            show_production_stat();
         }
     }
 
@@ -533,14 +478,22 @@ struct NodeEditor{
         ImGui::Begin("Tool box");
         auto open = ImGuiTreeNodeFlags_DefaultOpen;
 
-        draw_save_box();
+        if (ImGui::CollapsingHeader("Debug", open)){
+            ImGui::Indent(10);
+            draw_debug();
+            ImGui::Unindent(10);
+        }
 
-        if (ImGui::Button("Show Stats")){
-            show_production_stat();
+        if (ImGui::CollapsingHeader("Save/Load", open)){
+            ImGui::Indent(10);
+            draw_save_box();
+            ImGui::Unindent(10);
         }
 
         if (ImGui::CollapsingHeader("Brush", open)){
+            ImGui::Indent(10);
             draw_brush();
+            ImGui::Unindent(10);
         }
 
         if (ImGui::CollapsingHeader("Selected Building", open)){
@@ -548,26 +501,37 @@ struct NodeEditor{
         }
 
         if (ImGui::CollapsingHeader("Entity List", open)){
+            ImGui::Indent(10);
             draw_node_list();
+            ImGui::Unindent(10);
         }
 
         ImGui::End();
     }
 
+    void draw_overall_performance();
+
     void draw(){
         ImGui::SetNextWindowSize(ImVec2(700, 600), ImGuiCond_FirstUseEver);
-        if (!ImGui::Begin("Example: Custom Node Graph", &opened))
+        if (!ImGui::Begin("Factory Blueprint", &opened))
         {
             ImGui::End();
             return;
         }
 
+        if (need_recompute_prod) {
+            prod_stats = graph.compute_production();
+            need_recompute_prod = false;
+        }
+
         draw_tool_panel();
+        draw_overall_performance();
         draw_workspace();
 
         ImGui::End();
     }
 };
 
+ImVec4 operator* (float v, ImVec4 f);
 
 #endif
