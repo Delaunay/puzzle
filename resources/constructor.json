@@ -274,6 +274,7 @@
   {
     "Recipe Name": "Iron Rod",
     "Crafting Time (sec)": 4.0,
+    "texture": "resources/assets/iron_rod.png",
     "Ingredients": [
       {
         "qty": 1.0,
@@ -400,6 +401,7 @@
   {
     "Recipe Name": "Screw",
     "Crafting Time (sec)": 6.0,
+    "texture": "resources/assets/screw.png",
     "Ingredients": [
       {
         "qty": 1.0,

@@ -230,7 +230,6 @@ public:
     }
 
     void _compute_node_production(Node const* node, ProductionStats& stats) const {
-
         if (node == nullptr) {
             debug("nullptr was passed!");
             return;
@@ -247,6 +246,9 @@ public:
         // TODO: add logic for splitter/merger
         // std::unordered_map<std::string, DoubleEntry>;
         ProductionBook node_prod;
+
+        // register it now to avoid infinite recursion
+        stats[node->ID] = node_prod;
 
         // Add the ingredients we need
         auto recipe = node->recipe();
@@ -351,7 +353,7 @@ public:
                 if (out_pin.size() > 0) {
                     float total_production = out.speed * efficiency;
                     // this is incorrect a connection could be consuming less
-                    // but we need to go down stream and up again to know that
+                    // but we need to go downstream and up again to know that
 
                     // to compute this correctly we need:
                     //    - put the partial total in each
@@ -377,7 +379,6 @@ public:
                 }
             }
         }
-        stats[node->ID] = node_prod;
     }
 
     void save(std::string const& filename, bool override=false);

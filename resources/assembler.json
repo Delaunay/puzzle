@@ -762,6 +762,7 @@
   {
     "Recipe Name": "Reinforced Iron Plate",
     "Crafting Time (sec)": 12.0,
+    "texture": "resources/assets/reinforced_iron_plate.png",
     "Ingredients": [
       {
         "qty": 6.0,
