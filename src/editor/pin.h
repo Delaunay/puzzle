@@ -16,7 +16,6 @@ struct Pin {
     int   count        = 0;
 
     Node* const parent = nullptr;
-    Node* child        = nullptr;
 
     // Holds all the data necessary for it to compute its position
     ImVec2 position() const;

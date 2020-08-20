@@ -2,6 +2,7 @@
   {
     "Recipe Name": "Caterium Ingot",
     "Crafting Time (sec)": 4.0,
+    "texture": "resources/assets/iron_ingot.png",
     "Ingredients": [
       {
         "qty": 3.0,
@@ -20,6 +21,7 @@
   {
     "Recipe Name": "Copper Ingot",
     "Crafting Time (sec)": 2.0,
+    "texture": "resources/assets/iron_ingot.png",
     "Ingredients": [
       {
         "qty": 1.0,
@@ -57,6 +59,7 @@
   {
     "Recipe Name": "alt Pure Aluminum Ingot",
     "Crafting Time (sec)": 5.0,
+    "texture": "resources/assets/iron_ingot.png",
     "Ingredients": [
       {
         "qty": 12.0,

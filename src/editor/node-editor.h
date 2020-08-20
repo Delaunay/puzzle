@@ -509,9 +509,29 @@ struct NodeEditor{
         }
     }
 
+    std::string save_name = std::string(256, '\0');
+    bool override_save = false;
+
+    void draw_save_box(){
+        ImGui::InputText("Save name", save_name.data(), save_name.size());
+        ImGui::Checkbox("Override", &override_save);
+
+        if (ImGui::Button("Save")){
+            graph.save(std::string(save_name.c_str()), override_save);
+        }
+
+        ImGui::SameLine();
+
+        if (ImGui::Button("Load")){
+            graph.load(std::string(save_name.c_str()));
+        }
+    }
+
     void draw_tool_panel(){
         ImGui::Begin("Tool box");
         auto open = ImGuiTreeNodeFlags_DefaultOpen;
+
+        draw_save_box();
 
         if (ImGui::Button("Show Stats")){
             show_production_stat();

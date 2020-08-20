@@ -130,12 +130,12 @@ int main() {
     }*/
     app.editor.inited = true;
 
-    try {
+//    try {
         app.run();
-    } catch (const std::exception& error) {
-        debug("{}", error.what());
-        return EXIT_FAILURE;
-    }
+//    } catch (const std::exception& error) {
+//        debug("{}", error.what());
+//        return EXIT_FAILURE;
+//    }
 
     return EXIT_SUCCESS;
 }

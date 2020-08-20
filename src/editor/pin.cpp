@@ -10,7 +10,7 @@ Pin::Pin(char type, bool is_input, int side, int index, int count, Node* parent)
 
 Pin::Pin(Pin const&& obj) noexcept:
     ID(obj.ID), belt_type(obj.belt_type), side(obj.side), index(obj.index),
-    count(obj.count), parent(obj.parent), child(obj.child)
+    count(obj.count), parent(obj.parent)
 {}
 
 

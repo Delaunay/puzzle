@@ -51,6 +51,10 @@ void signal_handler(int sig){
 
 int register_signal_handler(){
     signal(SIGSEGV, signal_handler);   // install our handler
+    signal(SIGABRT, signal_handler);   // install our handler
+    signal(SIGKILL, signal_handler);   // install our handler
+    signal(SIGTERM, signal_handler);   // install our handler
+
     return 0;
 }
 #else

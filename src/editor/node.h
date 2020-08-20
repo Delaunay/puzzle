@@ -20,7 +20,7 @@ struct Node {
     int               recipe_idx = -1;
     int               rotation   =  0;
 
-    std::array<std::vector<Pin>, 4> pins;
+    std::vector<std::vector<Pin>> pins;
 
     Node(int building, const ImVec2& pos, int recipe_idx=-1, int rotation=0);
 
@@ -43,5 +43,6 @@ struct Node {
         return obj.ID == ID;
     }
 };
+
 
 #endif

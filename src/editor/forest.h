@@ -41,6 +41,9 @@ V* get(std::unordered_map<K, V>& map, K const& k){
 // Data structure to manage and query the graph drawn on the screen
 struct Forest{
 public:
+    friend void to_json(json& j, const Forest& n);
+    friend void from_json(const json& j, Forest& n);
+
     // check if a pin is connected only once
     // if not remove it and make the new connection
     void remove_pin_link(Pin const* p){
@@ -364,9 +367,12 @@ public:
                 }
             }
         }
-
         stats[node->ID] = node_prod;
     }
+
+    void save(std::string const& filename, bool override=false);
+
+    void load(std::string const& filename);
 
 private:
     // We are using list because we want to use pointer as optional reference to a Node/NodeLink
@@ -377,7 +383,7 @@ private:
     std::list<NodeLink> links;
     // Pin to Link lookup
     std::unordered_map<std::size_t, NodeLink*> lookup;
-
 };
+
 
 #endif

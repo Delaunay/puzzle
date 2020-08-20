@@ -2,7 +2,7 @@
 
 
 Node::Node(int building, const ImVec2& pos, int recipe_idx, int rotation):
-    ID(next_id<std::size_t>()), building(building), recipe_idx(recipe_idx), rotation(rotation)
+    ID(next_id<std::size_t>()), building(building), recipe_idx(recipe_idx), rotation(rotation), pins(4)
 {
     assertf(building >= 0, "Node shoudl have a building");
 
