@@ -213,10 +213,12 @@ struct NodeEditor{
         if (ImGui::IsKeyReleased(SDL_SCANCODE_DELETE)){
             if (selected_node != nullptr){
                 remove_node(selected_node);
+                selected_node = nullptr;
             }
 
             if (selected_link != nullptr){
                 remove_link(selected_link);
+                selected_link = nullptr;
             }
         }
 

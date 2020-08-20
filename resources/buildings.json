@@ -33,7 +33,7 @@
         "l": 20,
         "h": 30,
         "inputs": ["C", "P"],
-        "outputs": ["C", "P"]
+        "outputs": ["P", "C"]
     },
     {
         "name": "Smelter",
@@ -87,6 +87,34 @@
           "top"   : ["CO"],
           "right" : ["CO"],
           "bottom": ["CO"]
+        },
+        "tier": 1
+    },
+    {
+        "name": "Pipeline Junction Cross (S)",
+        "energy": 0,
+        "w": 4,
+        "l": 4,
+        "h": 2,
+        "layout": {
+          "left"  : ["PI"],
+          "top"   : ["PO"],
+          "right" : ["PO"],
+          "bottom": ["PO"]
+        },
+        "tier": 1
+    },
+    {
+        "name": "Pipeline Junction Cross (M)",
+        "energy": 0,
+        "w": 4,
+        "l": 4,
+        "h": 2,
+        "layout": {
+          "left"  : ["PO"],
+          "top"   : ["PI"],
+          "right" : ["PI"],
+          "bottom": ["PI"]
         },
         "tier": 1
     },

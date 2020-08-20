@@ -10,8 +10,10 @@ NodeLink::NodeLink(Pin const* s, Pin const* e):
     assertf(start != nullptr, "start cannot be null");
     assertf(end   != nullptr, "end cannot be null");
 
-    assertf(!start->is_input, "Start the the output of a node");
-    assertf(end->is_input   , "End   the the output of a node");
+    if (start->belt_type == 'C'){
+        assertf(!start->is_input, "Start the the output of a node");
+        assertf(end->is_input   , "End   the the output of a node");
+    }
 }
 
 void LinkDragDropState::start_drag(){
@@ -31,20 +33,35 @@ void LinkDragDropState::set_starting_point(ImVec2 pos, Pin const* s){
 void LinkDragDropState::make_new_link(NodeEditor* editor){
     if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
         if (release && is_hovering){
-            if (start->is_input != end->is_input){
+            if (start->belt_type != end->belt_type){
+                debug("Cannot connect {} to {}!", start->belt_type, end->belt_type);
+                reset();
+                return;
+            }
+
+            bool make_connection = false;
+
+            // Conveyor belts have more constraints than pipes
+            if (start->belt_type == 'C'){
+                if (start->is_input == end->is_input){
+                    debug("Cannot connect input to input!");
+                    reset();
+                    return;
+
+                }
+
                 // Start needs to be the output of a node
                 if (start->is_input) {
                     std::swap(start, end);
                 }
+                make_connection = true;
+            } else if (start->belt_type == 'P'){
+                make_connection = true;
+            }
 
-                if (start->belt_type == end->belt_type){
-                    debug("Make Connection {} -> {}", start->ID, end->ID);
-                    editor->new_link(start, end);
-                } else {
-                    debug("Cannot connect {} to {}!", start->belt_type, end->belt_type);
-                }
-            } else {
-                debug("Cannot connect input to input!");
+            if (make_connection){
+                debug("Make Connection {} -> {}", start->ID, end->ID);
+                editor->new_link(start, end);
             }
         }
         reset();

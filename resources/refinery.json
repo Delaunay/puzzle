@@ -359,6 +359,7 @@
   {
     "Recipe Name": "Petroleum Coke",
     "Crafting Time (sec)": 6.0,
+    "texture": "resources/assets/petroleum_coke.png",
     "Ingredients": [
       {
         "qty": 4.0,
@@ -378,6 +379,7 @@
   {
     "Recipe Name": "Plastic",
     "Crafting Time (sec)": 6.0,
+    "texture": "resources/assets/plastic.png",
     "Ingredients": [
       {
         "qty": 3.0,
@@ -664,6 +666,7 @@
   {
     "Recipe Name": "Rubber",
     "Crafting Time (sec)": 6.0,
+    "texture": "resources/assets/rubber.png",
     "Ingredients": [
       {
         "qty": 3.0,

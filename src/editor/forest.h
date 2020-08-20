@@ -294,7 +294,17 @@ public:
             // Input link does not have the production info
             // recusively compute the parents
             if (!link_prod){
-                _compute_node_production(link->start->parent, stats);
+                // if (link->start->belt_type == 'C'){
+                //    _compute_node_production(link->start->parent, stats);
+                //}
+
+                // Only conveyor belts have start as guaranteed parent
+                // Pipe could have end as well
+                Node const* parent = link->start->parent;
+                if (parent == node){
+                    parent = link->end->parent;
+                }
+                _compute_node_production(parent, stats);
             }
 
             link_prod = get(stats, link->ID);
