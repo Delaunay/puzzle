@@ -210,6 +210,16 @@ struct NodeEditor{
             brush.set(selected_node->building, selected_node->recipe_idx, selected_node->rotation);
         }
 
+        if (ImGui::IsKeyReleased(SDL_SCANCODE_DELETE)){
+            if (selected_node != nullptr){
+                remove_node(selected_node);
+            }
+
+            if (selected_link != nullptr){
+                remove_link(selected_link);
+            }
+        }
+
         if (open_context_menu) {
             ImGui::OpenPopup("context_menu");
             if (node_hovered_in_list != nullptr)
