@@ -317,21 +317,8 @@ public:
                     for(auto& in_item: link_prod){
                         auto receiving = link_prod[in_item.first].produced;
                         node_prod[in_item.first].received += receiving;
-
-                        // by default mark all resources we received as not accepted
-                        // node_prod[in_item.first].overflow = node_prod[in_item.first].received;
                     }
                 }
-
-                 // now that we know the amount of item we are receiving we can compute
-                 // efficient and we can backward overflow
-                 //for(auto& item: recipe->inputs){
-                 //    auto& node_item = node_prod[item.name];
-                     // node_item.consumed = std::min(node_item.received, item.speed);
-                     // update overflow to reflect our usage
-                 //    node_item.overflow = std::max(node_item.received - item.speed, 0.f);
-                     // efficiency = std::min(efficiency, node_item.consumed / item.speed);
-                 //}
             }
         }
         // Splitter / Merger
@@ -376,17 +363,14 @@ public:
 
                 auto next_node = get_next(out_link, node);
                 // TODO: might need to backtrack here
+                // min = item.second.produced / div
+                // max = item.second.produced
                 forward(next_node, node, stats);
             }
             return;
         }
 
         if (recipe){
-            // we have solid & liquid output
-            // TODO
-            if (recipe->outputs.size() > 1)
-                return;
-
             // Set node production
             for(auto& recipe: node->recipe()->outputs){
                 node_prod[recipe.name].produced = recipe.speed;
@@ -400,7 +384,10 @@ public:
 
                 ProductionBook out_prod;
                 for(auto& item: recipe->outputs){
-                    out_prod[item.name].produced = item.speed;
+                    // Make sure output type match the item type
+                    if ((out_pin->belt_type == 'C' && item.type == 'S' )|| (out_pin->belt_type == 'P' && item.type == 'L' )){
+                        out_prod[item.name].produced = item.speed;
+                    }
                 }
 
                 stats[out_link->ID] = out_prod;
@@ -467,7 +454,6 @@ public:
                 in_links.push_back(in_link);
             }
 
-            auto div = float(in_links.size());
             for(auto& in_link: in_links){
                 ProductionBook& in_prod = stats[in_link->ID] ;
 
@@ -489,11 +475,6 @@ public:
         }
 
         if (recipe){
-            // we have solid & liquid output
-            // TODO
-            if (recipe->outputs.size() > 1)
-                return;
-
             // Set node consumption
             for(auto& recipe: node->recipe()->inputs){
                 node_prod[recipe.name].consumed = recipe.speed;
@@ -508,7 +489,9 @@ public:
                 ProductionBook& in_prod = stats[in_link->ID];
                 for(auto& item: recipe->inputs){
                     if (in_prod.count(item.name) == 1){
-                        in_prod[item.name].consumed = item.speed;
+                        if ((in_pin->belt_type == 'C' && item.type == 'S' )|| (in_pin->belt_type == 'P' && item.type == 'L' )){
+                            in_prod[item.name].consumed = item.speed;
+                        }
                     }
                 }
 

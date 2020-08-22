@@ -47,21 +47,26 @@ void draw_efficiency(float efficiency, const char* label){
 }
 
 
-float compute_efficiency(ProductionBook const& prod){
+float compute_efficiency(ProductionBook const& prod, bool include_prod){
     float node_efficiency = 1;
     for (auto& item: prod){
-        if (item.second.consumed > 0){
-            // Are we receiving enough resources
-            // node_efficiency = std::min(node_efficiency, item.second.received / item.second.consumed);
-
-            // in that context overflow is the item we receive but cannot used because
-            // out output is backed up
-            node_efficiency = std::min(node_efficiency,
-                                       (item.second.received - item.second.overflow) / item.second.consumed);
+        if (include_prod && item.second.produced > 0){
+            //  2.5 / 5 =  50%
+            // 10   / 5 = 100%
+            auto production_efficiency = std::min(item.second.consumed / item.second.produced, 1.f);
+            node_efficiency = std::min(node_efficiency, production_efficiency);
         }
 
-        // In case of Raw Nodes
+        if (item.second.received > 0){
+            // we are receiving an item we do not need
+            if (item.second.consumed <= 0)
+                node_efficiency = 0.f;
 
+            else{
+                auto consumption_efficiency = std::min(item.second.received / item.second.consumed, 1.f);
+                node_efficiency = std::min(node_efficiency, consumption_efficiency);
+            }
+        }
     }
     return node_efficiency;
 }
@@ -72,7 +77,7 @@ float NodeEditor::compute_overal_efficiency(){
 
     for(auto& node: graph.iter_nodes()){
         ProductionBook& prod = prod_stats[node.ID];
-        efficiency += compute_efficiency(prod);
+        efficiency += compute_efficiency(prod, true);
         count += 1;
     }
 
@@ -145,13 +150,15 @@ void NodeEditor::draw_overall_performance(){
     ProductionBook low_tier;
     for(auto& leaf: graph.roots()){
         ProductionBook& prod = prod_stats[leaf->ID];
+        float eff = compute_efficiency(prod, false);
+
         for(auto& item: prod){
             if (item.second.produced <= 0)
                 continue;
 
-            low_tier[item.first].consumed += item.second.consumed;
-            low_tier[item.first].produced += item.second.produced;
-            low_tier[item.first].received += item.second.received;
+            low_tier[item.first].consumed += item.second.consumed * eff;
+            low_tier[item.first].produced += item.second.produced * eff;
+            low_tier[item.first].received += item.second.received * eff;
         }
     }
 
@@ -167,13 +174,15 @@ void NodeEditor::draw_overall_performance(){
     ProductionBook high_tier;
     for(auto& leaf: graph.leaves()){
         ProductionBook& prod = prod_stats[leaf->ID];
+        float eff = compute_efficiency(prod, false);
+
         for(auto& item: prod){
             if (item.second.produced <= 0)
                 continue;
 
-            high_tier[item.first].consumed += item.second.consumed;
-            high_tier[item.first].produced += item.second.produced;
-            high_tier[item.first].received += item.second.received;
+            high_tier[item.first].consumed += item.second.consumed * eff;
+            high_tier[item.first].produced += item.second.produced * eff;
+            high_tier[item.first].received += item.second.received * eff;
         }
     }
 
@@ -197,7 +206,7 @@ void NodeEditor::draw_production(std::size_t id, bool link){
         ProductionBook const& prod = prod_stats[id];
 
         if (!link){
-            float efficiency = compute_efficiency(prod);
+            float efficiency = compute_efficiency(prod, true);
             auto label = fmt::format("Efficiency ({:6.2f})", efficiency * 100.f);
             draw_efficiency(efficiency, label.c_str());
         }
