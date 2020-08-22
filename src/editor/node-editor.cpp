@@ -51,8 +51,17 @@ float compute_efficiency(ProductionBook const& prod){
     float node_efficiency = 1;
     for (auto& item: prod){
         if (item.second.consumed > 0){
-            node_efficiency = std::min(node_efficiency, item.second.received / item.second.consumed);
+            // Are we receiving enough resources
+            // node_efficiency = std::min(node_efficiency, item.second.received / item.second.consumed);
+
+            // in that context overflow is the item we receive but cannot used because
+            // out output is backed up
+            node_efficiency = std::min(node_efficiency,
+                                       (item.second.received - item.second.overflow) / item.second.consumed);
         }
+
+        // In case of Raw Nodes
+
     }
     return node_efficiency;
 }
@@ -73,11 +82,10 @@ float NodeEditor::compute_overal_efficiency(){
 
 void draw_book(const char* id, ProductionBook const& prod, bool prod_only=false){
     // Production Breakdown
-    int cols = 4;
+    int cols = 5;
     if (prod_only){
         cols = 2;
     }
-
 
     ImGui::Separator();
     ImGui::Columns(cols, id, true);
@@ -89,7 +97,11 @@ void draw_book(const char* id, ProductionBook const& prod, bool prod_only=false)
 
     ImGui::NextColumn();
     ImGui::Text("Produced");
-    ImGui::Spacing();
+    if (!prod_only)
+        ImGui::Spacing();
+    else
+        ImGui::Separator();
+
     for(auto& item: prod){
         ImGui::Text("%5.2f", item.second.produced);
     }
@@ -104,9 +116,16 @@ void draw_book(const char* id, ProductionBook const& prod, bool prod_only=false)
 
         ImGui::NextColumn();
         ImGui::Text("Received");
-        ImGui::Separator();
+        ImGui::Spacing();
         for(auto& item: prod){
             ImGui::Text("%5.2f", item.second.received);
+        }
+
+        ImGui::NextColumn();
+        ImGui::Text("Overflow");
+        ImGui::Separator();
+        for(auto& item: prod){
+            ImGui::Text("%5.2f", item.second.overflow);
         }
     }
 
@@ -290,7 +309,7 @@ void NodeEditor::draw_selected_info(){
         ImGui::TreePop();
     }
     // Recipe Stop
-    draw_production(selected_node->ID);
+    draw_production(selected_node->ID, false);
 
     ImGui::TreePop();
 }

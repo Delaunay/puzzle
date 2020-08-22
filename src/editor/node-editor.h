@@ -520,7 +520,10 @@ struct NodeEditor{
         }
 
         if (need_recompute_prod) {
-            prod_stats = graph.compute_production();
+            prod_stats = graph.full_forward();
+            graph.full_backward(prod_stats);
+
+            // prod_stats = graph.compute_production();
             need_recompute_prod = false;
         }
 

@@ -30,6 +30,11 @@ struct Node {
 
     ImVec2 size() const;
 
+    std::vector<Pin*> input_pins;
+    std::vector<Pin*> output_pins;
+
+    void add_pin(int side, char type, bool input, int pin_side, int i, int n);
+
     // Return slot position (no rotation)
     ImVec2 left_slots  (float num, float count) const;
     ImVec2 right_slots (float num, float count) const;
@@ -42,6 +47,8 @@ struct Node {
     bool operator== (Node const& obj){
         return obj.ID == ID;
     }
+
+
 };
 
 

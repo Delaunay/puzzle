@@ -26,18 +26,27 @@ Node::Node(int building, const ImVec2& pos, int recipe_idx, int rotation):
             assertf(p[1] == 'I' || p[1] == 'O',
                     "Pin type should be defined");
 
-            side_pins.emplace_back(
-                p[0],           // Belt Type
-                p[1] == 'I',    // Input
-                pin_side,       // Pin Side
-                i,              // Pin Index
-                n,              // Pin Count on that side
-                this);          // Parent
+            add_pin(get_side(side.first),
+                    p[0],           // Belt Type
+                    p[1] == 'I',    // Input
+                    pin_side,       // Pin Side
+                    i,              // Pin Index
+                    n);             // Pin Count on that side
         }
     }
     Pos = pos;
 }
 
+void Node::add_pin(int side, char type, bool input, int pin_side, int i, int n){
+    std::vector<Pin>& side_array = pins[std::size_t(side)];
+    side_array.emplace_back(type, input, pin_side, i, n, this);
+
+    if (input){
+        input_pins.emplace_back(&*side_array.rbegin());
+    } else {
+        output_pins.emplace_back(&*side_array.rbegin());
+    }
+}
 
 void Node::update_size(ImVec2){
     ImVec2 base = {scaling * descriptor->l, scaling *descriptor->w};
