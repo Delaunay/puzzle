@@ -231,12 +231,14 @@ void NodeEditor::draw_selected_info(){
         ImGui::Text("Name");
         ImGui::Text("Energy");
         ImGui::Text("Dimension");
+        ImGui::Text("ID");
 
         ImGui::NextColumn();
 
         ImGui::Text("%s", b->name.c_str());
         ImGui::Text("%.2f", b->energy);
         ImGui::Text("%.0f x %.0f", b->w, b->l);
+        ImGui::Text("%lu", selected_node->ID);
 
         ImGui::Separator();
         ImGui::Columns(1);

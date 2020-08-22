@@ -268,18 +268,11 @@ public:
     // going through it
     using ProductionStats = std::unordered_map<std::size_t, ProductionBook>;
 
-    ProductionStats compute_production(){
-        // Memoization table
-        ProductionStats stats;
-        _compute_production(stats);
-        return stats;
-    }
 
-    // Compute the
-    void _compute_production(ProductionStats& stats) const {
-        for(auto& node: iter_nodes()){
-            _compute_node_production(&node, stats);
-        }
+    ProductionStats compute_production(){
+        ProductionStats prod_stats = full_forward();
+        full_backward(prod_stats);
+        return prod_stats;
     }
 
     ProductionStats full_forward(){
@@ -296,43 +289,6 @@ public:
         }
     }
 
-//    void backward(Node* const node, Node* const prev, ProductionStats& stats){
-//        auto recipe = node->recipe();
-//        ProductionBook& node_prod = stats[node->ID];
-//        float efficiency = 1;
-
-//        // Production Nodes
-//        if (recipe){
-//            // pass down all the consumed resources to the top
-//            for(auto& out_pin: node->output_pins){
-//                auto out_link = find_link(out_pin);
-//                if (!out_link)
-//                    continue;
-
-//                auto link_prod = stats[out_link->ID];
-//                for(auto& out_prod: link_prod){
-//                    node_prod[out_prod.first].consumed = out_prod.second.consumed;
-//                }
-//            }
-
-////            for(auto& item: recipe->outputs){
-////                auto& node_item = node_prod[item.name];
-////                efficiency = std::max(efficiency, 1.f - node_item.overflow / node_item.produced);
-////            }
-
-////            for(auto* in_pin: node->input_pins){
-////                auto in_link = find_link(in_pin);
-////                if (!in_link)
-////                    continue;
-
-////                auto link_prod = stats[in_link->ID];
-////                for(auto& item: link_prod){
-////                    item.second.overflow = node_prod
-////                }
-////            }
-//        }
-//    }
-
     void forward(Node const* node, Node const* prev, ProductionStats& stats){
         auto recipe = node->recipe();
         ProductionBook& node_prod = stats[node->ID];
@@ -348,6 +304,7 @@ public:
             // start Building, fetch inputs
             else {
                 std::vector<NodeLink*> in_links;
+
                 // Compute how much resources we are receving accross lanes
                 for(auto& in_pin: node->input_pins){
                     auto in_link = find_link(in_pin);
@@ -362,7 +319,7 @@ public:
                         node_prod[in_item.first].received += receiving;
 
                         // by default mark all resources we received as not accepted
-                        node_prod[in_item.first].overflow = node_prod[in_item.first].received;
+                        // node_prod[in_item.first].overflow = node_prod[in_item.first].received;
                     }
                 }
 
@@ -379,6 +336,7 @@ public:
         }
         // Splitter / Merger
         else {
+            ProductionBook receiving;
 
             // Compute how much item we are receiving
             for(auto& in_pin: node->input_pins){
@@ -388,8 +346,13 @@ public:
 
                 auto link_prod = stats[in_link->ID];
                 for(auto& in_item: link_prod){
-                    node_prod[in_item.first].produced += in_item.second.produced;
+                    receiving[in_item.first].produced += in_item.second.produced;
                 }
+            }
+
+            //
+            for(auto& item: receiving){
+                node_prod[item.first].produced = item.second.produced;
             }
 
             // Redistribute the items accross all the output links
@@ -424,11 +387,12 @@ public:
             if (recipe->outputs.size() > 1)
                 return;
 
+            // Set node production
             for(auto& recipe: node->recipe()->outputs){
                 node_prod[recipe.name].produced = recipe.speed;
             }
 
-            // One output
+            // forward production to outputs
             for(auto& out_pin: node->output_pins){
                 auto out_link = find_link(out_pin);
                 if (!out_link)
@@ -442,7 +406,10 @@ public:
                 stats[out_link->ID] = out_prod;
 
                 auto next_node = get_next(out_link, node);
-                forward(next_node, node, stats);
+
+                if (next_node != prev){
+                    forward(next_node, node, stats);
+                }
             }
         }
     }
@@ -452,10 +419,16 @@ public:
         ProductionBook& node_prod = stats[node->ID];
         float efficiency = 1;
 
-        if (recipe){
+        // set it to 0
+        for(auto& item: node_prod){
+            item.second.consumed = 0;
+        }
+        // -
 
+        if (recipe){
             std::vector<NodeLink*> out_links;
-            // Compute how much resources we are consumed accross lanes
+
+            // Compute how much resources we are consuming accross lanes
             for(auto& out_pin: node->output_pins){
                 auto out_link = find_link(out_pin);
                 if (!out_link)
@@ -500,14 +473,17 @@ public:
 
                 // Consume the % of its contribution
                 for(auto& item: in_prod){
-                    float total_received = node_prod[item.first].received;
+                    float total_received = node_prod[item.first].produced;
                     float contributed    = item.second.produced;
                     item.second.consumed = node_prod[item.first].consumed * (contributed / total_received);
                 }
 
                 auto next_node = get_next(in_link, node);
                 // TODO: might need to backtrack here
-                backward(next_node, node, stats);
+
+                if (next_node != prev){
+                    backward(next_node, node, stats);
+                }
             }
             return;
         }
@@ -518,6 +494,12 @@ public:
             if (recipe->outputs.size() > 1)
                 return;
 
+            // Set node consumption
+            for(auto& recipe: node->recipe()->inputs){
+                node_prod[recipe.name].consumed = recipe.speed;
+            }
+
+            // Forward consumption to inputs
             for(auto& in_pin: node->input_pins){
                 auto in_link = find_link(in_pin);
                 if (!in_link)
@@ -525,7 +507,9 @@ public:
 
                 ProductionBook& in_prod = stats[in_link->ID];
                 for(auto& item: recipe->inputs){
-                    in_prod[item.name].consumed = item.speed;
+                    if (in_prod.count(item.name) == 1){
+                        in_prod[item.name].consumed = item.speed;
+                    }
                 }
 
                 auto next_node = get_next(in_link, node);
@@ -536,283 +520,6 @@ public:
 
     // roots (Raw material) => Leaves (propagate max production)
     // Leaves => roots (propagate overflow)
-
-    void propagate_overflow(NodeLink* link, Node const* prev, ProductionStats& stats) const {
-        if (!link)
-            return;
-
-        Node* next = nullptr;
-
-        if (link->end->parent == prev)
-            next = link->start->parent;
-
-        if (link->start->parent == prev)
-            next = link->end->parent;
-
-        auto& link_prod = stats[link->ID];
-        auto& next_prod = stats[next->ID];
-
-        for(auto& item: link_prod){
-            next_prod[item.first].overflow = item.second.overflow;
-        }
-
-        propagate_overflow(next, link, stats);
-    }
-
-    // leaves to roots
-    void propagate_overflow(Node const* node, NodeLink const* prev, ProductionStats& stats) const {
-        auto sorted_pins = get_connected_pins(node);
-
-        // Compute craft-time efficiency
-        auto& node_prod = stats[node->ID];
-
-        // check all the item we are producing
-        // if some are backed up it reduces efficiency
-        float efficiency = 1;
-        for (auto& item: node_prod){
-            if (item.second.produced > 0 && item.second.overflow > 0){
-                efficiency = std::min(efficiency, item.second.overflow / item.second.produced);
-            }
-        }
-
-        // produced - consumed + overflow
-
-        // reduce our consumption of goods
-        for (auto& item: node_prod){
-            // production node
-            if (item.second.consumed > 0){
-                item.second.overflow = item.second.consumed - item.second.consumed * efficiency;
-            }
-            // resource node
-            else if (item.second.produced > 0) {
-                debug("{}", efficiency);
-            }
-        }
-
-        // Propagte the change to the links
-        for(auto& inpin: sorted_pins.input_pins){
-            auto link = find_link(inpin);
-            if (!link)
-                continue;
-
-            auto link_prod = stats[link->ID];
-            for(auto& item: link_prod){
-                link_prod[item.first].overflow = node_prod[item.first].overflow;
-            }
-
-            propagate_overflow(link, node, stats);
-        }
-    }
-
-    // Roots => leaves
-    ProductionBook _compute_node_production(Node const* node, ProductionStats& stats) const {
-        // TODO: add logic for splitter/merger
-        // std::unordered_map<std::string, DoubleEntry>;
-
-
-        if (node == nullptr) {
-            debug("nullptr was passed!");
-            return ProductionBook();
-        }
-
-        if (stats.count(node->ID) > 0) {
-            // we are recursively computing node prod
-            // so some nodes might get computed before we reach them
-            return ProductionBook();
-        }
-
-        debug("Compute production for {}:{}", node->ID, node->descriptor->name);
-
-        // register it now to avoid infinite recursion
-        ProductionBook& node_prod = stats[node->ID];
-
-        // Add the ingredients we need
-        auto recipe = node->recipe();
-        if (recipe){
-            for (auto& in: recipe->inputs){
-                DoubleEntry v;
-                v.consumed = in.speed;
-                node_prod.insert(std::make_pair(in.name, v));
-            }
-        }
-
-        // Extract the pin we are interested in
-        std::vector<Pin const*> solid_output;
-        std::vector<Pin const*> liquid_output;
-
-        for (auto& side: node->pins){
-            for(auto& pin: side){
-                if (find_link(&pin)) {
-                    if (!pin.is_input) {
-                        if (pin.belt_type == 'C'){
-                            solid_output.push_back(&pin);
-                        } else if (pin.belt_type == 'P'){
-                            liquid_output.push_back(&pin);
-                        }
-                    }
-                }
-            }
-        }
-
-        // Check input pins first
-        // we need to know if the node require input is satified to
-        // known how much we output
-        for(auto pin: node->input_pins){
-            auto link = find_link(pin);
-            if (!link)
-                continue;
-
-            // Find out which item this belt in bringing
-            ProductionBook* link_prod = get(stats, link->ID);
-
-            // Input link does not have the production info
-            // recusively compute the parents
-            if (!link_prod){
-                // Only conveyor belts have start as guaranteed parent
-                // Pipe could have end as well
-                Node const* parent = link->start->parent;
-                if (parent == node){
-                    parent = link->end->parent;
-                }
-                _compute_node_production(parent, stats);
-            }
-
-            link_prod = get(stats, link->ID);
-
-            // result was cached!
-            if (link_prod){
-                // for each item this link provide consume as much as we can
-                for(auto& link_item: (*link_prod)){
-                    // is the item a requirement for us?
-                    DoubleEntry* node_item = get(node_prod, link_item.first);
-                    float consumed = 0;
-
-                    if (node_item){
-                        consumed = std::min(node_item->consumed, link_item.second.produced);
-                        node_item->received = consumed;
-                    }
-
-                    // If the item is not needed it fully overflows
-                    link_item.second.consumed = consumed;
-
-                    // This is the first overflow
-                    // we are receiving more items that we need
-                    link_item.second.overflow = std::max(link_item.second.produced - consumed, 0.f);
-                    propagate_overflow(link, node, stats);
-                }
-                // --
-            } else {
-                debug("Link was not computed! {}", link->ID);
-            }
-        }
-
-        // Compute craft-time efficiency
-        float efficiency = 1;
-        for (auto& item: node_prod){
-            if (item.second.consumed > 0){
-                efficiency = std::min(efficiency, item.second.received / item.second.consumed);
-            }
-        }
-
-        // Populate output connection with production info
-        if (recipe){
-            // For each output set the production
-            for (auto& out: recipe->outputs){
-                std::vector<Pin const*> out_pin;
-
-                float total_production = out.speed * efficiency;
-
-                // Set the production info the the node itself as well
-                // Building can consume & produce the same good!
-                DoubleEntry& node_prod_entry = node_prod[out.name];
-                node_prod_entry.produced = total_production;
-
-                // set production to the correct pin
-                if (out.type == 'S') {
-                    out_pin = solid_output;
-                } else if (out.type == 'L') {
-                    out_pin = liquid_output;
-                } else {
-                    debug("{} output not known", out.type);
-                }
-
-                if (out_pin.size() > 0) {
-                    // this is incorrect a connection could be consuming less
-                    // but we need to go downstream and up again to know that
-
-                    // to compute this correctly we need:
-                    //    - put the partial total in each
-                    //    - traverse down each and see if anyone is not using it in to its fullest
-                    //    - move unused quantities to the other branches
-                    //
-                    // Obviously this would cost a lot of resources to compute
-                    // might mitigate the cost if we could compute that in reverse
-                    // leaves send up what they need and from that we know if the max will be reached or not
-                    float prod_by_link = total_production / out_pin.size();
-
-
-                    // This is the second possible overflow
-                    // We receive enough but it is not consumed
-                    // For now it is ignored
-                    for (auto& pin: out_pin){
-                        auto link = find_link(pin);
-
-                        DoubleEntry out_prod;
-                        out_prod.produced = prod_by_link;
-
-                        ProductionBook link_prod;
-                        link_prod[out.name] = out_prod;
-
-                        stats[link->ID] = link_prod;
-                    }
-                } else {
-                    debug("No valid output pin found for {}", node->ID);
-                }
-            }
-        } else {
-            // Merger/Splitter logic
-            // Find out how much items are passing through this
-            for(auto& inpin: node->input_pins){
-                auto link = find_link(inpin);
-                if (!link)
-                    continue;
-
-                ProductionBook* link_prod = get(stats, link->ID);
-                for(auto& item_received: *link_prod){
-                    node_prod[item_received.first].received += item_received.second.produced;
-                }
-            }
-
-            std::vector<Pin const*> out_pin;
-
-            // set production to the correct pin
-            if (solid_output.size() > 0) {
-                out_pin = solid_output;
-            } else {
-                out_pin = liquid_output;
-            }
-
-            for(auto& outpin: out_pin){
-                auto link = find_link(outpin);
-                if (!link)
-                    continue;
-
-                ProductionBook link_prod;
-
-                for(auto& produced_item: node_prod){
-                    if (produced_item.second.received > 0){
-                        DoubleEntry out_prod;
-                        out_prod.produced = produced_item.second.received / float(out_pin.size());
-                        link_prod[produced_item.first] = out_prod;
-                    }
-                }
-
-                stats[link->ID] = link_prod;
-            }
-        }
-
-        return node_prod;
-    }
 
     void save(std::string const& filename, bool override=false);
 

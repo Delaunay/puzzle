@@ -47,9 +47,6 @@ struct Node {
     bool operator== (Node const& obj){
         return obj.ID == ID;
     }
-
-
 };
-
 
 #endif
