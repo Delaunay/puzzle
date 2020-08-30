@@ -71,6 +71,8 @@ public:
         auto* link = &(*links.rbegin());
         lookup[s->ID] = link;
         lookup[e->ID] = link;
+
+        link->logic = fetch_logic(this, link);
         return link;
     }
 
@@ -187,34 +189,6 @@ public:
         return prod;
     }
 
-    SortedPins get_connected_pins(Node const* node) const {
-        // Extract the pin we are interested in
-        std::vector<Pin const*> input_pins;
-        std::vector<Pin const*> solid_output;
-        std::vector<Pin const*> liquid_output;
-
-        for (auto& side: node->pins){
-            for(auto& pin: side){
-                if (find_link(&pin)) {
-                    if (pin.is_input) {
-                        input_pins.push_back(&pin);
-                    }  else {
-                        if (pin.belt_type == 'C'){
-                            solid_output.push_back(&pin);
-                        } else if (pin.belt_type == 'P'){
-                            liquid_output.push_back(&pin);
-                        }
-                    }
-                }
-            }
-        }
-
-        return SortedPins{
-            input_pins,
-            solid_output,
-            liquid_output};
-    }
-
     // Roots do not have input links
     std::vector<Node*> find_roots_leaves(bool match){
         std::vector<Node*> prod;
@@ -249,9 +223,7 @@ public:
 
     void compute_production(){
         for(int k = 0; k <= 10; ++k){
-            traverse([this](Node* n){
-                n->logic->tick();
-            });
+            traverse([this](Node* n){ n->logic->tick(); });
         }
     }
 

@@ -29,6 +29,7 @@ struct NodeLink{
         return start->belt_type;
     }
 
+    SimualtionStep logic = nullptr;
     ProductionBook production;
 };
 
