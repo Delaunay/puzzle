@@ -143,13 +143,15 @@ public:
 
         for(auto& node: iter_nodes()){
             if (node.descriptor){
+                float energy = node.descriptor->energy * node.efficiency;
+
                 if (node.descriptor->energy > 0){
-                    stat.produced += node.descriptor->energy;
+                    stat.produced += energy;
                 } else {
-                    stat.consumed += node.descriptor->energy;
+                    stat.consumed += energy;
                 }
 
-                stat.stats[node.descriptor] += node.descriptor->energy;
+                stat.stats[node.descriptor] += energy;
             }
         }
 
