@@ -151,7 +151,7 @@ void NodeEditor::draw_overall_performance(){
     // Raw material use (lowest tier item)
     ProductionBook low_tier;
     for(auto& leaf: graph.roots()){
-        ProductionBook& prod = prod_stats[leaf->ID];
+        ProductionBook const& prod = leaf->production();
         float eff = leaf->efficiency; // compute_efficiency(prod, false);
 
         for(auto& item: prod){
@@ -175,7 +175,7 @@ void NodeEditor::draw_overall_performance(){
     // Roots Productions (highest tier item)
     ProductionBook high_tier;
     for(auto& leaf: graph.leaves()){
-        ProductionBook& prod = prod_stats[leaf->ID];
+        ProductionBook const& prod = leaf->production();
         float eff = leaf->efficiency; // compute_efficiency(prod, false);
 
         for(auto& item: prod){

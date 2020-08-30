@@ -77,6 +77,12 @@ class Pin;
 // Using strategy pattern to define how each building behave in the simulation
 
 
+struct Simulation{
+    ProductionBook raw_materials;
+    ProductionBook top_items;
+};
+
+
 // Simulation strategy
 struct SimulationLogic{
     Forest* forest = nullptr;
