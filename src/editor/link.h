@@ -2,7 +2,7 @@
 #define PUZZLE_EDITOR_LINK_HEADER
 
 #include "pin.h"
-#include "simulation.h"
+#include "factory/simulation.h"
 
 // Link between two pins
 struct NodeLink{

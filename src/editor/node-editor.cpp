@@ -262,7 +262,7 @@ void NodeEditor::draw_selected_info(){
             available_recipes->data(),
             available_recipes->size())){
             need_recompute_prod = true;
-            selected_node->production = ProductionBook();
+            selected_node->logic->reset();
         }
 
         // display selected recipe
@@ -317,7 +317,7 @@ void NodeEditor::draw_selected_info(){
         ImGui::TreePop();
     }
     // Recipe Stop
-    draw_production(selected_node->production, selected_node->efficiency);
+    draw_production(selected_node->production(), selected_node->efficiency);
 
     ImGui::TreePop();
 }

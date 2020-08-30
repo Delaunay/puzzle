@@ -4,7 +4,7 @@
 #include "config.h"
 #include "utils.h"
 #include "pin.h"
-#include "simulation.h"
+
 #include "factory/simulation.h"
 
 #include <array>
@@ -25,6 +25,10 @@ struct Node {
     int               rotation   =  0;
     float             efficiency =  0.f;
     SimualtionStep    logic      = nullptr;
+
+    ProductionBook const& production () const {
+        return logic->production;
+    }
 
     bool is_pipeline_cross() const;
 
@@ -80,10 +84,6 @@ struct Node {
     bool operator== (Node const& obj){
         return obj.ID == ID;
     }
-
-    ProductionBook production;
-
-    void simulation_tick();
 };
 
 #endif

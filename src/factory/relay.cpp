@@ -19,7 +19,7 @@ void RelayLogic::fetch_inputs(){
         auto& link_prod = in_link->production;
 
         for(auto& item: link_prod){
-            auto& prod = self->production[item.first];
+            auto& prod = production[item.first];
 
             float remaining = prod.received;
 
@@ -37,7 +37,7 @@ void RelayLogic::fetch_inputs(){
 
 
 void RelayLogic::clear_outputs(){
-    for(auto& prod: self->production){
+    for(auto& prod: production){
         prod.second.consumed = prod.second.produced;
         prod.second.produced = 0;
     }
@@ -70,13 +70,13 @@ void RelayLogic::dispatch_outputs(){
     }
 
     ProductionBook available;
-    for(auto& item: self->production){
+    for(auto& item: production){
         available[item.first].received = item.second.received / float(links.size());
         item.second.consumed = 0;
     }
 
     for(auto& link: links){
-        for(auto& item:  self->production){
+        for(auto& item: production){
             auto remaining = link->production[item.first].produced;
 
             debug("    {}: {} {}", item.first, available[item.first].received, remaining);

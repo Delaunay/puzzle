@@ -3,11 +3,8 @@
 
 #include "link.h"
 #include "node.h"
-#include "simulation.h"
 
-struct NodeProduction {
-
-};
+using CircleGuard = std::unordered_map<std::size_t, bool>;
 
 
 // Safe Get
@@ -33,16 +30,8 @@ struct SortedPins{
 
 
 
-struct GraphIteratorForward{
-
-};
-
-struct GraphIteratorBackward{
-
-};
-
 inline
-    Node* get_next(NodeLink const* link, Node const* p){
+Node* get_next(NodeLink const* link, Node const* p){
     if (link->start->parent == p)
         return link->end->parent;
     return link->start->parent;
@@ -50,7 +39,7 @@ inline
 
 
 inline
-    Node* get_next(NodeLink* link, Node* p){
+Node* get_next(NodeLink* link, Node* p){
     if (link->start->parent == p)
         return link->end->parent;
     return link->start->parent;

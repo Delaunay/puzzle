@@ -14,7 +14,7 @@ void ManufacturerLogic::tick(){
 
 void ManufacturerLogic::fetch_inputs(Recipe* recipe) {
     for(auto& ingredient: recipe->inputs){
-        auto& prod = self->production[ingredient.name];
+        auto& prod = production[ingredient.name];
         prod.limit_consumed = ingredient.speed;
 
         for(auto& in_pin: self->input_pins){
@@ -39,13 +39,13 @@ void ManufacturerLogic::manufacture(Recipe* recipe) {
 
     // check if our input is full
     for(auto& ingredient: recipe->inputs){
-        auto& prod = self->production[ingredient.name];
+        auto& prod = production[ingredient.name];
         efficiency = std::min(efficiency, prod.consumed / ingredient.speed);
     }
 
     // check if our output is full
     for(auto& ingredient: recipe->outputs){
-        auto& prod = self->production[ingredient.name];
+        auto& prod = production[ingredient.name];
         efficiency = std::min(efficiency, prod.consumed / ingredient.speed);
     }
 
@@ -54,13 +54,13 @@ void ManufacturerLogic::manufacture(Recipe* recipe) {
 
     // consume inputs
     for(auto& ingredient: recipe->inputs){
-        auto& prod = self->production[ingredient.name];
+        auto& prod = production[ingredient.name];
         prod.received -= efficiency * ingredient.speed;
     }
 
     // produce outputs
     for(auto& ingredient: recipe->outputs){
-        auto& prod = self->production[ingredient.name];
+        auto& prod = production[ingredient.name];
         prod.produced += efficiency * ingredient.speed;
     }
 }
@@ -69,7 +69,7 @@ void ManufacturerLogic::dispatch_outputs(Recipe* recipe) {
     int out_link_count = 0;
 
     for (auto& ingredient: recipe->outputs){
-        auto& prod = self->production[ingredient.name];
+        auto& prod = production[ingredient.name];
         prod.limit_produced = ingredient.speed;
 
         for(auto& out_pin: self->output_pins){
@@ -102,7 +102,7 @@ void ManufacturerLogic::dispatch_outputs(Recipe* recipe) {
 
 void ManufacturerLogic::clear_outputs(Recipe* recipe){
     for (auto& ingredient: recipe->outputs){
-        auto& prod = self->production[ingredient.name];
+        auto& prod = production[ingredient.name];
         prod.produced = 0;
         prod.consumed = ingredient.speed;
     }
