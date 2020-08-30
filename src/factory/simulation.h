@@ -44,9 +44,9 @@ struct fmt::formatter<DoubleEntry>: formatter<float> {
 };
 
 struct ItemStat{
-    float consumed;
-    float produced;
-    float received;
+    float consumed = 0;
+    float produced = 0;
+    float received = 0;
 
     float overflow   = 0;
     float efficiency = 0;
@@ -94,8 +94,8 @@ struct SimulationLogic{
 
     NodeLink* find_link(Pin* pin);
 
-    inline void reset(){
-        production = ProductionBook();
+    virtual void reset(){
+        production.clear();
     }
 };
 
@@ -117,6 +117,8 @@ struct ManufacturerLogic: public SimulationLogic {
     void dispatch_outputs(Recipe* recipe);
 
     void clear_outputs(Recipe* recipe);
+
+    void reset() override;
 };
 
 

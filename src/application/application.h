@@ -14,18 +14,20 @@
 #include "utils.h"
 #include "imgui_impl_vulkan.h"
 
-struct Image{
+struct HostImage{
     int x = 0;
     int y = 0;
     int c = 4;
     void* data = nullptr;
 
-    Image(std::string const& path);
+    HostImage(std::string const& path);
 
-    Image(){}
+    HostImage(){}
 
-    ~Image();
+    ~HostImage();
 };
+
+using Image = HostImage;
 
 
 struct DeviceImage {
@@ -34,14 +36,38 @@ struct DeviceImage {
     VkImage        image   = VK_NULL_HANDLE;
     VkDeviceMemory memory  = VK_NULL_HANDLE;
     ImTextureID    descriptor_set = nullptr;
+    // VkDevice       device;
 
-    void cleanup(VkDevice device, VkDescriptorPool pool){
+    void cleanup(VkDevice device){
         vkDestroySampler(device, sampler, nullptr);
         vkDestroyImageView(device, view, nullptr);
         vkDestroyImage(device, image, nullptr);
         vkFreeMemory(device, memory, nullptr);
     }
 };
+
+
+/*
+// used to only keep one copy of the image
+struct Image2 {
+    union Data {
+        ~Data() {}
+
+        HostImage   host;
+        DeviceImage device;
+    } data;
+
+    bool is_host;
+
+    ~Image2(){
+        if (is_host) {
+            data.host.~HostImage();
+        } else {
+            data.device.~DeviceImage();
+        }
+    }
+};
+*/
 
 std::string to_string(VkResult err);
 

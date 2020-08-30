@@ -15,7 +15,6 @@ void ManufacturerLogic::tick(){
 void ManufacturerLogic::fetch_inputs(Recipe* recipe) {
     for(auto& ingredient: recipe->inputs){
         auto& prod = production[ingredient.name];
-        prod.limit_consumed = ingredient.speed;
 
         for(auto& in_pin: self->input_pins){
             auto in_link = find_link(in_pin);
@@ -28,40 +27,57 @@ void ManufacturerLogic::fetch_inputs(Recipe* recipe) {
 
                 in_link->production[ingredient.name].produced -= received;
                 prod.received += received;
-                prod.consumed = received;
             }
         }
     }
 }
 
+void ManufacturerLogic::reset() {
+    production.clear();
+    self->efficiency = 0.f;
+}
+
 void ManufacturerLogic::manufacture(Recipe* recipe) {
-    float efficiency = 1.f;
+    float in_efficiency = 1.f;
+    float out_efficiency = 1.f;
 
     // check if our input is full
     for(auto& ingredient: recipe->inputs){
         auto& prod = production[ingredient.name];
-        efficiency = std::min(efficiency, prod.consumed / ingredient.speed);
+        in_efficiency = std::min(in_efficiency, prod.received / ingredient.speed);
+
+        // debug("{} {} ", ingredient.name, in_efficiency, );
     }
 
     // check if our output is full
     for(auto& ingredient: recipe->outputs){
         auto& prod = production[ingredient.name];
-        efficiency = std::min(efficiency, prod.consumed / ingredient.speed);
+
+        // was not produced yet
+        if (prod.produced <= 0)
+            continue;
+
+        out_efficiency = std::min(out_efficiency, prod.consumed / ingredient.speed);
     }
 
-    self->efficiency = efficiency;
-    debug("({} {}) => {}", self->ID, self->recipe()->recipe_name, self->efficiency);
+    self->efficiency = std::min(in_efficiency, out_efficiency);
+    debug("({} {}) => (i: {}) (o: {})",
+          self->ID,
+          self->recipe()->recipe_name,
+          in_efficiency,
+          out_efficiency
+          );
 
     // consume inputs
     for(auto& ingredient: recipe->inputs){
         auto& prod = production[ingredient.name];
-        prod.received -= efficiency * ingredient.speed;
+        prod.received -= self->efficiency * ingredient.speed;
     }
 
     // produce outputs
     for(auto& ingredient: recipe->outputs){
         auto& prod = production[ingredient.name];
-        prod.produced += efficiency * ingredient.speed;
+        prod.produced += self->efficiency * ingredient.speed;
     }
 }
 
@@ -81,7 +97,11 @@ void ManufacturerLogic::dispatch_outputs(Recipe* recipe) {
             if (out_pin->compatible(ingredient)) {
                 // the amount of resources remaining since last tick
                 auto remaining = out_link->production[ingredient.name].produced;
-                auto can_be_send = std::max(ingredient.speed - remaining, 0.f);
+                auto can_be_send = std::max(prod.produced - remaining, 0.f);
+
+                if (can_be_send >= 0.f){
+                    debug("max({}- {}, {})", prod.produced, remaining, 0.f);
+                }
 
                 out_link->production[ingredient.name].produced += can_be_send;
                 out_link->production[ingredient.name].limit_produced = prod.limit_produced;

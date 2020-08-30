@@ -34,8 +34,6 @@ struct Node {
 
     std::vector<std::vector<Pin>> pins;
 
-    Node(int building, const ImVec2& pos, int recipe_idx=-1, int rotation=0);
-
     Recipe* recipe() const;
 
     void update_size(ImVec2);
@@ -84,6 +82,8 @@ struct Node {
     bool operator== (Node const& obj){
         return obj.ID == ID;
     }
+
+    Node(int building, const ImVec2& pos, int recipe_idx=-1, int rotation=0);
 };
 
 #endif

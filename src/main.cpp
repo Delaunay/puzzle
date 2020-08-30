@@ -65,69 +65,64 @@ public:
 
 #include "config.h"
 
-int main() {
+int main(int argc, const char* argv[]) {
+    std::string load_save;
+
+    for(int i = 1; i < argc;){
+        if (strcmp(argv[i], "--save") == 0){
+            load_save = argv[i + 1];
+            i += 2;
+        } else {
+            i += 1;
+        }
+    }
+
+
     auto& resources = Resources::instance();
     resources.load_configs();
 
     MyGame app;
 
-    assert(resources.buildings.size() > 0);
-    int miner  = resources.find_building("Miner");
-    int iron_ore = resources.find_recipe(miner, "Iron Ore");
+    if (load_save.size() > 0) {
+        app.editor.graph.load(load_save, true);
+    } else {
+        assert(resources.buildings.size() > 0);
+        int miner  = resources.find_building("Miner");
+        int iron_ore = resources.find_recipe(miner, "Iron Ore");
 
-    int smelter  = resources.find_building("Smelter");
-    int iron_ingot = resources.find_recipe(smelter, "Iron Ingot");
+        int smelter  = resources.find_building("Smelter");
+        int iron_ingot = resources.find_recipe(smelter, "Iron Ingot");
 
-    int constructor  = resources.find_building("Constructor");
-    int iron_plate = resources.find_recipe(constructor, "Iron Plate");
+        int constructor  = resources.find_building("Constructor");
+        int iron_plate = resources.find_recipe(constructor, "Iron Plate");
 
-    assertf(miner >= 0, "miner should be found");
-    assertf(iron_ore >= 0, "iron ore should be found");
-    assertf(smelter >= 0, "smelter should be found");
-    assertf(iron_ingot >= 0, "iron ingot");
-    assertf(constructor >= 0, "constructor");
-    assertf(iron_plate >= 0, "iron plate");
+        assertf(miner >= 0, "miner should be found");
+        assertf(iron_ore >= 0, "iron ore should be found");
+        assertf(smelter >= 0, "smelter should be found");
+        assertf(iron_ingot >= 0, "iron ingot");
+        assertf(constructor >= 0, "constructor");
+        assertf(iron_plate >= 0, "iron plate");
 
-    Node* n0 = app.editor.new_node(ImVec2(40 ,  50), miner, iron_ore);
-    Node* n1 = app.editor.new_node(ImVec2(240 , 50), smelter, iron_ingot);
-    Node* n2 = app.editor.new_node(ImVec2(440,  50), constructor, iron_plate);
+        Node* n0 = app.editor.new_node(ImVec2(40 ,  50), miner, iron_ore);
+        Node* n1 = app.editor.new_node(ImVec2(240 , 50), smelter, iron_ingot);
+        Node* n2 = app.editor.new_node(ImVec2(440,  50), constructor, iron_plate);
 
-    // Ore to smelter
-    {
-        auto outpin = &n0->pins[RightToLeft][0];
-        auto inpin  = &n1->pins[LeftToRight][0];
-        app.editor.new_link(outpin, inpin);
+        // Ore to smelter
+        {
+            auto outpin = &n0->pins[RightToLeft][0];
+            auto inpin  = &n1->pins[LeftToRight][0];
+            app.editor.new_link(outpin, inpin);
+        }
+
+        // Ingot to constructor
+        {
+            auto outpin = &n1->pins[RightToLeft][0];
+            auto inpin  = &n2->pins[LeftToRight][0];
+            app.editor.new_link(outpin, inpin);
+        }
     }
 
-    // Ingot to constructor
-    {
-        auto outpin = &n1->pins[RightToLeft][0];
-        auto inpin  = &n2->pins[LeftToRight][0];
-        app.editor.new_link(outpin, inpin);
-    }
 
-
-    /*
-    Node* n0 = app.editor.new_node(ImVec2(40 ,  50), 0, 0);
-    Node* n1 = app.editor.new_node(ImVec2(40 , 150), 0, 0);
-    Node* n2 = app.editor.new_node(ImVec2(270,  80), 1, 0);
-
-               app.editor.new_node(ImVec2(370, 100), 2, 0);
-               app.editor.new_node(ImVec2(470, 120), 3, 0);
-               app.editor.new_node(ImVec2(570, 140), 4, 0);
-               app.editor.new_node(ImVec2(570, 160), 5, 0);
-
-    {
-        auto outpin = &n0->pins[RightToLeft][0];
-        auto inpin  = &n2->pins[LeftToRight][0];
-        app.editor.new_link(outpin, inpin);
-    }
-
-    {
-        auto outpin = &n1->pins[RightToLeft][0];
-        auto inpin  = &n2->pins[LeftToRight][1];
-        app.editor.new_link(outpin, inpin);
-    }*/
     app.editor.inited = true;
 
 //    try {

@@ -38,7 +38,7 @@ const std::vector<uint16_t> indices = {
 
 #include <stb_image.h>
 
-Image::Image(std::string const& path){
+HostImage::HostImage(std::string const& path){
     data = stbi_load(path.c_str(), &x, &y, &c, c);
 
     if (!data){
@@ -47,7 +47,7 @@ Image::Image(std::string const& path){
     debug("Image {}x{}x{} loaded", x, y, c);
 }
 
-Image::~Image(){
+HostImage::~HostImage(){
     stbi_image_free(data);
     data = nullptr;
 }

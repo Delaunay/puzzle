@@ -22,14 +22,6 @@ V* get(std::unordered_map<K, V>& map, K const& k){
 //    }
 }
 
-struct SortedPins{
-    std::vector<Pin const*> input_pins;
-    std::vector<Pin const*> solid_output;
-    std::vector<Pin const*> liquid_output;
-};
-
-
-
 inline
 Node* get_next(NodeLink const* link, Node const* p){
     if (link->start->parent == p)
@@ -222,7 +214,15 @@ public:
     }
 
     void compute_production(){
-        for(int k = 0; k <= 10; ++k){
+        static int stop = 0;
+        static int steps = 0;
+
+        if (stop == 0){
+            traverse([this](Node* n){ n->logic->tick(); });
+            return;
+        }
+
+        for(; steps < stop; steps++){
             traverse([this](Node* n){ n->logic->tick(); });
         }
     }
