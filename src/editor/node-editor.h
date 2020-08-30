@@ -48,12 +48,13 @@ bool TreeNode(const char* label, ImGuiTreeNodeFlags flag)
 struct NodeEditor{
     puzzle::Application* app = nullptr;
     Forest               graph;
+    Simulation           sim;
     Brush                brush;
     ImVec2               scrolling = ImVec2(0.0f, 0.0f);
     LinkDragDropState    link_builder;
 
     NodeEditor(puzzle::Application* app = nullptr):
-        app(app)
+        app(app), sim(&graph)
     {
         inited = true;
     }
@@ -524,7 +525,7 @@ struct NodeEditor{
         }
 
         // simulation bit
-        graph.compute_production();
+        sim.compute_production();
 
 //        if (need_recompute_prod) {
 //            prod_stats = graph.compute_production();

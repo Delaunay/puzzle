@@ -144,26 +144,12 @@ void NodeEditor::draw_overall_performance(){
     ImGui::Begin("Performance");
 
     // Energy Consumption
-    auto e = graph.compute_electricity();
+    auto e = sim.compute_electricity();
     auto energy_label = fmt::format("Energy ({:6.2f} MW)", -1.f * e.consumed);
     draw_efficiency(-1.f * e.produced / e.consumed, energy_label.c_str());
 
     // Raw material use (lowest tier item)
-    ProductionBook low_tier;
-    for(auto& leaf: graph.roots()){
-        ProductionBook const& prod = leaf->production();
-        float eff = leaf->efficiency; // compute_efficiency(prod, false);
-
-        for(auto& item: prod){
-            if (item.second.produced <= 0)
-                continue;
-
-            low_tier[item.first].consumed += item.second.consumed * eff;
-            low_tier[item.first].produced += item.second.produced * eff;
-            low_tier[item.first].received += item.second.received * eff;
-        }
-    }
-
+    auto low_tier = sim.raw_materials();
     ImGui::Text("Raw Material Usage");
     draw_book("Raw Material", low_tier, true);
 
@@ -172,21 +158,8 @@ void NodeEditor::draw_overall_performance(){
     auto label = fmt::format("Overall Efficiency ({:6.2f} %)", efficiency * 100.f);
     draw_efficiency(efficiency, label.c_str());
 
-    // Roots Productions (highest tier item)
-    ProductionBook high_tier;
-    for(auto& leaf: graph.leaves()){
-        ProductionBook const& prod = leaf->production();
-        float eff = leaf->efficiency; // compute_efficiency(prod, false);
 
-        for(auto& item: prod){
-            if (item.second.produced <= 0)
-                continue;
-
-            high_tier[item.first].consumed += item.second.consumed * eff;
-            high_tier[item.first].produced += item.second.produced * eff;
-            high_tier[item.first].received += item.second.received * eff;
-        }
-    }
+    auto high_tier = sim.top_items();
 
     ImGui::Text("Production Available");
     draw_book("Production", high_tier, true);

@@ -137,160 +137,18 @@ public:
     Iterator<NodeConstIterator> iter_nodes() const { return Iterator(nodes.begin(), nodes.end()); }
     Iterator<LinkConstIterator> iter_links() const { return Iterator(links.begin(), links.end()); }
 
-    // Return the consumption of electricity per buildings and in total
-    Engery compute_electricity(){
-        Engery stat;
-
-        for(auto& node: iter_nodes()){
-            if (node.descriptor){
-                float energy = node.descriptor->energy * node.efficiency;
-
-                if (node.descriptor->energy > 0){
-                    stat.produced += energy;
-                } else {
-                    stat.consumed += energy;
-                }
-
-                stat.stats[node.descriptor] += energy;
-            }
-        }
-
-        return stat;
-    }
-
-    // Compute the item consumption/production
-    // This is more informative than anything else
-    // Craft Time Efficiency is better suited to detect bottlenecks
-    //
-    //  Iron Rod            + 939
-    //                              - 203
-    ProductionBook production_statement(){
-        ProductionBook prod;
-
-        for(auto& node: iter_nodes()){
-            auto recipe = node.recipe();
-
-            if (recipe){
-                for(auto& input: recipe->inputs){
-                    prod[input.name].consumed += input.speed;
-                }
-
-                for(auto& output: recipe->outputs){
-                    prod[output.name].produced += output.speed;
-                }
-            }
-        }
-        return prod;
-    }
+    // Roots do not have input links
+    std::vector<Node*> find_roots_leaves(bool match);
 
     // Roots do not have input links
-    std::vector<Node*> find_roots_leaves(bool match){
-        std::vector<Node*> prod;
-
-        for(auto& node: iter_nodes()){
-            bool has_inputs = false;
-
-            for (auto& side: node.pins){
-                for(auto& pin: side){
-                    if (pin.is_input == match && find_link(&pin)){
-                        has_inputs = true;
-                    }
-                }
-            }
-
-            if (!has_inputs){
-                prod.push_back(&node);
-            }
-        }
-        return prod;
-    }
-
-    // Roots do not have input links
-    std::vector<Node*> roots(){
-        return find_roots_leaves(true);
-    }
+    std::vector<Node*> roots();
 
     // Leaves do not have output links
-    std::vector<Node*> leaves(){
-        return find_roots_leaves(false);
-    }
+    std::vector<Node*> leaves();
 
-    void compute_production(){
-        static int stop = 0;
-        static int steps = 0;
+    void traverse(std::function<void(Node*)> fun);
 
-        if (stop == 0){
-            traverse([this](Node* n){ n->logic->tick(); });
-            return;
-        }
-
-        for(; steps < stop; steps++){
-            traverse([this](Node* n){ n->logic->tick(); });
-        }
-    }
-
-    void traverse(std::function<void(Node*)> fun){
-        // We should only visit a child once
-        // children can be shared
-        CircleGuard guard;
-
-        // Breadth-first traversal so production gets populated evenly
-        std::list<Node*> children;
-        for(auto& n: roots())
-            children.push_back(n);
-
-        while (children.size() > 0){
-            Node* node = *children.begin();
-            children.pop_front();
-
-            if (guard.count(node->ID) > 0){
-                continue;
-            }
-
-            guard[node->ID] = true;
-            fun(node);
-
-            for(auto& out_pin: node->output_pins){
-                auto link = find_link(out_pin);
-                if (!link)
-                    continue;
-
-                auto next = get_next(link, node);
-                children.push_back(next);
-            }
-        }
-    }
-
-    void reverse(std::function<void(Node*)> fun){
-        // We should only visit a child once
-        // children can be shared
-        CircleGuard guard;
-
-        std::list<Node*> children;
-        for(auto& n: leaves())
-            children.push_back(n);
-
-        while (children.size() > 0){
-            Node* node = *children.begin();
-            children.pop_front();
-
-            if (guard.count(node->ID) > 0){
-                continue;
-            }
-
-            guard[node->ID] = true;
-            fun(node);
-
-            for(auto& out_pin: node->input_pins){
-                auto link = find_link(out_pin);
-                if (!link)
-                    continue;
-
-                auto next = get_next(link, node);
-                children.push_back(next);
-            }
-        }
-    }
+    void reverse(std::function<void(Node*)> fun);
 
     void save(std::string const& filename, bool override=false);
 

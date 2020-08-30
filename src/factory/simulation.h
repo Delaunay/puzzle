@@ -78,8 +78,20 @@ class Pin;
 
 
 struct Simulation{
-    ProductionBook raw_materials;
-    ProductionBook top_items;
+    Forest* forest;
+
+    Simulation(Forest* f): forest(f)
+    {}
+
+    void compute_production();
+
+    ProductionBook production_statement();
+
+    Engery compute_electricity();
+
+    ProductionBook raw_materials();
+
+    ProductionBook top_items();
 };
 
 

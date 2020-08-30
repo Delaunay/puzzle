@@ -175,3 +175,101 @@ void Forest::load(std::string const& filename, bool clear){
     from_json(forest, *this);
 }
 
+
+// Roots do not have input links
+std::vector<Node*> Forest::find_roots_leaves(bool match){
+    std::vector<Node*> prod;
+
+    for(auto& node: iter_nodes()){
+        bool has_inputs = false;
+
+        for (auto& side: node.pins){
+            for(auto& pin: side){
+                if (pin.is_input == match && find_link(&pin)){
+                    has_inputs = true;
+                }
+            }
+        }
+
+        if (!has_inputs){
+            prod.push_back(&node);
+        }
+    }
+    return prod;
+}
+
+// Roots do not have input links
+std::vector<Node*> Forest::roots(){
+    return find_roots_leaves(true);
+}
+
+// Leaves do not have output links
+std::vector<Node*> Forest::leaves(){
+    return find_roots_leaves(false);
+}
+
+void Forest::traverse(std::function<void(Node*)> fun){
+    // We should only visit a child once
+    // children can be shared
+    CircleGuard guard;
+
+    // Breadth-first traversal so production gets populated evenly
+    std::list<Node*> children;
+    for(auto& n: roots())
+        children.push_back(n);
+
+    while (children.size() > 0){
+        Node* node = *children.begin();
+        children.pop_front();
+
+        if (guard.count(node->ID) > 0){
+            continue;
+        }
+
+        guard[node->ID] = true;
+        fun(node);
+
+        for(auto& out_pin: node->output_pins){
+            auto link = find_link(out_pin);
+            if (!link)
+                continue;
+
+            auto next = get_next(link, node);
+            children.push_back(next);
+        }
+    }
+}
+
+void Forest::reverse(std::function<void(Node*)> fun){
+    // We should only visit a child once
+    // children can be shared
+    CircleGuard guard;
+
+    std::list<Node*> children;
+    for(auto& n: leaves())
+        children.push_back(n);
+
+    while (children.size() > 0){
+        Node* node = *children.begin();
+        children.pop_front();
+
+        if (guard.count(node->ID) > 0){
+            continue;
+        }
+
+        guard[node->ID] = true;
+        fun(node);
+
+        for(auto& out_pin: node->input_pins){
+            auto link = find_link(out_pin);
+            if (!link)
+                continue;
+
+            auto next = get_next(link, node);
+            children.push_back(next);
+        }
+    }
+}
+
+
+
