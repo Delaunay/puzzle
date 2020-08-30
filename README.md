@@ -1,5 +1,5 @@
-Statisafactory Planner
-======================
+Statisfactory Planer
+====================
 
 ![Preview](/preview/factory_planer.png)
 

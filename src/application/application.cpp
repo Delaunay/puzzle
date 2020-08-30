@@ -450,7 +450,7 @@ bool Application::init_window() {
     }
 
     window = SDL_CreateWindow(
-        "test_project",
+        "Satisfactory Planer",
         0,
         0,
         int(WIDTH),
