@@ -46,13 +46,13 @@ bool TreeNode(const char* label, ImGuiTreeNodeFlags flag)
 }
 
 struct NodeEditor{
-    puzzle::Application& app;
+    puzzle::Application* app = nullptr;
     Forest               graph;
     Brush                brush;
     ImVec2               scrolling = ImVec2(0.0f, 0.0f);
     LinkDragDropState    link_builder;
 
-    NodeEditor(puzzle::Application& app):
+    NodeEditor(puzzle::Application* app = nullptr):
         app(app)
     {
         inited = true;
@@ -187,7 +187,9 @@ struct NodeEditor{
         }
 
         link_builder.draw_path(draw_list);
+
         link_builder.make_new_link(this);
+
 
         draw_list->ChannelsMerge();
 
@@ -330,9 +332,9 @@ struct NodeEditor{
         auto img_size = ImVec2(256, 256) * scale;
         auto pos = ImGui::GetCursorScreenPos();
 
-        if (recipe && recipe->texture.size() > 0){
+        if (recipe && recipe->texture.size() > 0 && app != nullptr){
             Image* _ = Resources::instance().load_texture(recipe->texture);
-            auto image = app.load_texture_image(*_);
+            auto image = app->load_texture_image(*_);
 
             if (image->descriptor_set == nullptr){
                 image->descriptor_set = ImGui_ImplVulkan_AddTexture(
@@ -401,8 +403,9 @@ struct NodeEditor{
     void draw_selected_info();
 
     void show_production_stat(){
-        auto data = graph.compute_production();
+        // auto data = graph.compute_production();
 
+        /*
         debug("    {:>20}: {:>10} {:>10} {:>10}", "", "consumed", "produced", "received");
         for(auto& entity: data){
             debug("{}:", entity.first);
@@ -421,16 +424,17 @@ struct NodeEditor{
                   item.first,
                   item.second.produced,
                   item.second.consumed,
-                  item.second.produced - item.second.consumed
+                  item.second.received
                   );
         }
+        //*/
     }
 
     std::string save_name = std::string(256, '\0');
     bool override_save = false;
     bool clear_on_load = false;
     bool need_recompute_prod = true;
-    Forest::ProductionStats prod_stats;
+    ProductionStats prod_stats;
 
     void draw_save_box(){
         ImGui::InputText("Save name", save_name.data(), save_name.size());
@@ -466,7 +470,7 @@ struct NodeEditor{
         ImGui::EndGroup();
     }
 
-    void draw_production(std::size_t id, bool link=false);
+    void draw_production(ProductionBook const& prod, float efficiency);
 
     void draw_debug(){
         if (ImGui::Button("Show Stats")){
@@ -519,13 +523,13 @@ struct NodeEditor{
             return;
         }
 
-        if (need_recompute_prod) {
-            prod_stats = graph.full_forward();
-            graph.full_backward(prod_stats);
+        // simulation bit
+        graph.compute_production();
 
-            // prod_stats = graph.compute_production();
-            need_recompute_prod = false;
-        }
+//        if (need_recompute_prod) {
+//            prod_stats = graph.compute_production();
+//            need_recompute_prod = false;
+//        }
 
         draw_tool_panel();
         draw_overall_performance();

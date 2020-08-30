@@ -3,22 +3,7 @@
 
 #include "link.h"
 #include "node.h"
-
-struct DoubleEntry{
-    float consumed = 0;
-    float produced = 0;
-    float received = 0;
-    float overflow = 0;
-    float efficiency = 0;
-};
-
-struct Engery{
-    float consumed = 0;
-    float produced = 0;
-    std::unordered_map<Building*, float> stats;
-};
-
-using ProductionBook = std::unordered_map<std::string, DoubleEntry>;
+#include "simulation.h"
 
 struct NodeProduction {
 
@@ -57,7 +42,15 @@ struct GraphIteratorBackward{
 };
 
 inline
-Node const* get_next(NodeLink const* link, Node const* p){
+    Node* get_next(NodeLink const* link, Node const* p){
+    if (link->start->parent == p)
+        return link->end->parent;
+    return link->start->parent;
+}
+
+
+inline
+    Node* get_next(NodeLink* link, Node* p){
     if (link->start->parent == p)
         return link->end->parent;
     return link->start->parent;
@@ -110,6 +103,7 @@ public:
         // Node(building, pos, recipe, rotation);
 
         Node& inserted_node = nodes.emplace_back(building, pos, recipe, rotation);
+        inserted_node.logic = fetch_logic(this, &inserted_node);
         return &inserted_node;
     }
 
@@ -264,245 +258,76 @@ public:
         return find_roots_leaves(false);
     }
 
-    // Save a per entity stats about what kind of item and the qty of item
-    // going through it
-    using ProductionStats = std::unordered_map<std::size_t, ProductionBook>;
-
-
-    ProductionStats compute_production(){
-        ProductionStats prod_stats = full_forward();
-        full_backward(prod_stats);
-        return prod_stats;
-    }
-
-    ProductionStats full_forward(){
-        ProductionStats prod_stats;
-        for(auto& node: roots()){
-            forward(node, nullptr, prod_stats);
-        }
-        return prod_stats;
-    }
-
-    void full_backward(ProductionStats& prod_stats){
-        for(auto& node: leaves()){
-            backward(node, nullptr, prod_stats);
+    void compute_production(){
+        for(int k = 0; k <= 10; ++k){
+            traverse([this](Node* n){
+                n->logic->tick();
+            });
         }
     }
 
-    void forward(Node const* node, Node const* prev, ProductionStats& stats){
-        auto recipe = node->recipe();
-        ProductionBook& node_prod = stats[node->ID];
-        float efficiency = 1;
+    void traverse(std::function<void(Node*)> fun){
+        // We should only visit a child once
+        // children can be shared
+        CircleGuard guard;
 
-        if (recipe){
-            // Resource Node, no inputs, only outputs
-            if (recipe->inputs.size() == 0){
-                for(auto& out: recipe->outputs){
-                    node_prod[out.name].produced = out.speed;
-                }
-            }
-            // start Building, fetch inputs
-            else {
-                std::vector<NodeLink*> in_links;
+        // Breadth-first traversal so production gets populated evenly
+        std::list<Node*> children;
+        for(auto& n: roots())
+            children.push_back(n);
 
-                // Compute how much resources we are receving accross lanes
-                for(auto& in_pin: node->input_pins){
-                    auto in_link = find_link(in_pin);
-                    if (!in_link)
-                        continue;
+        while (children.size() > 0){
+            Node* node = *children.begin();
+            children.pop_front();
 
-                    auto link_prod = stats[in_link->ID];
-                    in_links.push_back(in_link);
-
-                    for(auto& in_item: link_prod){
-                        auto receiving = link_prod[in_item.first].produced;
-                        node_prod[in_item.first].received += receiving;
-                    }
-                }
-            }
-        }
-        // Splitter / Merger
-        else {
-            ProductionBook receiving;
-
-            // Compute how much item we are receiving
-            for(auto& in_pin: node->input_pins){
-                auto in_link = find_link(in_pin);
-                if (!in_link)
-                    continue;
-
-                auto link_prod = stats[in_link->ID];
-                for(auto& in_item: link_prod){
-                    receiving[in_item.first].produced += in_item.second.produced;
-                }
+            if (guard.count(node->ID) > 0){
+                continue;
             }
 
-            //
-            for(auto& item: receiving){
-                node_prod[item.first].produced = item.second.produced;
-            }
+            guard[node->ID] = true;
+            fun(node);
 
-            // Redistribute the items accross all the output links
-            std::vector<NodeLink*> out_links;
             for(auto& out_pin: node->output_pins){
-                auto out_link = find_link(out_pin);
-                if (!out_link)
+                auto link = find_link(out_pin);
+                if (!link)
                     continue;
 
-                out_links.push_back(out_link);
-            }
-
-            auto div = float(out_links.size());
-            ProductionBook out_prod;
-            for (auto& item: node_prod){
-                out_prod[item.first].produced = item.second.produced / div;
-            }
-
-            for(auto& out_link: out_links){
-                stats[out_link->ID] = out_prod;
-
-                auto next_node = get_next(out_link, node);
-                // TODO: might need to backtrack here
-                // min = item.second.produced / div
-                // max = item.second.produced
-                forward(next_node, node, stats);
-            }
-            return;
-        }
-
-        if (recipe){
-            // Set node production
-            for(auto& recipe: node->recipe()->outputs){
-                node_prod[recipe.name].produced = recipe.speed;
-            }
-
-            // forward production to outputs
-            for(auto& out_pin: node->output_pins){
-                auto out_link = find_link(out_pin);
-                if (!out_link)
-                    continue;
-
-                ProductionBook out_prod;
-                for(auto& item: recipe->outputs){
-                    // Make sure output type match the item type
-                    if ((out_pin->belt_type == 'C' && item.type == 'S' )|| (out_pin->belt_type == 'P' && item.type == 'L' )){
-                        out_prod[item.name].produced = item.speed;
-                    }
-                }
-
-                stats[out_link->ID] = out_prod;
-
-                auto next_node = get_next(out_link, node);
-
-                if (next_node != prev){
-                    forward(next_node, node, stats);
-                }
+                auto next = get_next(link, node);
+                children.push_back(next);
             }
         }
     }
 
-    void backward(Node const* node, Node const* prev, ProductionStats& stats){
-        auto recipe = node->recipe();
-        ProductionBook& node_prod = stats[node->ID];
-        float efficiency = 1;
+    void reverse(std::function<void(Node*)> fun){
+        // We should only visit a child once
+        // children can be shared
+        CircleGuard guard;
 
-        // set it to 0
-        for(auto& item: node_prod){
-            item.second.consumed = 0;
-        }
-        // -
+        std::list<Node*> children;
+        for(auto& n: leaves())
+            children.push_back(n);
 
-        if (recipe){
-            std::vector<NodeLink*> out_links;
+        while (children.size() > 0){
+            Node* node = *children.begin();
+            children.pop_front();
 
-            // Compute how much resources we are consuming accross lanes
-            for(auto& out_pin: node->output_pins){
-                auto out_link = find_link(out_pin);
-                if (!out_link)
+            if (guard.count(node->ID) > 0){
+                continue;
+            }
+
+            guard[node->ID] = true;
+            fun(node);
+
+            for(auto& out_pin: node->input_pins){
+                auto link = find_link(out_pin);
+                if (!link)
                     continue;
 
-                auto link_prod = stats[out_link->ID];
-                out_links.push_back(out_link);
-
-                for(auto& out_item: link_prod){
-                    auto consumed = link_prod[out_item.first].consumed;
-                    node_prod[out_item.first].consumed += consumed;
-                }
-            }
-        }
-        // Splitter / Merger
-        else {
-            // Compute how much item we are consuming
-            for(auto& out_pin: node->output_pins){
-                auto out_link = find_link(out_pin);
-                if (!out_link)
-                    continue;
-
-                auto link_prod = stats[out_link->ID];
-                for(auto& out_item: link_prod){
-                    node_prod[out_item.first].consumed += out_item.second.consumed;
-                }
-            }
-
-            // Redistribute the items accross all the input links
-            std::vector<NodeLink*> in_links;
-            for(auto& int_pin: node->input_pins){
-                auto in_link = find_link(int_pin);
-                if (!in_link)
-                    continue;
-
-                in_links.push_back(in_link);
-            }
-
-            for(auto& in_link: in_links){
-                ProductionBook& in_prod = stats[in_link->ID] ;
-
-                // Consume the % of its contribution
-                for(auto& item: in_prod){
-                    float total_received = node_prod[item.first].produced;
-                    float contributed    = item.second.produced;
-                    item.second.consumed = node_prod[item.first].consumed * (contributed / total_received);
-                }
-
-                auto next_node = get_next(in_link, node);
-                // TODO: might need to backtrack here
-
-                if (next_node != prev){
-                    backward(next_node, node, stats);
-                }
-            }
-            return;
-        }
-
-        if (recipe){
-            // Set node consumption
-            for(auto& recipe: node->recipe()->inputs){
-                node_prod[recipe.name].consumed = recipe.speed;
-            }
-
-            // Forward consumption to inputs
-            for(auto& in_pin: node->input_pins){
-                auto in_link = find_link(in_pin);
-                if (!in_link)
-                    continue;
-
-                ProductionBook& in_prod = stats[in_link->ID];
-                for(auto& item: recipe->inputs){
-                    if (in_prod.count(item.name) == 1){
-                        if ((in_pin->belt_type == 'C' && item.type == 'S' )|| (in_pin->belt_type == 'P' && item.type == 'L' )){
-                            in_prod[item.name].consumed = item.speed;
-                        }
-                    }
-                }
-
-                auto next_node = get_next(in_link, node);
-                backward(next_node, node, stats);
+                auto next = get_next(link, node);
+                children.push_back(next);
             }
         }
     }
-
-    // roots (Raw material) => Leaves (propagate max production)
-    // Leaves => roots (propagate overflow)
 
     void save(std::string const& filename, bool override=false);
 

@@ -24,7 +24,7 @@ SET(CXX_STANDARD_REQUIRED ON)
 # Project's Options
 # ====================================
 
-OPTION(BUILD_TESTING        "Enable tests"       OFF)
+OPTION(BUILD_TESTING        "Enable tests"       ON)
 OPTION(BUILD_BENCHMARK      "Build Benchmarks"   OFF)
 OPTION(BUILD_EXAMPLES       "Build Examples"     OFF)
 OPTION(BUILD_DOCUMENTATION  "Build docs"         OFF)
@@ -32,7 +32,6 @@ OPTION(BUILD_DOCUMENTATION  "Build docs"         OFF)
 # Binary/pre-compiled Dependencies
 # ====================================
 FIND_PACKAGE(Git REQUIRED)
-
 
 # Configuration
 # ====================================

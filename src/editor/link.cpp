@@ -61,7 +61,7 @@ void LinkDragDropState::make_new_link(NodeEditor* editor){
 
             if (make_connection){
                 debug("Make Connection {} -> {}", start->ID, end->ID);
-                editor->new_link(start, end);
+                editor->select_link(editor->new_link(start, end));
             }
         }
         reset();

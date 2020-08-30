@@ -2,6 +2,7 @@
 #define PUZZLE_EDITOR_LINK_HEADER
 
 #include "pin.h"
+#include "simulation.h"
 
 // Link between two pins
 struct NodeLink{
@@ -27,7 +28,11 @@ struct NodeLink{
     char link_type(){
         return start->belt_type;
     }
+
+    ProductionBook production;
 };
+
+using PinToLink = std::unordered_map<std::size_t, NodeLink*>;
 
 struct NodeEditor;
 

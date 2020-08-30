@@ -2,6 +2,7 @@
 #define PUZZLE_EDITOR_PIN_HEADER
 
 #include "utils.h"
+#include "config.h"
 
 struct Node;
 
@@ -27,6 +28,11 @@ struct Pin {
     Pin(Pin const&& obj) noexcept;
 
     Pin(char type, bool is_input, int side, int index, int count, Node* parent);
+
+    bool compatible(Item const& item){
+        return (belt_type == 'C' && item.type == 'S') ||
+               (belt_type == 'P' && item.type == 'L') ;
+    }
 };
 
 std::ostream& operator<<(std::ostream& out, Pin const& pin);

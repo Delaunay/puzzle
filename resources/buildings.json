@@ -160,8 +160,8 @@
         "w": 5,
         "l": 10,
         "h": 4,
-        "inputs": ["P"],
-        "outputs": ["P"]
+        "inputs": ["C"],
+        "outputs": ["C"]
     },
     {
         "name": "Nuclear Plant",

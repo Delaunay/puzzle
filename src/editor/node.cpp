@@ -1,10 +1,17 @@
 #include "node.h"
+#include "factory/simulation.h"
 
+bool Node::is_pipeline_cross() const {
+    if (descriptor->name == "Pipeline Junction Cross (S)" || descriptor->name == "Pipeline Junction Cross (M)"){
+        return true;
+    }
+    return false;
+}
 
 Node::Node(int building, const ImVec2& pos, int recipe_idx, int rotation):
     ID(next_id<std::size_t>()), building(building), recipe_idx(recipe_idx), rotation(rotation), pins(4)
 {
-    assertf(building >= 0, "Node shoudl have a building");
+    assertf(building >= 0, "Node should have a building");
 
     descriptor = &Resources::instance().buildings[std::size_t(building)];
 
@@ -41,7 +48,10 @@ void Node::add_pin(int side, char type, bool input, int pin_side, int i, int n){
     std::vector<Pin>& side_array = pins[std::size_t(side)];
     side_array.emplace_back(type, input, pin_side, i, n, this);
 
-    if (input){
+    if (is_pipeline_cross()){
+        input_pins.emplace_back(&*side_array.rbegin());
+        output_pins.emplace_back(&*side_array.rbegin());
+    } else if (input){
         input_pins.emplace_back(&*side_array.rbegin());
     } else {
         output_pins.emplace_back(&*side_array.rbegin());

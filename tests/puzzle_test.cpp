@@ -1,6 +1,4 @@
-#include "mult_test.h"
-#include "add_test.h"
-
+#include "forest_test.h"
 
 int main(int argc, char **argv)
 {

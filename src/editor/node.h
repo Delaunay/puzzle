@@ -4,8 +4,12 @@
 #include "config.h"
 #include "utils.h"
 #include "pin.h"
+#include "simulation.h"
+#include "factory/simulation.h"
 
 #include <array>
+#include <unordered_set>
+
 
 struct Node {
     // TODO: make this configurable
@@ -19,6 +23,10 @@ struct Node {
     int               building   = -1;
     int               recipe_idx = -1;
     int               rotation   =  0;
+    float             efficiency =  0.f;
+    SimualtionStep    logic      = nullptr;
+
+    bool is_pipeline_cross() const;
 
     std::vector<std::vector<Pin>> pins;
 
@@ -35,6 +43,31 @@ struct Node {
 
     void add_pin(int side, char type, bool input, int pin_side, int i, int n);
 
+    bool is_relay(){
+        static std::unordered_set<std::string> relays = {
+            "Conveyor Splitter",
+            "Conveyor Merger",
+            "Pipeline Junction Cross (S)",
+            "Pipeline Junction Cross (M)",
+            };
+        return relays.count(descriptor->name) == 1;
+    }
+
+    bool is_storage(){
+        static std::unordered_set<std::string> relays = {
+            "Storage Container",
+        };
+        return relays.count(descriptor->name) == 1;
+    }
+
+    bool is_input_pipe(int i){
+        return input_pins[std::size_t(i)]->belt_type == 'P';
+    }
+
+    bool is_input_conveyor(int i){
+        return !is_input_pipe(i);
+    }
+
     // Return slot position (no rotation)
     ImVec2 left_slots  (float num, float count) const;
     ImVec2 right_slots (float num, float count) const;
@@ -47,6 +80,10 @@ struct Node {
     bool operator== (Node const& obj){
         return obj.ID == ID;
     }
+
+    ProductionBook production;
+
+    void simulation_tick();
 };
 
 #endif

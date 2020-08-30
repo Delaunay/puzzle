@@ -38,10 +38,14 @@ asset_dir("resources")
 asset_dir("saves")
 
 FILE(GLOB MAIN_SRC *.cpp *.h)
-FILE(GLOB EDITOR_SRC editor/*.cpp editor/*.h)
+FILE(GLOB EDITOR_SRC editor/*.cpp editor/*.h factory/*.cpp factory/*.h)
 
-ADD_EXECUTABLE(main ${MAIN_SRC} ${EDITOR_SRC})
-TARGET_LINK_LIBRARIES(main stdc++fs glm::glm spdlog::spdlog SDL2 Vulkan::Vulkan vkApplication nlohmann_json::nlohmann_json)
+ADD_LIBRARY(editor ${EDITOR_SRC} ${MAIN_SRC})
+TARGET_LINK_LIBRARIES(editor stdc++fs glm::glm spdlog::spdlog SDL2 Vulkan::Vulkan vkApplication nlohmann_json::nlohmann_json)
+
+
+ADD_EXECUTABLE(main main.cpp)
+TARGET_LINK_LIBRARIES(main editor stdc++fs glm::glm spdlog::spdlog SDL2 Vulkan::Vulkan vkApplication nlohmann_json::nlohmann_json)
 ADD_DEPENDENCIES(main asset_dirs)
 
 

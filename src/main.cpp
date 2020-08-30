@@ -27,7 +27,7 @@ public:
     NodeEditor editor;
 
     MyGame():
-        Application(1980, 1080), editor(*this)
+        Application(1980, 1080), editor(this)
     {}
 
     const std::vector<Vertex> vertices = {

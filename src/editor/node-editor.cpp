@@ -76,9 +76,11 @@ float NodeEditor::compute_overal_efficiency(){
     float count      = 0;
 
     for(auto& node: graph.iter_nodes()){
-        ProductionBook& prod = prod_stats[node.ID];
-        efficiency += compute_efficiency(prod, true);
-        count += 1;
+        // Splitter have no efficiency
+        if (node.descriptor && node.descriptor->recipe_names().size() > 0){
+            efficiency += node.efficiency;
+            count += 1;
+        }
     }
 
     return efficiency / count;
@@ -150,7 +152,7 @@ void NodeEditor::draw_overall_performance(){
     ProductionBook low_tier;
     for(auto& leaf: graph.roots()){
         ProductionBook& prod = prod_stats[leaf->ID];
-        float eff = compute_efficiency(prod, false);
+        float eff = leaf->efficiency; // compute_efficiency(prod, false);
 
         for(auto& item: prod){
             if (item.second.produced <= 0)
@@ -174,7 +176,7 @@ void NodeEditor::draw_overall_performance(){
     ProductionBook high_tier;
     for(auto& leaf: graph.leaves()){
         ProductionBook& prod = prod_stats[leaf->ID];
-        float eff = compute_efficiency(prod, false);
+        float eff = leaf->efficiency; // compute_efficiency(prod, false);
 
         for(auto& item: prod){
             if (item.second.produced <= 0)
@@ -196,17 +198,11 @@ void NodeEditor::draw_overall_performance(){
     ImGui::End();
 };
 
-void NodeEditor::draw_production(std::size_t id, bool link){
+void NodeEditor::draw_production(ProductionBook const& prod, float efficiency){
     auto open = ImGuiTreeNodeFlags_DefaultOpen;
 
     if (ImGui::TreeNode("Production", open)){
-        if (prod_stats.count(id) == 0){
-            prod_stats = graph.compute_production();
-        }
-        ProductionBook const& prod = prod_stats[id];
-
-        if (!link){
-            float efficiency = compute_efficiency(prod, true);
+        if (efficiency > -1.f){
             auto label = fmt::format("Efficiency ({:6.2f})", efficiency * 100.f);
             draw_efficiency(efficiency, label.c_str());
         }
@@ -220,7 +216,7 @@ void NodeEditor::draw_selected_info(){
     ImGui::TreePush("selected-info");
 
     if (selected_link != nullptr){
-        draw_production(selected_link->ID, true);
+        draw_production(selected_link->production, -1.f);
         ImGui::TreePop();
         return;
     }
@@ -266,6 +262,7 @@ void NodeEditor::draw_selected_info(){
             available_recipes->data(),
             available_recipes->size())){
             need_recompute_prod = true;
+            selected_node->production = ProductionBook();
         }
 
         // display selected recipe
@@ -320,7 +317,7 @@ void NodeEditor::draw_selected_info(){
         ImGui::TreePop();
     }
     // Recipe Stop
-    draw_production(selected_node->ID, false);
+    draw_production(selected_node->production, selected_node->efficiency);
 
     ImGui::TreePop();
 }
